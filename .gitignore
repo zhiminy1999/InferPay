@@ -56,3 +56,12 @@ Thumbs.db
 *.tsbuildinfo
 next-env.d.ts
 
+# Local Databases
+data/
+*.db
+*.json-journal
+*.db-journal
+
+# Deployment scripts containing credentials
+scripts/deploy-v2.js
+
