@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { RefreshCw, Sparkles, Lock, EyeOff, Eye, AlertTriangle, Play, ExternalLink } from 'lucide-react'
 import { useAgentEscrow } from '@/hooks/useAgentEscrow'
+import { CurrencySelector } from './CurrencySelector'
 
 interface SpendingBudgetProps {
   isConnected: boolean
@@ -35,6 +36,7 @@ export function SpendingBudget({
   const [showPrivateKey, setShowPrivateKey] = useState<boolean>(false)
   const [piggyBankSpent, setPiggyBankSpent] = useState<number>(0)
   const [showOverspentWarning, setShowOverspentWarning] = useState(false)
+  const [currency, setCurrency] = useState<'USDC' | 'EURC'>('USDC')
 
   // Real AgentEscrow contract integration hook
   const {
@@ -43,6 +45,7 @@ export function SpendingBudget({
     txStatus,
     errorMsg,
     ephemeralUsdcBal,
+    ephemeralEurcBal,
     ephemeralGasBal,
     createSession,
     executeSpend,
@@ -72,7 +75,7 @@ export function SpendingBudget({
     if (isConnected && walletClient && address) {
       // Real On-chain mode
       try {
-        const keypair = await createSession(pocketMoney, safePeriod, whitelistServices)
+        const keypair = await createSession(pocketMoney, safePeriod, whitelistServices, currency)
         if (keypair) {
           setPiggyBankAddress(keypair.address)
           setEphemeralPrivateKey(keypair.privateKey)
@@ -160,7 +163,7 @@ export function SpendingBudget({
         <div className="brutalist-split">
           <div>
             <div className="brutalist-form-group">
-              <label className="brutalist-label">How much can your AI spend? (up to $500)</label>
+              <label className="brutalist-label">How much can your AI spend? (up to 500 {currency})</label>
               <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginTop: '8px' }}>
                 <input 
                   type="range" 
@@ -171,7 +174,14 @@ export function SpendingBudget({
                   className="slider-brutalist"
                   disabled={piggyBankStatus === 'ACTIVE'}
                 />
-                <span style={{ fontWeight: 800, fontSize: '18px', fontFamily: 'var(--font-serif)', fontStyle: 'italic', width: '90px', textAlign: 'right', color: 'var(--accent-coral)' }}>${pocketMoney}</span>
+                <span style={{ fontWeight: 800, fontSize: '18px', fontFamily: 'var(--font-serif)', fontStyle: 'italic', width: '120px', textAlign: 'right', color: 'var(--accent-coral)' }}>{pocketMoney} {currency}</span>
+              </div>
+            </div>
+
+            <div className="brutalist-form-group" style={{ marginBottom: '15px' }}>
+              <label className="brutalist-label">Denomination Currency</label>
+              <div style={{ marginTop: '8px' }}>
+                <CurrencySelector selected={currency} onChange={setCurrency} disabled={piggyBankStatus === 'ACTIVE'} />
               </div>
             </div>
 
@@ -352,7 +362,7 @@ export function SpendingBudget({
                   </div>
                   {isConnected && (
                     <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-                      ⛽ Gas Balance: <strong>{ephemeralGasBal} USDC</strong> (native gas) · USDC Token Balance: <strong>{ephemeralUsdcBal} USDC</strong>
+                      ⛽ Gas Balance: <strong>{ephemeralGasBal} USDC</strong> (native gas) · USDC Balance: <strong>{ephemeralUsdcBal} USDC</strong> · EURC Balance: <strong>{ephemeralEurcBal} EURC</strong>
                     </div>
                   )}
                 </div>
@@ -410,7 +420,7 @@ export function SpendingBudget({
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{ fontSize: '14px', fontWeight: 'bold' }}>
-              AI has spent: <span style={{ color: 'var(--accent-coral)', fontSize: '20px', fontFamily: 'var(--font-serif)', fontStyle: 'italic' }}>${piggyBankSpent}</span> out of ${pocketMoney} budget
+              AI has spent: <span style={{ color: 'var(--accent-coral)', fontSize: '20px', fontFamily: 'var(--font-serif)', fontStyle: 'italic' }}>{piggyBankSpent} {currency}</span> out of {pocketMoney} {currency} budget
             </div>
             
             {piggyBankStatus === 'ACTIVE' && (
@@ -420,7 +430,7 @@ export function SpendingBudget({
                 disabled={isEscrowLoading}
               >
                 {isEscrowLoading ? <RefreshCw size={12} className="spin" /> : <Play size={12} />}
-                <span>Simulate: AI Buys a $5 Service</span>
+                <span>Simulate: AI Buys a 5 {currency} Service</span>
               </button>
             )}
 

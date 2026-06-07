@@ -6,7 +6,9 @@ import { privateKeyToAccount } from 'viem/accounts'
 import { arcTestnet } from 'viem/chains'
 import { 
   AGENT_CONSENSUS_ADDRESS, 
-  agentConsensusAbi 
+  agentConsensusAbi,
+  USDC_ADDRESS_ARC,
+  EURC_ADDRESS_ARC
 } from '@/lib/contracts'
 
 const AGENT_1_KEY = '0x0000000000000000000000000000000000000000000000000000000000000001' as const
@@ -57,7 +59,8 @@ export function useAgentConsensus({
   const createProposal = async (
     recipient: string,
     amountUsd: number,
-    purpose: string
+    purpose: string,
+    currency: 'USDC' | 'EURC' = 'USDC'
   ): Promise<number | null> => {
     setIsConsensusLoading(true)
     setTxStatus('pending')
@@ -69,14 +72,16 @@ export function useAgentConsensus({
         throw new Error("Wallet not connected")
       }
 
-      addActivity('Creating Proposal', `Submitting on-chain proposal for $${amountUsd} USDC...`, '📝', 'info')
+      const tokenAddress = currency === 'EURC' ? EURC_ADDRESS_ARC : USDC_ADDRESS_ARC
+
+      addActivity('Creating Proposal', `Submitting on-chain proposal for ${amountUsd} ${currency}...`, '📝', 'info')
       const amountUnits = parseUnits(amountUsd.toString(), 6)
 
       const hash = await walletClient.writeContract({
         address: AGENT_CONSENSUS_ADDRESS,
         abi: agentConsensusAbi,
         functionName: 'createProposal',
-        args: [recipient as `0x${string}`, amountUnits, purpose],
+        args: [recipient as `0x${string}`, tokenAddress, amountUnits, purpose],
         account: address,
         chain: null
       })
@@ -84,16 +89,27 @@ export function useAgentConsensus({
       setTxHash(hash)
       const receipt = await publicClient.waitForTransactionReceipt({ hash })
       
-      // Look up proposal length or parse events to determine ID
-      // A safe way is to query the proposals count/length
-      // Let's get proposal ID from event or mapping
-      // Since it starts at 0, we can read the proposals array or parse receipt logs
-      // Let's just find the next index by looping or checking index
-      // Since we know the index is sequential, let's fetch the ID
       setTxStatus('success')
-      addActivity('Proposal Created', 'Consensus proposal registered on-chain.', '✅', 'success')
+      addActivity('Proposal Created', `Consensus proposal (${currency}) registered on-chain.`, '✅', 'success')
       
-      return 0 // return a placeholder, we will read the proposal state dynamically
+      // Save proposal to database
+      try {
+        await fetch('/api/proposals', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            wallet_address: recipient,
+            amount: amountUsd,
+            status: 'PENDING',
+            tx_hash: hash,
+            metadata: { currency, purpose }
+          })
+        })
+      } catch (err) {
+        console.warn('Failed to save proposal in DB:', err)
+      }
+
+      return 0
     } catch (err: any) {
       console.error(err)
       setTxStatus('error')

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { RefreshCw, Check, ShieldCheck } from 'lucide-react'
 import { useAgentRegistry } from '@/hooks/useAgentRegistry'
 import { useJobEscrow } from '@/hooks/useJobEscrow'
+import { CurrencySelector } from './CurrencySelector'
 
 interface AIWorkReviewProps {
   isConnected: boolean
@@ -76,6 +77,14 @@ export function AIWorkReview({
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<string>('INV-03')
   const [isPayrollLoading, setIsPayrollLoading] = useState(false)
   const [liveReputations, setLiveReputations] = useState<{ [key: string]: number }>({})
+  const [currency, setCurrency] = useState<'USDC' | 'EURC'>('USDC')
+
+  // Keep invoice currency in sync with selected currency toggle for pending payroll
+  useEffect(() => {
+    if (selectedInvoiceId) {
+      setInvoices(prev => prev.map(inv => (inv.id === selectedInvoiceId && inv.status === 'PENDING') ? { ...inv, currency } : inv))
+    }
+  }, [currency, selectedInvoiceId])
 
   const { getAgentDetails } = useAgentRegistry({
     isConnected,
@@ -165,7 +174,7 @@ export function AIWorkReview({
       setTimeout(() => {
         setInvoices(prev => prev.map(inv => inv.id === selectedInvoiceId ? { ...inv, status: 'PAID' } : inv))
         addActivity('Report verified', 'This work report has been confirmed as authentic and untampered.', '🛡️', 'success')
-        addActivity('Payment sent', `$${selectedInv.amount} ${selectedInv.currency} has been sent to ${selectedInv.agentName}.`, '💸', 'success')
+        addActivity('Payment sent', `${selectedInv.amount} ${selectedInv.currency} has been sent to ${selectedInv.agentName}.`, '💸', 'success')
         setIsPayrollLoading(false)
       }, 2000)
     } catch (err) {
@@ -303,6 +312,13 @@ export function AIWorkReview({
                       <span>Verify on AgentRegistry contract ↗</span>
                     </a>
                   )}
+                </div>
+              </div>
+
+              <div className="brutalist-form-group" style={{ marginTop: '15px' }}>
+                <label className="brutalist-label">Select Payment Currency</label>
+                <div style={{ marginTop: '8px' }}>
+                  <CurrencySelector selected={currency} onChange={setCurrency} disabled={selectedInvoice?.status !== 'PENDING' || isPayrollLoading} />
                 </div>
               </div>
 

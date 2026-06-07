@@ -1,7 +1,8 @@
 'use client'
 
-import React from 'react'
-import { Cpu, RefreshCw, Droplet, Key, Fingerprint, ShieldCheck } from 'lucide-react'
+import React, { useState, useEffect } from 'react'
+import { Cpu, RefreshCw, Droplet, Key, Fingerprint, ShieldCheck, ArrowLeftRight } from 'lucide-react'
+import { StableFXClient } from '@/lib/stablefx'
 
 interface TopBarProps {
   isConnected: boolean
@@ -12,6 +13,7 @@ interface TopBarProps {
   handleFaucet: () => void
   walletType: 'metamask' | 'passkey' | null
   onOpenAuthModal: () => void
+  onOpenBridge: () => void
   disconnect: () => void
 }
 
@@ -24,8 +26,27 @@ export function TopBar({
   handleFaucet,
   walletType,
   onOpenAuthModal,
+  onOpenBridge,
   disconnect
 }: TopBarProps) {
+  const [rate, setRate] = useState<number>(1.08)
+
+  useEffect(() => {
+    const fetchRate = async () => {
+      try {
+        const val = await StableFXClient.fetchExchangeRate('EURC', 'USDC')
+        setRate(val)
+      } catch (err) {
+        console.error('Failed to update TopBar exchange rate:', err)
+      }
+    }
+    fetchRate()
+    const interval = setInterval(fetchRate, 15000)
+    return () => clearInterval(interval)
+  }, [])
+
+  const combinedValuation = (parseFloat(usdcBalance || '0') + parseFloat(eurcBalance || '0') * rate).toFixed(2)
+
   return (
     <header className="app-topbar">
       <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
@@ -40,6 +61,17 @@ export function TopBar({
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+        {isConnected && (
+          <button 
+            className="btn-brutalist btn-brutalist-pink" 
+            onClick={onOpenBridge}
+            style={{ padding: '6px 12px', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '5px' }}
+          >
+            <ArrowLeftRight size={11} />
+            <span>🌉 Bridge USDC via CCTP</span>
+          </button>
+        )}
+
         {/* Feature A: Faucet for judges */}
         <button 
           className="btn-brutalist btn-brutalist-green" 
@@ -70,8 +102,8 @@ export function TopBar({
                   <ShieldCheck size={14} style={{ color: 'var(--accent-green)' }} />
                 )}
               </div>
-              <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--accent-coral)' }}>
-                Balance: ${usdcBalance} USD · €{eurcBalance} EUR
+              <div style={{ fontSize: '12px', fontWeight: 650, color: 'var(--accent-coral)' }}>
+                Balance: ${usdcBalance} USD · €{eurcBalance} EUR <span style={{ color: 'var(--text-light)', fontSize: '10px', fontWeight: 500 }}>(Combined: ${combinedValuation} USD @ 1 EUR = {rate.toFixed(3)} USD)</span>
               </div>
             </div>
             <button className="btn-brutalist btn-brutalist-muted" onClick={disconnect} style={{ padding: '6px 12px', fontSize: '11px' }}>

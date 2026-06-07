@@ -1,11 +1,11 @@
 'use client'
 
 import React from 'react'
-import { Lock, ArrowRightLeft, Coins, FileText, Shield, Zap, Users, Briefcase } from 'lucide-react'
+import { Lock, ArrowRightLeft, Coins, FileText, Shield, Zap, Users, Briefcase, History } from 'lucide-react'
 
 interface SidebarProps {
-  activeTab: 'escrow' | 'intent' | 'yield' | 'payroll' | 'consensus' | 'directory' | 'jobs'
-  setActiveTab: (tab: 'escrow' | 'intent' | 'yield' | 'payroll' | 'consensus' | 'directory' | 'jobs') => void
+  activeTab: 'escrow' | 'intent' | 'yield' | 'payroll' | 'consensus' | 'directory' | 'jobs' | 'nanopayments' | 'history'
+  setActiveTab: (tab: 'escrow' | 'intent' | 'yield' | 'payroll' | 'consensus' | 'directory' | 'jobs' | 'nanopayments' | 'history') => void
 }
 
 export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
@@ -81,6 +81,26 @@ export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
           <div className="sidebar-icon-wrap">
             <Briefcase size={15} />
             <span>7. Autonomous Jobs</span>
+          </div>
+        </div>
+
+        <div 
+          className={`sidebar-menu-item ${activeTab === 'nanopayments' ? 'active' : ''}`}
+          onClick={() => setActiveTab('nanopayments')}
+        >
+          <div className="sidebar-icon-wrap">
+            <Zap size={15} />
+            <span>8. Gateway Nanopayments</span>
+          </div>
+        </div>
+
+        <div 
+          className={`sidebar-menu-item ${activeTab === 'history' ? 'active' : ''}`}
+          onClick={() => setActiveTab('history')}
+        >
+          <div className="sidebar-icon-wrap text-accent-pink font-bold">
+            <History size={15} />
+            <span>9. Transaction Audit Trail</span>
           </div>
         </div>
       </div>

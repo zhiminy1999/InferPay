@@ -3,8 +3,10 @@
 import React, { useState, useEffect } from 'react'
 import { RefreshCw, Send, CheckCircle, ArrowRight, ExternalLink } from 'lucide-react'
 import { useBillPay } from '@/hooks/useBillPay'
-import { USDC_ADDRESS_ARC, erc20Abi } from '@/lib/contracts'
+import { useNanopayments } from '@/hooks/useNanopayments'
+import { USDC_ADDRESS_ARC, EURC_ADDRESS_ARC, erc20Abi } from '@/lib/contracts'
 import { formatUnits } from 'viem'
+import { CurrencySelector } from './CurrencySelector'
 
 interface SmartBillPayProps {
   isConnected: boolean
@@ -17,6 +19,7 @@ interface SmartBillPayProps {
 const intentsPreload = [
   { id: 'renew_subscription', name: 'Renew Software Subscriptions — $250', amount: 250, type: 'split', details: 'Your assistant reads the invoice from tools like Figma or Canva, pays it on time, and logs the expense for your records.' },
   { id: 'scale_gpu', name: 'Scale Up Cloud Computing — $100', amount: 100, type: 'escrow', details: 'When your servers get busy, InferPay automatically adds more computing power so your services stay fast.' },
+  { id: 'nanopayment_api', name: 'Micro-Inference Tokens — $0.001', amount: 0.001, type: 'nanopayment', details: 'A sub-cent request for AI model token inference, using Circle Gateway Nanopayments (x402 protocol) without gas friction.' },
   { id: 'data_purchase', name: 'Purchase Data & Research — $450', amount: 450, type: 'split', details: 'Your AI assistant buys verified research datasets your team needs, without waiting for manual approval.' }
 ]
 
@@ -38,9 +41,14 @@ export function SmartBillPay({
   
   // Balance monitoring states
   const [usdcBalance, setUsdcBalance] = useState<string>('0.00')
+  const [eurcBalance, setEurcBalance] = useState<string>('0.00')
+  const [currency, setCurrency] = useState<'USDC' | 'EURC'>('USDC')
 
   // Timeline Step Tracker
   const [currentStep, setCurrentStep] = useState<number>(0)
+
+  // Nanopayments hooks
+  const { executeInference, gatewayBalanceFormatted } = useNanopayments()
 
   // On-chain Bill Pay hook
   const {
@@ -58,7 +66,7 @@ export function SmartBillPay({
     addActivity
   })
 
-  // Load user USDC balance on mount & tab select
+  // Load user USDC/EURC balance on mount & tab select
   const fetchBalance = async () => {
     if (isConnected && address && publicClient) {
       try {
@@ -69,6 +77,14 @@ export function SmartBillPay({
           args: [address as `0x${string}`]
         })
         setUsdcBalance(Number(formatUnits(balRaw, 6)).toFixed(2))
+
+        const eurcRaw = await publicClient.readContract({
+          address: EURC_ADDRESS_ARC,
+          abi: erc20Abi,
+          functionName: 'balanceOf',
+          args: [address as `0x${string}`]
+        })
+        setEurcBalance(Number(formatUnits(eurcRaw, 6)).toFixed(2))
       } catch (err) {
         console.error("Failed to fetch balance:", err)
       }
@@ -101,23 +117,37 @@ export function SmartBillPay({
         setCurrentStep(2) // Bill details analyzed
         addActivity('Bill analyzed', `${intent.name}. Total: $${intent.amount} USDC.`, '🧠', 'info')
 
-        if (intent.type === 'split') {
+        if (intent.type === 'nanopayment') {
+          // Circle Gateway Nanopayments mode
+          const res = await executeInference('llm_llama')
+          if (res.success) {
+            setCurrentStep(3)
+            addActivity('Nanopayment signature sent', `Signed offchain EIP-3009 payload for $0.001.`, '⚡', 'success')
+            
+            setTimeout(() => {
+              setCurrentStep(4)
+              addActivity('Nanopayment settled', 'Inference processed, gasless credit settled.', '🎉', 'success')
+            }, 800)
+          } else {
+            throw new Error(res.data?.error || 'Nanopayment signature verification failed')
+          }
+        } else if (intent.type === 'split') {
           // Standard split payment (90% vendor / 10% reserve)
-          const result = await payStandardBill(intent.amount)
+          const result = await payStandardBill(intent.amount, currency)
           if (result) {
             setVendorTx(result[0])
             setReserveTx(result[1])
             setCurrentStep(3) // Split completed
             setTimeout(() => {
               setCurrentStep(4) // Settle
-              addActivity('Bill split settled', 'Treasury reserve set aside and vendor paid.', '🎉', 'success')
+              addActivity('Bill split settled', `Treasury reserve set aside and vendor paid in ${currency}.`, '🎉', 'success')
             }, 800)
           } else {
             throw new Error("Split transfer failed")
           }
         } else {
           // Inference bill (escrow deposit)
-          const result = await payInferenceBill(intent.amount, 'gpu-scaling')
+          const result = await payInferenceBill(intent.amount, 'gpu-scaling', currency)
           if (result) {
             setApproveTx(result[0])
             setVendorTx(result[1])
@@ -125,7 +155,7 @@ export function SmartBillPay({
             setCurrentStep(3) // Escrow locked
             setTimeout(() => {
               setCurrentStep(4) // Settle
-              addActivity('Inference escrow complete', `Job #${result[2]} active on-chain.`, '🎉', 'success')
+              addActivity('Inference escrow complete', `Job #${result[2]} active on-chain in ${currency}.`, '🎉', 'success')
             }, 800)
           } else {
             throw new Error("Escrow deposit failed")
@@ -193,6 +223,13 @@ export function SmartBillPay({
               </select>
             </div>
 
+            <div className="brutalist-form-group" style={{ marginBottom: '15px' }}>
+              <label className="brutalist-label">Select Payment Currency</label>
+              <div style={{ marginTop: '8px' }}>
+                <CurrencySelector selected={currency} onChange={setCurrency} disabled={isIntentLoading} />
+              </div>
+            </div>
+
             <div className="brutalist-form-group">
               <label className="brutalist-label">What InferPay understands about this bill</label>
               <p style={{
@@ -219,9 +256,9 @@ export function SmartBillPay({
 
               {isConnected && (
                 <div style={{ fontSize: '12.5px', fontWeight: 650, color: 'var(--text-light)', borderLeft: '3px solid var(--accent-coral)', paddingLeft: '8px' }}>
-                  Your Balance: <strong style={{ color: 'var(--text-main)' }}>${usdcBalance} USDC</strong>
+                  Balances: <strong style={{ color: 'var(--text-main)' }}>{usdcBalance} USDC</strong> · <strong style={{ color: 'var(--text-main)' }}>{eurcBalance} EURC</strong>
                   <br />
-                  Est. Gas Cost: <strong style={{ color: 'var(--text-main)' }}>{activeIntent?.type === 'split' ? '~0.0008 USDC' : '~0.0008 USDC'}</strong>
+                  Est. Gas Cost: <strong style={{ color: 'var(--text-main)' }}>~0.0008 USDC</strong>
                 </div>
               )}
             </div>
@@ -274,6 +311,17 @@ export function SmartBillPay({
                   <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0' }}>
                     <span style={{ marginRight: '30px', fontSize: '13px' }}>Saved to reserves (10%)</span>
                     <strong>${(intentAmount * 0.1).toFixed(2)} USDC</strong>
+                  </div>
+                </>
+              ) : activeIntent?.type === 'nanopayment' ? (
+                <>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid var(--border)' }}>
+                    <span style={{ marginRight: '30px', fontSize: '13px' }}>Inference Fee (100%)</span>
+                    <strong>$0.0010 USDC</strong>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', fontSize: '11px', color: 'var(--text-light)' }}>
+                    <span>Method: Circle Gateway</span>
+                    <span>Gasless offchain</span>
                   </div>
                 </>
               ) : (

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Lock, ArrowRightLeft, Coins, FileText, Shield, Briefcase, Users } from 'lucide-react'
+import { Lock, ArrowRightLeft, Coins, FileText, Shield, Briefcase, Users, History, Zap } from 'lucide-react'
 import { useWeb3 } from '@/lib/web3-provider'
 import { useActivityFeed } from '@/hooks/useActivityFeed'
 import { useBalances } from '@/hooks/useBalances'
@@ -20,6 +20,11 @@ import AIWorkReview from '@/components/AIWorkReview'
 import ApprovalCommittee from '@/components/ApprovalCommittee'
 import AgentDirectory from '@/components/AgentDirectory'
 import JobBoard from '@/components/JobBoard'
+import { NanopaymentWidget } from '@/components/NanopaymentWidget'
+import { NanopaymentDeposit } from '@/components/NanopaymentDeposit'
+import { BridgeModal } from '@/components/BridgeModal'
+import { UnifiedBalance } from '@/components/UnifiedBalance'
+import { TransactionHistory } from '@/components/TransactionHistory'
 
 export default function InferPayDashboard() {
   const {
@@ -34,11 +39,12 @@ export default function InferPayDashboard() {
   } = useWeb3()
 
   // Tab views
-  const [activeTab, setActiveTab] = useState<'escrow' | 'intent' | 'yield' | 'payroll' | 'consensus' | 'directory' | 'jobs'>('escrow')
+  const [activeTab, setActiveTab] = useState<'escrow' | 'intent' | 'yield' | 'payroll' | 'consensus' | 'directory' | 'jobs' | 'nanopayments' | 'history'>('escrow')
   
-  // Faucet and Auth modal states
+  // Faucet, Auth, and Bridge modal states
   const [showFaucetModal, setShowFaucetModal] = useState<boolean>(false)
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false)
+  const [showBridgeModal, setShowBridgeModal] = useState<boolean>(false)
 
   // Shared hooks
   const { activities, addActivity } = useActivityFeed()
@@ -127,6 +133,7 @@ export default function InferPayDashboard() {
         handleFaucet={handleFaucet}
         walletType={walletType}
         onOpenAuthModal={() => setIsAuthModalOpen(true)}
+        onOpenBridge={() => setShowBridgeModal(true)}
         disconnect={handleDisconnectAll}
       />
 
@@ -146,13 +153,17 @@ export default function InferPayDashboard() {
               {activeTab === 'consensus' && <><Shield size={17} /><span>Big Payments Need <i>Team Approval</i></span></>}
               {activeTab === 'directory' && <><Users size={17} /><span>ERC-8004 Agent <i>Identity & Reputation Directory</i></span></>}
               {activeTab === 'jobs' && <><Briefcase size={17} /><span>ERC-8183 <i>Autonomous Job Market</i></span></>}
+              {activeTab === 'nanopayments' && <><Zap size={17} /><span>Circle Gateway <i>Nanopayments (x402 Protocol)</i></span></>}
+              {activeTab === 'history' && <><History size={17} /><span>Audit Trail & <i>Transaction Registry</i></span></>}
             </div>
             <div>
               <span className="badge-brutalist cyan">Business Ready</span>
             </div>
           </div>
 
-          <div className="content-body">
+          <div className="content-body" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            {isConnected && <UnifiedBalance />}
+
             {activeTab === 'escrow' && (
               <SpendingBudget
                 isConnected={isConnected}
@@ -226,6 +237,17 @@ export default function InferPayDashboard() {
                 addActivity={addActivity}
               />
             )}
+
+            {activeTab === 'nanopayments' && (
+              <div className="space-y-6" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                <NanopaymentWidget />
+                <NanopaymentDeposit />
+              </div>
+            )}
+
+            {activeTab === 'history' && (
+              <TransactionHistory />
+            )}
           </div>
         </main>
 
@@ -237,6 +259,7 @@ export default function InferPayDashboard() {
         isOpen={showFaucetModal}
         onClose={() => setShowFaucetModal(false)}
         address={address}
+        onOpenBridge={() => setShowBridgeModal(true)}
         addActivity={addActivity}
       />
 
@@ -247,6 +270,11 @@ export default function InferPayDashboard() {
         onRegisterPasskey={handleRegisterPasskey}
         onLoginPasskey={handleLoginPasskey}
         loading={modularWalletLoading}
+      />
+
+      <BridgeModal
+        isOpen={showBridgeModal}
+        onClose={() => setShowBridgeModal(false)}
       />
     </div>
   )

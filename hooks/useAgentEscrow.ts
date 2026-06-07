@@ -7,6 +7,7 @@ import { arcTestnet } from 'viem/chains'
 import { 
   AGENT_ESCROW_ADDRESS, 
   USDC_ADDRESS_ARC, 
+  EURC_ADDRESS_ARC,
   agentEscrowAbi, 
   erc20Abi 
 } from '@/lib/contracts'
@@ -54,6 +55,7 @@ export function useAgentEscrow({
   
   // Ephemeral wallet balances
   const [ephemeralUsdcBal, setEphemeralUsdcBal] = useState<string>('0.00')
+  const [ephemeralEurcBal, setEphemeralEurcBal] = useState<string>('0.00')
   const [ephemeralGasBal, setEphemeralGasBal] = useState<string>('0.00')
 
   // Helper to fetch ephemeral balances
@@ -69,7 +71,16 @@ export function useAgentEscrow({
       }) as bigint
       setEphemeralUsdcBal(Number(formatUnits(usdcBal, 6)).toFixed(4))
 
-      // 2. Native gas balance (18 decimals)
+      // 2. ERC20 EURC balance (6 decimals)
+      const eurcBal = await publicClient.readContract({
+        address: EURC_ADDRESS_ARC,
+        abi: erc20Abi,
+        functionName: 'balanceOf',
+        args: [ephemeralAddress]
+      }) as bigint
+      setEphemeralEurcBal(Number(formatUnits(eurcBal, 6)).toFixed(4))
+
+      // 3. Native gas balance (18 decimals)
       const gasBal = await publicClient.getBalance({ address: ephemeralAddress })
       setEphemeralGasBal(Number(formatUnits(gasBal, 18)).toFixed(4))
     } catch (err) {
@@ -81,7 +92,8 @@ export function useAgentEscrow({
   const createSession = async (
     pocketMoney: number,
     safePeriod: string,
-    whitelistServices: { openai: boolean; together: boolean; huggingface: boolean; anthropic: boolean }
+    whitelistServices: { openai: boolean; together: boolean; huggingface: boolean; anthropic: boolean },
+    currency: 'USDC' | 'EURC' = 'USDC'
   ): Promise<EphemeralKeypair | null> => {
     setIsEscrowLoading(true)
     setTxStatus('pending')
@@ -96,11 +108,13 @@ export function useAgentEscrow({
         throw new Error("Wallet not connected")
       }
 
-      // 1. Approve USDC transfer
-      addActivity('USDC Approve', 'Requesting allowance for AgentEscrow contract...', '⛓️', 'info')
+      const tokenAddress = currency === 'EURC' ? EURC_ADDRESS_ARC : USDC_ADDRESS_ARC
+
+      // 1. Approve USDC/EURC transfer
+      addActivity(`${currency} Approve`, `Requesting allowance for AgentEscrow V2 in ${currency}...`, '⛓️', 'info')
       const approveAmount = parseUnits(pocketMoney.toString(), 6)
       const approveTx = await walletClient.writeContract({
-        address: USDC_ADDRESS_ARC,
+        address: tokenAddress,
         abi: erc20Abi,
         functionName: 'approve',
         args: [AGENT_ESCROW_ADDRESS, approveAmount],
@@ -109,7 +123,7 @@ export function useAgentEscrow({
       })
       setTxHash(approveTx)
       await publicClient.waitForTransactionReceipt({ hash: approveTx })
-      addActivity('Allowance Approved', 'USDC spend allowance verified.', '✅', 'success')
+      addActivity('Allowance Approved', `${currency} spend allowance verified.`, '✅', 'success')
 
       // 2. Fund Ephemeral Wallet with gas
       addActivity('Funding Gas', 'Transferring native USDC gas to ephemeral wallet...', '⛽', 'info')
@@ -132,13 +146,13 @@ export function useAgentEscrow({
       if (whitelistServices.anthropic) whitelist.push(WHITELIST_ADDRESSES.anthropic)
 
       // 4. Create Session on-chain
-      addActivity('On-chain Session', 'Initializing session policy on AgentEscrow...', '⛓️', 'info')
+      addActivity('On-chain Session', `Initializing session policy on AgentEscrow V2 using ${currency}...`, '⛓️', 'info')
       const duration = mapPeriodToSeconds(safePeriod)
       const createTx = await walletClient.writeContract({
         address: AGENT_ESCROW_ADDRESS,
         abi: agentEscrowAbi,
         functionName: 'createSession',
-        args: [keypair.address, approveAmount, duration, whitelist],
+        args: [keypair.address, tokenAddress, approveAmount, duration, whitelist],
         account: address,
         chain: null
       })
@@ -146,8 +160,25 @@ export function useAgentEscrow({
       await publicClient.waitForTransactionReceipt({ hash: createTx })
 
       setTxStatus('success')
-      addActivity('Session Active', 'AI budget policy enforced on Arc Testnet.', '🛡️', 'success')
+      addActivity('Session Active', `AI budget policy (${currency}) enforced on Arc Testnet.`, '🛡️', 'success')
       await updateEphemeralBalances(keypair.address)
+
+      // Save session choice to database
+      try {
+        await fetch('/api/sessions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            walletAddress: keypair.address,
+            amount: pocketMoney,
+            status: 'SUCCESS',
+            txHash: createTx,
+            metadata: { expiration: Number(duration) + Math.floor(Date.now() / 1000), currency }
+          })
+        })
+      } catch (err) {
+        console.warn('Failed to save session in DB:', err)
+      }
 
       return keypair
     } catch (err: any) {
@@ -269,6 +300,7 @@ export function useAgentEscrow({
     txStatus,
     errorMsg,
     ephemeralUsdcBal,
+    ephemeralEurcBal,
     ephemeralGasBal,
     createSession,
     executeSpend,
