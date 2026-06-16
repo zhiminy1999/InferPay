@@ -64,8 +64,15 @@ export const X402Protocol = {
           return
         }
 
-        // Create receipt token (simulated EIP-712 payment receipt)
-        const receiptHash = 'rcpt_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+        // Create deterministic receipt hash from payment details
+        const encoder = new TextEncoder()
+        const receiptData = encoder.encode(
+          `${challenge.headers['X-402-Service-Id']}:${priceStr}:${Date.now()}`
+        )
+        // Use Web Crypto API for deterministic hashing
+        const hashBuffer = await crypto.subtle.digest('SHA-256', receiptData)
+        const hashArray = Array.from(new Uint8Array(hashBuffer))
+        const receiptHash = '0x' + hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
 
         resolve({
           success: true,
@@ -89,7 +96,7 @@ export const X402Protocol = {
    * Verifies the x402 payment proof at the provider endpoint.
    */
   verifyPaymentProof(proof: X402PaymentProof, expectedServiceId: string, expectedPrice: number): boolean {
-    if (!proof['X-402-Receipt'] || !proof['X-402-Receipt'].startsWith('rcpt_')) {
+    if (!proof['X-402-Receipt'] || !proof['X-402-Receipt'].startsWith('0x') || proof['X-402-Receipt'].length !== 66) {
       return false
     }
     if (proof['X-402-Service-Id'] !== expectedServiceId) {

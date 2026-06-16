@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getAddress } from 'viem'
+import { getAddress, verifyTypedData, parseUnits } from 'viem'
+import { VENDOR_ADDRESS } from '@/lib/addresses'
+import { USDC_ADDRESS_ARC } from '@/lib/contracts'
 
 export async function POST(req: NextRequest) {
   try {
@@ -8,13 +10,17 @@ export async function POST(req: NextRequest) {
 
     // Payment configuration
     const price = '0.001' // $0.001 USDC per inference call
-    const destination = '0x8e50b1f2bc88bcf040523db42095f9c464e8e81d' // Mock merchant vault receiver
+    const destination = VENDOR_ADDRESS // Real vendor address from design system
 
     // 1. If checking support or no payment signature present, negotiate 402 Payment Required
     const signature = req.headers.get('PAYMENT-SIGNATURE')
     const buyerAddress = req.headers.get('PAYMENT-BUYER-ADDRESS')
+    const nonce = req.headers.get('PAYMENT-NONCE')
+    const validAfterStr = req.headers.get('PAYMENT-VALID-AFTER')
+    const validBeforeStr = req.headers.get('PAYMENT-VALID-BEFORE')
+    const paymentDest = req.headers.get('PAYMENT-DESTINATION')
 
-    if (checkOnly || !signature || !buyerAddress) {
+    if (checkOnly || !signature || !buyerAddress || !nonce || !validAfterStr || !validBeforeStr || !paymentDest) {
       const response = NextResponse.json(
         { error: 'Payment Required', code: 402 },
         { status: 402 }
@@ -32,8 +38,52 @@ export async function POST(req: NextRequest) {
       return response
     }
 
-    // 2. We have a signature and buyer address, simulate high-performance offchain EIP-3009 verification
-    console.log(`Gateway: Verified offchain EIP-3009 signature ${signature.slice(0, 10)}... from ${buyerAddress} for ${price} USDC`)
+    // 2. Cryptographically verify the off-chain EIP-712 signature
+    const costBigInt = parseUnits(price, 6)
+    const validAfter = BigInt(validAfterStr)
+    const validBefore = BigInt(validBeforeStr)
+
+    const domain = {
+      name: 'GatewayPayment',
+      version: '1',
+      chainId: 5042002, // Arc Testnet
+      verifyingContract: USDC_ADDRESS_ARC as `0x${string}`,
+    }
+
+    const types = {
+      TransferWithAuthorization: [
+        { name: 'from', type: 'address' },
+        { name: 'to', type: 'address' },
+        { name: 'value', type: 'uint256' },
+        { name: 'validAfter', type: 'uint256' },
+        { name: 'validBefore', type: 'uint256' },
+        { name: 'nonce', type: 'bytes32' },
+      ],
+    }
+
+    const message = {
+      from: getAddress(buyerAddress),
+      to: getAddress(paymentDest),
+      value: costBigInt,
+      validAfter,
+      validBefore,
+      nonce: nonce as `0x${string}`,
+    }
+
+    const isValid = await verifyTypedData({
+      address: getAddress(buyerAddress),
+      domain,
+      types,
+      primaryType: 'TransferWithAuthorization',
+      message,
+      signature: signature as `0x${string}`,
+    })
+
+    if (!isValid) {
+      return NextResponse.json({ error: 'Invalid payment signature' }, { status: 401 })
+    }
+
+    console.log(`Gateway: Verified real offchain EIP-712 payment signature from ${buyerAddress} for ${price} USDC`)
 
     // Sample inference answers for different AI models
     const modelAnswers: Record<string, string[]> = {
