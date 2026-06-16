@@ -61,30 +61,51 @@ export const BridgeModal: React.FC<BridgeModalProps> = ({ isOpen, onClose }) => 
     const explorerBaseUrl = chainConfig?.explorerUrl || selectedSourceConfig.explorerUrl
 
     return (
-      <div className={`border p-3 font-mono text-xs flex justify-between items-start gap-4 ${
-        stepStatus === 'running' ? 'border-accent-pink bg-zinc-900/60' :
-        stepStatus === 'success' ? 'border-zinc-800 bg-zinc-950/20' :
-        stepStatus === 'error' ? 'border-red-600 bg-red-950/20' :
-        'border-zinc-900 bg-black/40 text-zinc-600'
-      }`}>
-        <div className="space-y-1">
-          <div className="font-bold uppercase tracking-wider flex items-center gap-1.5">
-            {stepStatus === 'success' && <span className="text-accent-green">✓</span>}
-            {stepStatus === 'running' && <span className="inline-block animate-pulse text-accent-pink">●</span>}
-            {stepStatus === 'error' && <span className="text-red-500">✗</span>}
-            {stepStatus === 'pending' && <span className="text-zinc-700">○</span>}
-            <span className={stepStatus === 'pending' ? 'text-zinc-600' : 'text-zinc-200'}>
+      <div style={{
+        border: '1px solid',
+        borderColor: stepStatus === 'running' ? 'var(--accent-coral)' :
+                     stepStatus === 'success' ? 'var(--accent-green)' :
+                     stepStatus === 'error' ? '#f43f5e' :
+                     'var(--border)',
+        backgroundColor: stepStatus === 'running' ? '#fff1f2' :
+                         stepStatus === 'success' ? '#f0fdf4' :
+                         stepStatus === 'error' ? '#fef2f2' :
+                         'var(--bg-inner)',
+        color: stepStatus === 'pending' ? 'var(--text-light)' : 'var(--text-main)',
+        padding: '12px',
+        fontSize: '12px',
+        fontFamily: 'monospace',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'start',
+        gap: '16px'
+      }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          <div style={{ fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            {stepStatus === 'success' && <span style={{ color: 'var(--accent-green)' }}>✓</span>}
+            {stepStatus === 'running' && <span className="inline-block animate-pulse" style={{ color: 'var(--accent-coral)' }}>●</span>}
+            {stepStatus === 'error' && <span style={{ color: '#f43f5e' }}>✗</span>}
+            {stepStatus === 'pending' && <span style={{ color: 'var(--text-light)' }}>○</span>}
+            <span style={{ color: stepStatus === 'pending' ? 'var(--text-light)' : 'var(--text-main)' }}>
               {label}
             </span>
           </div>
-          <p className="text-[10px] text-zinc-500 leading-snug">{desc}</p>
+          <p style={{ fontSize: '10px', color: 'var(--text-light)', margin: 0, lineHeight: 1.4 }}>{desc}</p>
           
           {txHash && (
             <a
               href={`${explorerBaseUrl}/tx/${txHash}`}
               target="_blank"
               rel="noreferrer"
-              className="text-[9px] text-accent-pink underline hover:text-rose-400 inline-flex items-center gap-0.5 mt-1"
+              style={{
+                fontSize: '9px',
+                color: 'var(--accent-coral)',
+                textDecoration: 'underline',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '2px',
+                marginTop: '4px'
+              }}
             >
               Tx: {txHash.slice(0, 10)}... {txHash.slice(-8)} <ExternalLink size={8} />
             </a>
@@ -92,12 +113,25 @@ export const BridgeModal: React.FC<BridgeModalProps> = ({ isOpen, onClose }) => 
         </div>
 
         <div>
-          <span className={`px-2 py-0.5 text-[9px] font-bold uppercase border ${
-            stepStatus === 'success' ? 'bg-emerald-950/30 border-accent-green text-accent-green' :
-            stepStatus === 'running' ? 'bg-rose-950/30 border-accent-pink text-accent-pink' :
-            stepStatus === 'error' ? 'bg-red-950 border-red-500 text-red-400' :
-            'bg-zinc-900 border-zinc-800 text-zinc-600'
-          }`}>
+          <span style={{
+            padding: '2px 6px',
+            fontSize: '9px',
+            fontWeight: 700,
+            textTransform: 'uppercase',
+            border: '1px solid',
+            backgroundColor: stepStatus === 'success' ? '#dcfce7' :
+                             stepStatus === 'running' ? '#ffe4e6' :
+                             stepStatus === 'error' ? '#fee2e2' :
+                             'var(--bg-inner)',
+            borderColor: stepStatus === 'success' ? 'var(--accent-green)' :
+                         stepStatus === 'running' ? 'var(--accent-coral)' :
+                         stepStatus === 'error' ? '#f43f5e' :
+                         'var(--border)',
+            color: stepStatus === 'success' ? '#15803d' :
+                   stepStatus === 'running' ? '#b91c1c' :
+                   stepStatus === 'error' ? '#b91c1c' :
+                   'var(--text-light)',
+          }}>
             {stepStatus}
           </span>
         </div>
@@ -106,56 +140,70 @@ export const BridgeModal: React.FC<BridgeModalProps> = ({ isOpen, onClose }) => 
   }
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="brutalist-card bg-dark-card border-2 border-black w-full max-w-lg shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] flex flex-col max-h-[90vh]">
+    <div className="modal-overlay">
+      <div className="modal-container animate-slideDown" style={{ maxWidth: '520px' }}>
         
         {/* Header */}
-        <div className="flex justify-between items-center border-b-2 border-black p-4 bg-zinc-950">
-          <div className="flex items-center gap-2">
+        <div className="modal-header">
+          <div className="modal-title">
             <span className="badge-brutalist pink animate-pulse">CCTP V2</span>
-            <h3 className="text-md font-bold uppercase tracking-wider text-white">Cross-Chain USDC Bridge</h3>
+            <span>Cross-Chain <i>USDC Bridge</i></span>
           </div>
-          <button onClick={onClose} className="text-zinc-400 hover:text-white transition-colors">
+          <button onClick={onClose} className="modal-close-btn">
             <X size={18} />
           </button>
         </div>
 
         {/* Content Body */}
-        <div className="p-6 overflow-y-auto space-y-6 flex-1">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           {status === 'idle' ? (
-            <div className="space-y-4">
-              <p className="text-xs text-zinc-400 font-mono leading-relaxed">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+              <p style={{ fontSize: '13px', color: 'var(--text-muted)', lineHeight: '1.5' }}>
                 Bridge USDC from Ethereum Sepolia or Base Sepolia to Arc Testnet using Circle's native burn-and-mint protocol (CCTP). Funds arrive with zero slippage.
               </p>
 
               {/* Source Chain Selector */}
               <div>
-                <label className="block text-xs font-mono uppercase mb-1 text-zinc-400">Select Source Chain</label>
-                <div className="grid grid-cols-2 gap-3">
+                <label className="brutalist-label">Select Source Chain</label>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
                   <button
                     onClick={() => setSourceChain('ethereum_sepolia')}
-                    className={`p-3 font-mono text-xs text-left border-2 uppercase font-bold flex flex-col justify-between ${
-                      sourceChain === 'ethereum_sepolia'
-                        ? 'bg-zinc-900 border-accent-pink text-white'
-                        : 'bg-black border-zinc-800 text-zinc-500 hover:text-zinc-300'
-                    }`}
+                    className="btn-brutalist"
+                    style={{
+                      height: 'auto',
+                      padding: '12px',
+                      flexDirection: 'column',
+                      alignItems: 'flex-start',
+                      justifyContent: 'space-between',
+                      backgroundColor: sourceChain === 'ethereum_sepolia' ? 'var(--bg-card)' : 'var(--bg-inner)',
+                      borderColor: sourceChain === 'ethereum_sepolia' ? 'var(--accent-coral)' : 'var(--border)',
+                      color: sourceChain === 'ethereum_sepolia' ? 'var(--text-main)' : 'var(--text-light)',
+                      boxShadow: sourceChain === 'ethereum_sepolia' ? 'var(--shadow-hover)' : 'none',
+                    }}
                   >
-                    <span>Ethereum Sepolia</span>
-                    <span className="text-[10px] font-normal text-zinc-500 mt-2">
+                    <span style={{ fontWeight: 700, fontSize: '13px' }}>Ethereum Sepolia</span>
+                    <span style={{ fontSize: '10px', marginTop: '6px', opacity: 0.8 }}>
                       Balance: ${parseFloat(balances.ethereum_sepolia).toFixed(2)} USDC
                     </span>
                   </button>
 
                   <button
                     onClick={() => setSourceChain('base_sepolia')}
-                    className={`p-3 font-mono text-xs text-left border-2 uppercase font-bold flex flex-col justify-between ${
-                      sourceChain === 'base_sepolia'
-                        ? 'bg-zinc-900 border-accent-pink text-white'
-                        : 'bg-black border-zinc-800 text-zinc-500 hover:text-zinc-300'
-                    }`}
+                    className="btn-brutalist"
+                    style={{
+                      height: 'auto',
+                      padding: '12px',
+                      flexDirection: 'column',
+                      alignItems: 'flex-start',
+                      justifyContent: 'space-between',
+                      backgroundColor: sourceChain === 'base_sepolia' ? 'var(--bg-card)' : 'var(--bg-inner)',
+                      borderColor: sourceChain === 'base_sepolia' ? 'var(--accent-coral)' : 'var(--border)',
+                      color: sourceChain === 'base_sepolia' ? 'var(--text-main)' : 'var(--text-light)',
+                      boxShadow: sourceChain === 'base_sepolia' ? 'var(--shadow-hover)' : 'none',
+                    }}
                   >
-                    <span>Base Sepolia</span>
-                    <span className="text-[10px] font-normal text-zinc-500 mt-2">
+                    <span style={{ fontWeight: 700, fontSize: '13px' }}>Base Sepolia</span>
+                    <span style={{ fontSize: '10px', marginTop: '6px', opacity: 0.8 }}>
                       Balance: ${parseFloat(balances.base_sepolia).toFixed(2)} USDC
                     </span>
                   </button>
@@ -163,77 +211,114 @@ export const BridgeModal: React.FC<BridgeModalProps> = ({ isOpen, onClose }) => 
               </div>
 
               {/* Destination (Locked) */}
-              <div className="border border-dashed border-zinc-800 p-3 bg-zinc-950/60 font-mono text-xs flex justify-between items-center">
+              <div style={{
+                border: '1px dashed var(--border)',
+                padding: '12px',
+                backgroundColor: 'var(--bg-inner)',
+                fontSize: '12px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}>
                 <div>
-                  <span className="text-zinc-500">Destination Blockchain</span>
-                  <div className="font-bold text-white mt-0.5">ARC TESTNET</div>
+                  <span style={{ color: 'var(--text-light)' }}>Destination Blockchain</span>
+                  <div style={{ fontWeight: 700, color: 'var(--text-main)', marginTop: '2px' }}>ARC TESTNET</div>
                 </div>
-                <div className="text-right">
-                  <span className="text-zinc-500">Bridging Mode</span>
-                  <div className="font-bold text-accent-green mt-0.5">CCTP NATIVE MINT</div>
+                <div style={{ textAlign: 'right' }}>
+                  <span style={{ color: 'var(--text-light)' }}>Bridging Mode</span>
+                  <div style={{ fontWeight: 700, color: 'var(--accent-green)', marginTop: '2px' }}>CCTP NATIVE MINT</div>
                 </div>
               </div>
 
               {/* Amount input */}
-              <div>
-                <label className="block text-xs font-mono uppercase mb-1 text-zinc-400">USDC Amount to Bridge</label>
-                <div className="relative">
+              <div className="brutalist-form-group">
+                <label className="brutalist-label">USDC Amount to Bridge</label>
+                <div style={{ position: 'relative' }}>
                   <input
                     type="number"
                     value={inputAmount}
                     onChange={(e) => setInputAmount(e.target.value)}
-                    className="w-full bg-black border-2 border-black p-3 font-mono text-white text-sm"
+                    className="brutalist-input"
                     placeholder="10.00"
+                    style={{ paddingRight: '60px' }}
                   />
-                  <span className="absolute right-4 top-3.5 font-mono text-zinc-500 text-xs font-bold">USDC</span>
+                  <span style={{
+                    position: 'absolute',
+                    right: '16px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    fontSize: '12px',
+                    fontWeight: 700,
+                    color: 'var(--text-light)'
+                  }}>
+                    USDC
+                  </span>
                 </div>
                 {parseFloat(inputAmount) > parseFloat(sourceBalance) && (
-                  <p className="text-[10px] text-red-400 font-mono mt-1">
+                  <p style={{ fontSize: '10px', color: '#f43f5e', marginTop: '4px' }}>
                     ⚠️ Amount exceeds source chain USDC balance (${parseFloat(sourceBalance).toFixed(2)})
                   </p>
                 )}
               </div>
 
               {/* Estimate Details */}
-              <div className="bg-zinc-950 p-4 border border-black space-y-2 font-mono text-[10px] text-zinc-500">
-                <div className="flex justify-between">
+              <div style={{
+                backgroundColor: 'var(--bg-inner)',
+                padding: '12px 15px',
+                border: '1px solid var(--border)',
+                fontSize: '11px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '6px',
+                color: 'var(--text-muted)'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span>Standard Confirmation Time:</span>
-                  <span className="text-zinc-300 font-bold">~30 seconds (Testnet)</span>
+                  <strong style={{ color: 'var(--text-main)' }}>~30 seconds (Testnet)</strong>
                 </div>
-                <div className="flex justify-between">
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span>CCTP Fee:</span>
-                  <span className="text-accent-green font-bold">Free (Circle sponsored)</span>
+                  <strong style={{ color: 'var(--accent-green)' }}>Free (Circle sponsored)</strong>
                 </div>
-                <div className="flex justify-between">
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span>Source Gas Fee:</span>
-                  <span className="text-zinc-300 font-bold">~0.002 ETH</span>
+                  <strong style={{ color: 'var(--text-main)' }}>~0.002 ETH</strong>
                 </div>
               </div>
 
               <button
                 onClick={handleStartBridge}
                 disabled={parseFloat(inputAmount) <= 0 || parseFloat(inputAmount) > parseFloat(sourceBalance)}
-                className="w-full bg-accent-pink text-white uppercase font-bold text-sm py-3 border-2 border-black hover:bg-rose-600 transition-colors disabled:opacity-50"
+                className="btn-brutalist btn-brutalist-pink"
+                style={{ width: '100%', padding: '12px', height: '45px', justifyContent: 'center' }}
               >
                 Initiate CCTP Bridge Transfer
               </button>
             </div>
           ) : (
             // Bridging in progress
-            <div className="space-y-4">
-              <div className="flex items-center justify-between border border-zinc-800 p-4 bg-zinc-950 font-mono text-xs">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                border: '1px solid var(--border)',
+                padding: '15px',
+                backgroundColor: 'var(--bg-inner)',
+                fontSize: '13px'
+              }}>
                 <div>
-                  <span className="text-zinc-500">Bridging Amount</span>
-                  <div className="font-bold text-white mt-0.5">{inputAmount} USDC</div>
+                  <span style={{ color: 'var(--text-light)' }}>Bridging Amount</span>
+                  <div style={{ fontWeight: 700, color: 'var(--text-main)', marginTop: '2px' }}>{inputAmount} USDC</div>
                 </div>
-                <div className="text-right">
-                  <span className="text-zinc-500">Estimated remaining time</span>
-                  <div className="font-bold text-accent-pink mt-0.5 flex items-center gap-1 justify-end">
+                <div style={{ textAlign: 'right' }}>
+                  <span style={{ color: 'var(--text-light)' }}>Estimated remaining time</span>
+                  <div style={{ fontWeight: 700, color: 'var(--accent-coral)', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'flex-end' }}>
                     {status === 'success' ? (
-                      <span className="text-accent-green">Complete</span>
+                      <span style={{ color: 'var(--accent-green)' }}>Complete</span>
                     ) : (
                       <>
-                        <RefreshCw size={11} className="spin" />
+                        <RefreshCw size={12} className="spin" />
                         <span>{timeRemaining}s</span>
                       </>
                     )}
@@ -242,15 +327,32 @@ export const BridgeModal: React.FC<BridgeModalProps> = ({ isOpen, onClose }) => 
               </div>
 
               {errorMessage && (
-                <div className="bg-red-950/40 border border-red-500 text-red-200 px-4 py-3 text-xs uppercase font-mono space-y-2">
-                  <div className="font-bold flex items-center gap-1.5">
-                    <ShieldAlert size={14} className="text-red-500" />
+                <div style={{
+                  backgroundColor: '#fef2f2',
+                  border: '1px solid #fee2e2',
+                  color: '#991b1b',
+                  padding: '15px',
+                  fontSize: '13px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '8px'
+                }}>
+                  <div style={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <ShieldAlert size={16} />
                     <span>Bridge Process Interrupted</span>
                   </div>
-                  <p className="normal-case text-zinc-300">{errorMessage}</p>
+                  <p style={{ color: '#7f1d1d', margin: 0 }}>{errorMessage}</p>
                   <button
                     onClick={handleRetry}
-                    className="w-full bg-red-900 border border-red-500 text-white font-bold py-1.5 px-3 uppercase text-[10px] hover:bg-red-800 transition-colors"
+                    className="btn-brutalist"
+                    style={{
+                      backgroundColor: '#ef4444',
+                      borderColor: '#dc2626',
+                      color: 'white',
+                      padding: '8px',
+                      fontSize: '11px',
+                      textTransform: 'uppercase'
+                    }}
                   >
                     Retry Failed Step
                   </button>
@@ -258,7 +360,7 @@ export const BridgeModal: React.FC<BridgeModalProps> = ({ isOpen, onClose }) => 
               )}
 
               {/* Progress Steps list */}
-              <div className="space-y-3">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {renderStepRow('approve', '1. Approve USDC Allowance', 'Authorize CCTP TokenMessenger to spend your USDC.', 'approve')}
                 {renderStepRow('burn', '2. Burn USDC on Source Chain', 'USDC is burned. The transmitter registers the transaction.', 'burn')}
                 {renderStepRow('attest', '3. Fetch Circle Attestation', 'Poll Attestation API for Circle verification signature.', 'attest')}
@@ -266,17 +368,26 @@ export const BridgeModal: React.FC<BridgeModalProps> = ({ isOpen, onClose }) => 
               </div>
 
               {status === 'success' && (
-                <div className="border border-accent-green bg-emerald-950/10 p-4 font-mono text-xs text-center space-y-3">
-                  <div className="font-bold text-accent-green flex items-center justify-center gap-1.5">
-                    <CheckCircle size={16} />
+                <div style={{
+                  border: '1px solid var(--accent-green)',
+                  backgroundColor: '#f0fdf4',
+                  padding: '20px',
+                  textAlign: 'center',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '10px'
+                }}>
+                  <div style={{ fontWeight: 800, color: 'var(--accent-green)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '15px' }}>
+                    <CheckCircle size={18} />
                     <span>BRIDGE SUCCESSFUL!</span>
                   </div>
-                  <p className="text-[10px] text-zinc-400">
+                  <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: 0 }}>
                     USDC has successfully been minted on Arc Testnet.
                   </p>
                   <button
                     onClick={onClose}
-                    className="bg-accent-green text-black uppercase font-bold text-[10px] py-1.5 px-6 border border-black hover:bg-emerald-400 transition-colors"
+                    className="btn-brutalist btn-brutalist-pink"
+                    style={{ padding: '8px 20px', alignSelf: 'center' }}
                   >
                     Close & Check Balances
                   </button>

@@ -13,41 +13,60 @@ export const UnifiedBalance: React.FC = () => {
   ).toFixed(2)
 
   return (
-    <div className="brutalist-card p-6 bg-zinc-900 border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-      <div className="flex items-center gap-2 mb-4">
-        <Layers className="text-accent-pink" size={18} />
-        <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-400">Your Unified stablecoin treasury balance</h3>
+    <div className="brutalist-card accent-purple">
+      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', marginBottom: 'var(--space-4)' }}>
+        <Layers style={{ color: 'var(--accent-coral)' }} size={18} />
+        <span className="brutalist-label" style={{ marginBottom: 0 }}>Your Unified Stablecoin Treasury Balance</span>
       </div>
 
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+      <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'flex-start', gap: 'var(--space-6)' }}>
         <div>
-          <div className="text-[10px] uppercase font-mono text-zinc-500">Total Cumulative USDC Balance</div>
-          <div className="text-3xl font-black font-mono tracking-tighter mt-1 text-white">
-            ${unifiedTotal} <span className="text-xs font-bold text-accent-pink">USDC</span>
+          <div className="brutalist-label" style={{ marginBottom: '4px' }}>Total Cumulative USDC Balance</div>
+          <div style={{ fontSize: '28px', fontWeight: 800, fontFamily: 'var(--font-serif)', fontStyle: 'italic', color: 'var(--accent-coral)', letterSpacing: '-0.02em' }}>
+            ${unifiedTotal} <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-muted)' }}>USDC</span>
           </div>
         </div>
 
         {/* Breakdown details */}
-        <div className="flex flex-wrap gap-4 w-full md:w-auto">
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-3)' }}>
           {/* Ethereum Sepolia Balance card */}
-          <div className="bg-black border border-zinc-800 p-3 flex-1 md:flex-none min-w-[120px] font-mono">
-            <div className="text-[9px] text-zinc-500 uppercase">Ethereum Sepolia</div>
-            <div className="text-sm font-bold text-zinc-300">${parseFloat(balances.ethereum_sepolia).toFixed(2)}</div>
-            <div className="text-[8px] text-zinc-600">Domain ID: 0</div>
+          <div style={{
+            backgroundColor: 'var(--bg-inner)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-sm)',
+            padding: 'var(--space-3)',
+            minWidth: '120px'
+          }}>
+            <div className="brutalist-label" style={{ marginBottom: '2px' }}>Ethereum Sepolia</div>
+            <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-main)' }}>${parseFloat(balances.ethereum_sepolia).toFixed(2)}</div>
+            <div style={{ fontSize: '10px', color: 'var(--text-light)' }}>Domain ID: 0</div>
           </div>
 
           {/* Base Sepolia Balance card */}
-          <div className="bg-black border border-zinc-800 p-3 flex-1 md:flex-none min-w-[120px] font-mono">
-            <div className="text-[9px] text-zinc-500 uppercase">Base Sepolia</div>
-            <div className="text-sm font-bold text-zinc-300">${parseFloat(balances.base_sepolia).toFixed(2)}</div>
-            <div className="text-[8px] text-zinc-600">Domain ID: 6</div>
+          <div style={{
+            backgroundColor: 'var(--bg-inner)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-sm)',
+            padding: 'var(--space-3)',
+            minWidth: '120px'
+          }}>
+            <div className="brutalist-label" style={{ marginBottom: '2px' }}>Base Sepolia</div>
+            <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-main)' }}>${parseFloat(balances.base_sepolia).toFixed(2)}</div>
+            <div style={{ fontSize: '10px', color: 'var(--text-light)' }}>Domain ID: 6</div>
           </div>
 
           {/* Arc Testnet Balance card */}
-          <div className="bg-black border border-zinc-800 p-3 flex-1 md:flex-none min-w-[120px] font-mono border-l-2 border-l-accent-green">
-            <div className="text-[9px] text-zinc-500 uppercase text-accent-green">Arc Testnet</div>
-            <div className="text-sm font-bold text-white">${parseFloat(balances.arc_testnet).toFixed(2)}</div>
-            <div className="text-[8px] text-zinc-500">Domain ID: 26</div>
+          <div style={{
+            backgroundColor: 'var(--bg-inner)',
+            border: '1px solid var(--border)',
+            borderLeft: '3px solid var(--accent-green)',
+            borderRadius: 'var(--radius-sm)',
+            padding: 'var(--space-3)',
+            minWidth: '120px'
+          }}>
+            <div className="brutalist-label" style={{ marginBottom: '2px', color: 'var(--accent-green)' }}>Arc Testnet</div>
+            <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-main)' }}>${parseFloat(balances.arc_testnet).toFixed(2)}</div>
+            <div style={{ fontSize: '10px', color: 'var(--text-light)' }}>Domain ID: 26</div>
           </div>
         </div>
       </div>

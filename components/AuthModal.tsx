@@ -45,45 +45,16 @@ export function AuthModal({
   }
 
   return (
-    <div style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      width: '100vw',
-      height: '100vh',
-      backgroundColor: 'rgba(0,0,0,0.6)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      zIndex: 9999,
-      backdropFilter: 'blur(4px)'
-    }}>
-      <div className="brutalist-card accent-pink animate-slideDown" style={{
-        width: '440px',
-        padding: '24px',
-        backgroundColor: 'var(--window-bg)',
-        border: '3px solid var(--text)',
-        boxShadow: 'var(--shadow-hard)',
-        position: 'relative'
-      }}>
-        <button
-          onClick={onClose}
-          style={{
-            position: 'absolute',
-            top: '12px',
-            right: '12px',
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            color: 'var(--text)'
-          }}
-        >
-          <X size={18} />
-        </button>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
-          <Fingerprint size={24} className="accent-color" />
-          <h2 className="card-title" style={{ margin: 0, fontSize: '20px' }}>Gatekeeper <i>Authentication</i></h2>
+    <div className="modal-overlay">
+      <div className="modal-container animate-slideDown" style={{ maxWidth: '440px' }}>
+        <div className="modal-header">
+          <div className="modal-title">
+            <Fingerprint size={18} style={{ stroke: 'var(--accent-coral)' }} />
+            <span>Gatekeeper <i>Authentication</i></span>
+          </div>
+          <button className="modal-close-btn" onClick={onClose}>
+            <X size={16} />
+          </button>
         </div>
 
         {authMode === 'select' && (
@@ -140,7 +111,7 @@ export function AuthModal({
               <label className="brutalist-label">Username</label>
               <input
                 type="text"
-                className="input-brutalist"
+                className="brutalist-input"
                 placeholder="e.g. agent_alice"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
@@ -183,7 +154,7 @@ export function AuthModal({
               <label className="brutalist-label">Username</label>
               <input
                 type="text"
-                className="input-brutalist"
+                className="brutalist-input"
                 placeholder="e.g. agent_alice"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}

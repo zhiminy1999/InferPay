@@ -33,6 +33,7 @@ class FallbackDB {
       swaps: [],
       bridges: [],
       activity_log: [],
+      services: [],
     }
   }
 
@@ -202,6 +203,16 @@ try {
       wallet_address TEXT,
       amount REAL,
       status TEXT,
+      metadata TEXT
+    );
+
+    CREATE TABLE IF NOT EXISTS services (
+      id TEXT PRIMARY KEY,
+      name TEXT,
+      capability TEXT,
+      pricing REAL,
+      reputation REAL,
+      wallet_address TEXT,
       metadata TEXT
     );
   `)

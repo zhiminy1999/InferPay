@@ -14,22 +14,36 @@ export const CurrencySelector: React.FC<CurrencySelectorProps> = ({
   label = 'Select Currency',
 }) => {
   return (
-    <div className="flex flex-col space-y-2">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
       {label && (
-        <label className="text-zinc-400 text-xs uppercase font-mono tracking-wider">
+        <label className="brutalist-label">
           {label}
         </label>
       )}
-      <div className="flex bg-black p-1 border border-zinc-800 rounded-lg max-w-[240px]">
+      <div style={{
+        display: 'flex',
+        backgroundColor: 'var(--bg-inner)',
+        padding: '4px',
+        border: '1px solid var(--border)',
+        borderRadius: 'var(--radius-sm)',
+        maxWidth: '240px'
+      }}>
         <button
           type="button"
           onClick={() => !disabled && onChange('USDC')}
           disabled={disabled}
-          className={`flex-1 py-1.5 px-3 rounded-md text-xs font-bold uppercase transition-all duration-200 font-mono tracking-wider flex items-center justify-center space-x-1.5 ${
-            selected === 'USDC'
-              ? 'bg-accent-green text-black font-black'
-              : 'text-zinc-400 hover:text-white hover:bg-zinc-900/60'
-          } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+          className={`btn-brutalist ${selected === 'USDC' ? 'btn-brutalist-pink' : 'btn-brutalist-muted'}`}
+          style={{
+            flex: 1,
+            padding: '6px 12px',
+            fontSize: '12px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '6px',
+            borderRadius: 'var(--radius-sm)',
+            border: selected === 'USDC' ? undefined : '1px solid transparent'
+          }}
         >
           <span>🇺🇸</span>
           <span>USDC</span>
@@ -38,11 +52,18 @@ export const CurrencySelector: React.FC<CurrencySelectorProps> = ({
           type="button"
           onClick={() => !disabled && onChange('EURC')}
           disabled={disabled}
-          className={`flex-1 py-1.5 px-3 rounded-md text-xs font-bold uppercase transition-all duration-200 font-mono tracking-wider flex items-center justify-center space-x-1.5 ${
-            selected === 'EURC'
-              ? 'bg-blue-600 text-white font-black'
-              : 'text-zinc-400 hover:text-white hover:bg-zinc-900/60'
-          } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+          className={`btn-brutalist ${selected === 'EURC' ? 'btn-brutalist-pink' : 'btn-brutalist-muted'}`}
+          style={{
+            flex: 1,
+            padding: '6px 12px',
+            fontSize: '12px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '6px',
+            borderRadius: 'var(--radius-sm)',
+            border: selected === 'EURC' ? undefined : '1px solid transparent'
+          }}
         >
           <span>🇪🇺</span>
           <span>EURC</span>
