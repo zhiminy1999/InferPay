@@ -25,6 +25,8 @@ import { NanopaymentDeposit } from '@/components/NanopaymentDeposit'
 import { BridgeModal } from '@/components/BridgeModal'
 import { UnifiedBalance } from '@/components/UnifiedBalance'
 import { TransactionHistory } from '@/components/TransactionHistory'
+import Marketplace from '@/components/Marketplace'
+import AnalyticsDashboard from '@/components/AnalyticsDashboard'
 
 export default function InferPayDashboard() {
   const {
@@ -39,7 +41,7 @@ export default function InferPayDashboard() {
   } = useWeb3()
 
   // Tab views
-  const [activeTab, setActiveTab] = useState<'escrow' | 'intent' | 'yield' | 'payroll' | 'consensus' | 'directory' | 'jobs' | 'nanopayments' | 'history'>('escrow')
+  const [activeTab, setActiveTab] = useState<'escrow' | 'intent' | 'yield' | 'payroll' | 'consensus' | 'directory' | 'jobs' | 'nanopayments' | 'marketplace' | 'analytics' | 'history'>('escrow')
   
   // Faucet, Auth, and Bridge modal states
   const [showFaucetModal, setShowFaucetModal] = useState<boolean>(false)
@@ -243,6 +245,14 @@ export default function InferPayDashboard() {
                 <NanopaymentWidget />
                 <NanopaymentDeposit />
               </div>
+            )}
+
+            {activeTab === 'marketplace' && (
+              <Marketplace />
+            )}
+
+            {activeTab === 'analytics' && (
+              <AnalyticsDashboard />
             )}
 
             {activeTab === 'history' && (

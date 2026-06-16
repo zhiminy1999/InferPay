@@ -1,11 +1,11 @@
 'use client'
 
 import React from 'react'
-import { Lock, ArrowRightLeft, Coins, FileText, Shield, Zap, Users, Briefcase, History } from 'lucide-react'
+import { Lock, ArrowRightLeft, Coins, FileText, Shield, Zap, Users, Briefcase, History, Sparkles } from 'lucide-react'
 
 interface SidebarProps {
-  activeTab: 'escrow' | 'intent' | 'yield' | 'payroll' | 'consensus' | 'directory' | 'jobs' | 'nanopayments' | 'history'
-  setActiveTab: (tab: 'escrow' | 'intent' | 'yield' | 'payroll' | 'consensus' | 'directory' | 'jobs' | 'nanopayments' | 'history') => void
+  activeTab: 'escrow' | 'intent' | 'yield' | 'payroll' | 'consensus' | 'directory' | 'jobs' | 'nanopayments' | 'marketplace' | 'analytics' | 'history'
+  setActiveTab: (tab: 'escrow' | 'intent' | 'yield' | 'payroll' | 'consensus' | 'directory' | 'jobs' | 'nanopayments' | 'marketplace' | 'analytics' | 'history') => void
 }
 
 export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
@@ -95,12 +95,32 @@ export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
         </div>
 
         <div 
+          className={`sidebar-menu-item ${activeTab === 'marketplace' ? 'active' : ''}`}
+          onClick={() => setActiveTab('marketplace')}
+        >
+          <div className="sidebar-icon-wrap">
+            <Sparkles size={15} style={{ color: 'var(--accent-pink)' }} />
+            <span>9. Agent Marketplace</span>
+          </div>
+        </div>
+
+        <div 
+          className={`sidebar-menu-item ${activeTab === 'analytics' ? 'active' : ''}`}
+          onClick={() => setActiveTab('analytics')}
+        >
+          <div className="sidebar-icon-wrap">
+            <Coins size={15} style={{ color: 'var(--accent-green)' }} />
+            <span>10. Treasury Analytics</span>
+          </div>
+        </div>
+
+        <div 
           className={`sidebar-menu-item ${activeTab === 'history' ? 'active' : ''}`}
           onClick={() => setActiveTab('history')}
         >
           <div className="sidebar-icon-wrap text-accent-pink font-bold">
             <History size={15} />
-            <span>9. Transaction Audit Trail</span>
+            <span>11. Transaction Audit Trail</span>
           </div>
         </div>
       </div>
