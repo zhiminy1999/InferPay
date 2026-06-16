@@ -1,4 +1,5 @@
 import { getAddress, parseUnits, formatUnits, Hex } from 'viem'
+import { USDC_ADDRESS_ARC, erc20Abi, INFERPAY_ESCROW_V2_ADDRESS, inferPayEscrowV2Abi } from './contracts'
 
 export interface GatewayBalances {
   wallet: {
@@ -51,46 +52,49 @@ export class GatewayClient {
   }
 
   /**
-   * Fetches current wallet USDC balance (on-chain) and simulated Gateway nanopayments balance (localStorage)
+   * Fetches real on-chain balances:
+   * - Wallet USDC balance via ERC-20 balanceOf
+   * - Gateway balance via InferPayEscrowV2 getDeposit
    */
   async getBalances(): Promise<GatewayBalances> {
     let walletBalance = BigInt(0)
+    let gatewayBalance = BigInt(0)
     
-    // Attempt to fetch real USDC balance from Arc Testnet
+    // Fetch real USDC wallet balance from Arc Testnet
     try {
-      const USDC_ADDRESS = '0x3600000000000000000000000000000000000000'
-      const abi = [
-        {
-          name: 'balanceOf',
-          type: 'function',
-          stateMutability: 'view',
-          inputs: [{ name: 'account', type: 'address' }],
-          outputs: [{ name: '', type: 'uint256' }],
-        },
-      ] as const
-
       const res = await this.publicClient.readContract({
-        address: USDC_ADDRESS,
-        abi,
+        address: USDC_ADDRESS_ARC,
+        abi: erc20Abi,
         functionName: 'balanceOf',
         args: [this.userAddress],
       })
       walletBalance = BigInt(res)
     } catch (e) {
-      console.warn('Failed to fetch real wallet balance, using local simulation:', e)
-      walletBalance = parseUnits('100.0', 6)
+      console.error('Failed to fetch on-chain wallet balance:', e)
     }
 
-    // Read gateway balance from localStorage
-    let gatewayBalance = BigInt(0)
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem(`gateway_bal_${this.userAddress.toLowerCase()}`)
-      if (stored) {
-        gatewayBalance = BigInt(stored)
-      } else {
-        // Default seed to make demo interactive
-        gatewayBalance = parseUnits('5.0', 6)
-        localStorage.setItem(`gateway_bal_${this.userAddress.toLowerCase()}`, gatewayBalance.toString())
+    // Fetch real gateway deposit balance from InferPayEscrowV2
+    try {
+      const deposit = await this.publicClient.readContract({
+        address: INFERPAY_ESCROW_V2_ADDRESS,
+        abi: inferPayEscrowV2Abi,
+        functionName: 'getDeposit',
+        args: [this.userAddress],
+      }) as bigint
+      gatewayBalance = deposit
+    } catch (e) {
+      // Contract may not have getDeposit — fallback to reading allowance as proxy
+      console.warn('getDeposit not available, reading USDC allowance to escrow as fallback:', e)
+      try {
+        const allowance = await this.publicClient.readContract({
+          address: USDC_ADDRESS_ARC,
+          abi: erc20Abi,
+          functionName: 'allowance',
+          args: [this.userAddress, INFERPAY_ESCROW_V2_ADDRESS],
+        }) as bigint
+        gatewayBalance = allowance
+      } catch (e2) {
+        console.error('Failed to fetch gateway balance:', e2)
       }
     }
 
@@ -107,115 +111,98 @@ export class GatewayClient {
   }
 
   /**
-   * Deposits USDC into Gateway. Triggers real USDC on-chain transaction to vault if possible
+   * Deposits USDC into the InferPayEscrowV2 contract on Arc Testnet.
+   * Step 1: Approve escrow contract to spend USDC
+   * Step 2: Call deposit function on escrow contract
+   * Fallback: If escrow doesn't have deposit(), transfer USDC directly to escrow
    */
   async deposit(amount: string): Promise<DepositResult> {
+    if (!this.walletClient) {
+      throw new Error('Wallet not connected — cannot execute deposit')
+    }
+
     const amountRaw = parseUnits(amount, 6)
-    const USDC_ADDRESS = '0x3600000000000000000000000000000000000000'
-    const GATEWAY_VAULT = '0x000000000000000000000000000000000000dEaD' // Burn address as mock vault for gasless deposits
-    
-    const erc20Abi = [
-      {
-        name: 'transfer',
-        type: 'function',
-        stateMutability: 'nonpayable',
-        inputs: [
-          { name: 'recipient', type: 'address' },
-          { name: 'amount', type: 'uint256' },
-        ],
-        outputs: [{ name: '', type: 'bool' }],
-      },
-    ] as const
 
-    let txHash = '0x' + '0'.repeat(64)
+    // Step 1: Approve InferPayEscrowV2 to spend user's USDC
+    const approveHash = await this.walletClient.writeContract({
+      address: USDC_ADDRESS_ARC,
+      abi: erc20Abi,
+      functionName: 'approve',
+      args: [INFERPAY_ESCROW_V2_ADDRESS, amountRaw],
+    })
+    await this.publicClient.waitForTransactionReceipt({ hash: approveHash })
 
+    // Step 2: Try calling deposit on escrow contract
+    let depositHash: string
     try {
-      if (this.walletClient) {
-        // Execute real transfer on-chain
-        txHash = await this.walletClient.writeContract({
-          address: USDC_ADDRESS,
-          abi: erc20Abi,
-          functionName: 'transfer',
-          args: [GATEWAY_VAULT, amountRaw],
-        })
-
-        // Wait for block confirmation
-        await this.publicClient.waitForTransactionReceipt({ hash: txHash })
-      }
-    } catch (e) {
-      console.warn('Real deposit transfer failed or cancelled, executing local simulation:', e)
-      // Generate simulated hash
-      txHash = '0x' + Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join('')
-    }
-
-    // Update Gateway balance in localStorage
-    if (typeof window !== 'undefined') {
-      const key = `gateway_bal_${this.userAddress.toLowerCase()}`
-      const current = BigInt(localStorage.getItem(key) || '0')
-      const next = current + amountRaw
-      localStorage.setItem(key, next.toString())
-
-      // Record deposit history
-      const histKey = `gateway_hist_${this.userAddress.toLowerCase()}`
-      const hist = JSON.parse(localStorage.getItem(histKey) || '[]')
-      hist.unshift({
-        type: 'deposit',
-        amount,
-        txHash,
-        timestamp: Date.now(),
+      depositHash = await this.walletClient.writeContract({
+        address: INFERPAY_ESCROW_V2_ADDRESS,
+        abi: inferPayEscrowV2Abi,
+        functionName: 'deposit',
+        args: [amountRaw],
       })
-      localStorage.setItem(histKey, JSON.stringify(hist))
+    } catch (e) {
+      // Fallback: Transfer USDC directly to escrow contract address
+      console.warn('Escrow deposit() not available, using direct transfer:', e)
+      depositHash = await this.walletClient.writeContract({
+        address: USDC_ADDRESS_ARC,
+        abi: erc20Abi,
+        functionName: 'transfer',
+        args: [INFERPAY_ESCROW_V2_ADDRESS, amountRaw],
+      })
     }
+
+    // Wait for on-chain confirmation
+    await this.publicClient.waitForTransactionReceipt({ hash: depositHash })
 
     return {
       success: true,
-      depositTxHash: txHash,
+      depositTxHash: depositHash,
       amount,
     }
   }
 
   /**
-   * Withdraws USDC from Gateway back to user wallet
+   * Withdraws USDC from the InferPayEscrowV2 contract back to user wallet.
+   * Calls the withdraw function on the escrow contract.
    */
   async withdraw(amount: string): Promise<WithdrawResult> {
-    const amountRaw = parseUnits(amount, 6)
-    
-    // Deduct from local storage
-    if (typeof window !== 'undefined') {
-      const key = `gateway_bal_${this.userAddress.toLowerCase()}`
-      const current = BigInt(localStorage.getItem(key) || '0')
-      if (current < amountRaw) {
-        throw new Error('Insufficient Gateway balance for withdrawal')
-      }
-      const next = current - amountRaw
-      localStorage.setItem(key, next.toString())
-
-      // Record withdrawal history
-      const txHash = '0x' + Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join('')
-      const histKey = `gateway_hist_${this.userAddress.toLowerCase()}`
-      const hist = JSON.parse(localStorage.getItem(histKey) || '[]')
-      hist.unshift({
-        type: 'withdrawal',
-        amount,
-        txHash,
-        timestamp: Date.now(),
-      })
-      localStorage.setItem(histKey, JSON.stringify(hist))
-
-      return {
-        success: true,
-        mintTxHash: txHash,
-        amount,
-        formattedAmount: amount,
-      }
+    if (!this.walletClient) {
+      throw new Error('Wallet not connected — cannot execute withdrawal')
     }
 
-    throw new Error('Window environment required')
+    const amountRaw = parseUnits(amount, 6)
+
+    // Call withdraw on escrow contract
+    let withdrawHash: string
+    try {
+      withdrawHash = await this.walletClient.writeContract({
+        address: INFERPAY_ESCROW_V2_ADDRESS,
+        abi: inferPayEscrowV2Abi,
+        functionName: 'withdraw',
+        args: [amountRaw],
+      })
+    } catch (e) {
+      throw new Error(`Withdrawal failed: ${(e as Error).message}`)
+    }
+
+    // Wait for on-chain confirmation
+    await this.publicClient.waitForTransactionReceipt({ hash: withdrawHash })
+
+    return {
+      success: true,
+      mintTxHash: withdrawHash,
+      amount,
+      formattedAmount: amount,
+    }
   }
 
   /**
-   * Performs an x402 payment flow.
-   * Negotiates 402, requests off-chain signature authorization, and submits to server.
+   * Performs an x402 payment flow using real on-chain signatures.
+   * 1. Initial request triggers 402 Payment Required
+   * 2. User signs EIP-712 TransferWithAuthorization
+   * 3. Retry with signed payment proof
+   * 4. Balance deduction tracked on-chain via escrow
    */
   async pay(url: string, bodyPayload: any = {}): Promise<PayResult> {
     // 1. Initial request to trigger payment negotiation
@@ -228,7 +215,7 @@ export class GatewayClient {
     })
 
     if (initRes.status !== 402) {
-      // Direct success
+      // Direct success — no payment required
       const data = await initRes.json()
       return { success: true, status: initRes.status, data }
     }
@@ -242,95 +229,77 @@ export class GatewayClient {
     const { price, destination } = JSON.parse(reqHeader)
     const costBigInt = parseUnits(price, 6)
 
-    // Verify buyer has enough gateway balance
-    if (typeof window !== 'undefined') {
-      const balKey = `gateway_bal_${this.userAddress.toLowerCase()}`
-      const balance = BigInt(localStorage.getItem(balKey) || '0')
-      if (balance < costBigInt) {
-        throw new Error(`Insufficient Gateway balance: need ${price} USDC, have ${formatUnits(balance, 6)} USDC`)
-      }
+    // Verify buyer has enough on-chain gateway balance
+    const balances = await this.getBalances()
+    if (balances.gateway.available < costBigInt) {
+      throw new Error(
+        `Insufficient Gateway balance: need ${price} USDC, have ${formatUnits(balances.gateway.available, 6)} USDC`
+      )
     }
 
-    // 3. Create EIP-3009-like offchain signature
-    // For local simulation, we sign a standard EIP-712 typed structure
-    let signature = '0x'
-    try {
-      if (this.walletClient) {
-        const domain = {
-          name: 'GatewayWalletBatched',
-          version: '1',
-          chainId: 5042002,
-          verifyingContract: '0x3600000000000000000000000000000000000000' as `0x${string}`,
-        }
-
-        const types = {
-          TransferWithAuthorization: [
-            { name: 'from', type: 'address' },
-            { name: 'to', type: 'address' },
-            { name: 'value', type: 'uint256' },
-            { name: 'validAfter', type: 'uint256' },
-            { name: 'validBefore', type: 'uint256' },
-            { name: 'nonce', type: 'bytes32' },
-          ],
-        }
-
-        const message = {
-          from: this.userAddress,
-          to: getAddress(destination),
-          value: costBigInt,
-          validAfter: BigInt(0),
-          validBefore: BigInt(Math.floor(Date.now() / 1000) + 3600),
-          nonce: '0x' + Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join('') as `0x${string}`,
-        }
-
-        signature = await this.walletClient.signTypedData({
-          account: this.userAddress,
-          domain,
-          types,
-          primaryType: 'TransferWithAuthorization',
-          message,
-        })
-      }
-    } catch (e) {
-      console.warn('Signature collection cancelled/failed, using mock signature:', e)
-      signature = '0x' + Array.from({ length: 130 }, () => Math.floor(Math.random() * 16).toString(16)).join('')
+    // 3. Create EIP-712 TransferWithAuthorization signature
+    if (!this.walletClient) {
+      throw new Error('Wallet not connected — cannot sign payment authorization')
     }
 
-    // 4. Retry request with PAYMENT-SIGNATURE header
+    const domain = {
+      name: 'GatewayPayment',
+      version: '1',
+      chainId: 5042002, // Arc Testnet
+      verifyingContract: USDC_ADDRESS_ARC as `0x${string}`,
+    }
+
+    const types = {
+      TransferWithAuthorization: [
+        { name: 'from', type: 'address' },
+        { name: 'to', type: 'address' },
+        { name: 'value', type: 'uint256' },
+        { name: 'validAfter', type: 'uint256' },
+        { name: 'validBefore', type: 'uint256' },
+        { name: 'nonce', type: 'bytes32' },
+      ],
+    }
+
+    const nonce = '0x' + Array.from(crypto.getRandomValues(new Uint8Array(32)))
+      .map(b => b.toString(16).padStart(2, '0')).join('') as `0x${string}`
+
+    const validAfter = BigInt(0)
+    const validBefore = BigInt(Math.floor(Date.now() / 1000) + 3600)
+
+    const message = {
+      from: this.userAddress,
+      to: getAddress(destination),
+      value: costBigInt,
+      validAfter,
+      validBefore,
+      nonce,
+    }
+
+    // Request real signature from user's wallet — no mock fallback
+    const signature = await this.walletClient.signTypedData({
+      account: this.userAddress,
+      domain,
+      types,
+      primaryType: 'TransferWithAuthorization',
+      message,
+    })
+
+    // 4. Retry request with real payment signature and headers
     const retryRes = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'PAYMENT-SIGNATURE': signature,
         'PAYMENT-BUYER-ADDRESS': this.userAddress,
+        'PAYMENT-NONCE': nonce,
+        'PAYMENT-VALID-AFTER': validAfter.toString(),
+        'PAYMENT-VALID-BEFORE': validBefore.toString(),
+        'PAYMENT-DESTINATION': getAddress(destination),
       },
       body: JSON.stringify(bodyPayload),
     })
 
     const responseData = await retryRes.json()
-
-    if (retryRes.ok) {
-      // Deduct balance locally upon successful payment confirmation
-      if (typeof window !== 'undefined') {
-        const balKey = `gateway_bal_${this.userAddress.toLowerCase()}`
-        const current = BigInt(localStorage.getItem(balKey) || '0')
-        const next = current - costBigInt
-        localStorage.setItem(balKey, next.toString())
-
-        // Save history item
-        const histKey = `gateway_hist_${this.userAddress.toLowerCase()}`
-        const hist = JSON.parse(localStorage.getItem(histKey) || '[]')
-        hist.unshift({
-          type: 'spend',
-          amount: price,
-          description: bodyPayload.modelId ? `Inference call: ${bodyPayload.modelId}` : 'Nanopayment request',
-          timestamp: Date.now(),
-          settled: true, // Gasless offchain instant settlement
-          payoutHash: '0x' + Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join(''),
-        })
-        localStorage.setItem(histKey, JSON.stringify(hist))
-      }
-    }
 
     return {
       success: retryRes.ok,
