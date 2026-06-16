@@ -812,3 +812,64 @@ body {
   color: var(--text-main);
 }
 
+/* =======================================================
+   Utility Animations & Helpers
+   ======================================================= */
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Status dot indicator */
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  background-color: var(--text-light);
+}
+.status-dot.green {
+  background-color: var(--accent-green);
+  box-shadow: 0 0 6px var(--accent-green);
+}
+.status-dot.red {
+  background-color: #dc2626;
+  box-shadow: 0 0 6px #dc262680;
+}
+.status-dot.yellow-blink {
+  background-color: var(--accent-yellow);
+  animation: blink 1s ease-in-out infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+/* Responsive overrides for the 3-column grids */
+@media (max-width: 1100px) {
+  .brutalist-split {
+    grid-template-columns: 1fr !important;
+  }
+}
+
