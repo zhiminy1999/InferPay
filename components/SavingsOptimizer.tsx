@@ -128,7 +128,7 @@ export function SavingsOptimizer({
               <div className="brutalist-form-group">
                 <label className="brutalist-label">Source Asset</label>
                 <select
-                  className="input-brutalist"
+                  className="brutalist-input"
                   value={fromCurrency}
                   onChange={(e) => {
                     setFromCurrency(e.target.value as 'USDC' | 'EURC')
@@ -136,22 +136,23 @@ export function SavingsOptimizer({
                   }}
                   style={{ width: '100%', height: '42px', fontWeight: 700 }}
                 >
-                  <option value="USDC">USDC (USD Stablecoin)</option>
-                  <option value="EURC">EURC (EUR Stablecoin)</option>
+                  <option value="USDC" style={{ color: 'var(--text-main)' }}>USDC (USD Stablecoin)</option>
+                  <option value="EURC" style={{ color: 'var(--text-main)' }}>EURC (EUR Stablecoin)</option>
                 </select>
               </div>
 
               <div className="brutalist-form-group">
                 <label className="brutalist-label">Destination Asset</label>
                 <div
-                  className="input-brutalist"
+                  className="brutalist-input"
                   style={{
                     height: '42px',
                     display: 'flex',
                     alignItems: 'center',
-                    backgroundColor: 'rgba(0,0,0,0.05)',
+                    backgroundColor: 'var(--bg-inner)',
                     fontWeight: 700,
-                    padding: '0 10px'
+                    padding: '0 10px',
+                    color: 'var(--text-main)'
                   }}
                 >
                   {toCurrency}
@@ -165,7 +166,7 @@ export function SavingsOptimizer({
                 <input
                   type="number"
                   step="0.01"
-                  className="input-brutalist"
+                  className="brutalist-input"
                   placeholder="0.00"
                   value={amountInput}
                   onChange={(e) => {
@@ -190,11 +191,14 @@ export function SavingsOptimizer({
           {/* Quote display */}
           {quote && (
             <div
-              className="alert-brutalist accent-coral"
               style={{
                 marginTop: '15px',
                 marginBottom: '20px',
+                backgroundColor: 'var(--bg-inner)',
+                border: '1px solid var(--border)',
                 borderLeft: '4px solid var(--accent-coral)',
+                borderRadius: 'var(--radius-sm)',
+                padding: '15px',
                 animation: 'slideDown 0.2s'
               }}
             >
@@ -240,7 +244,7 @@ export function SavingsOptimizer({
 
               <button
                 onClick={handleExecuteSwapSubmit}
-                className="btn-brutalist btn-coral-pulsing"
+                className="btn-brutalist btn-brutalist-pink"
                 disabled={loading}
                 style={{ width: '100%', justifyContent: 'center', marginTop: '15px' }}
               >
@@ -257,21 +261,21 @@ export function SavingsOptimizer({
           <p className="card-desc">Compare current APY yields of each currency class and customize automatic notification parameters.</p>
 
           <div style={{ display: 'flex', gap: '15px', margin: '15px 0' }}>
-            <div style={{ flex: 1, padding: '12px', border: '2px solid var(--text)', backgroundColor: 'var(--window-bg)', boxShadow: 'var(--shadow-soft)' }}>
+            <div style={{ flex: 1, padding: '12px', border: '1px solid var(--border)', backgroundColor: 'var(--bg-inner)', borderRadius: 'var(--radius-md)' }}>
               <div style={{ fontSize: '10px', color: 'var(--text-light)', fontWeight: 800, textTransform: 'uppercase' }}>USD Savings (USDC)</div>
-              <div style={{ fontSize: '24px', fontWeight: 900, fontFamily: 'monospace', color: 'var(--text)' }}>{yieldUsdc}% APY</div>
+              <div style={{ fontSize: '24px', fontWeight: 900, fontFamily: 'monospace', color: 'var(--text-main)' }}>{yieldUsdc}% APY</div>
             </div>
             
-            <div style={{ flex: 1, padding: '12px', border: '2px solid var(--text)', backgroundColor: 'var(--window-bg)', boxShadow: 'var(--shadow-soft)' }}>
+            <div style={{ flex: 1, padding: '12px', border: '1px solid var(--border)', backgroundColor: 'var(--bg-inner)', borderRadius: 'var(--radius-md)' }}>
               <div style={{ fontSize: '10px', color: 'var(--text-light)', fontWeight: 800, textTransform: 'uppercase' }}>EUR Savings (EURC)</div>
               <div style={{ fontSize: '24px', fontWeight: 900, fontFamily: 'monospace', color: 'var(--accent-coral)' }}>{yieldEurc}% APY</div>
             </div>
           </div>
 
           {/* Rate alerts configuration */}
-          <div style={{ border: '2px solid var(--text)', padding: '12px', backgroundColor: 'var(--bg-inner)', marginBottom: '15px' }}>
+          <div style={{ border: '1px solid var(--border)', padding: '12px', backgroundColor: 'var(--bg-inner)', marginBottom: '15px', borderRadius: 'var(--radius-sm)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-              <span style={{ fontWeight: 800, fontSize: '12px', textTransform: 'uppercase' }}>Configure Rate Alerts</span>
+              <span style={{ fontWeight: 800, fontSize: '12px', textTransform: 'uppercase', color: 'var(--text-main)' }}>Configure Rate Alerts</span>
               <input
                 type="checkbox"
                 checked={rateAlertEnabled}
@@ -284,7 +288,7 @@ export function SavingsOptimizer({
               <input
                 type="number"
                 step="0.001"
-                className="input-brutalist"
+                className="brutalist-input"
                 value={alertRateThreshold}
                 onChange={(e) => setAlertRateThreshold(e.target.value)}
                 style={{ width: '80px', padding: '4px 8px', fontSize: '12px', fontWeight: 700 }}
@@ -305,7 +309,7 @@ export function SavingsOptimizer({
         <h3 className="card-title">Treasury <i>Optimization Trend</i></h3>
         <p className="card-desc">Real-time appreciation curve derived from arbitrage delta settlements on Arcscan.</p>
 
-        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-around', height: '140px', backgroundColor: 'var(--bg-inner)', border: '2px solid var(--text)', padding: '15px 10px 10px 10px', marginTop: '10px', position: 'relative' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-around', height: '140px', backgroundColor: 'var(--bg-inner)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '15px 10px 10px 10px', marginTop: '10px', position: 'relative' }}>
           {history.length === 0 ? (
             <div style={{ position: 'absolute', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)', fontSize: '13px' }}>
               No data points. Swap transactions to build the growth curve.
@@ -325,8 +329,7 @@ export function SavingsOptimizer({
                     width: '25px',
                     height: `${heightPercent}px`,
                     backgroundColor: 'var(--accent-green)',
-                    border: '2px solid var(--text)',
-                    boxShadow: '2px 2px 0 var(--text)',
+                    border: '1px solid var(--border)',
                     borderRadius: '2px 2px 0 0'
                   }}></div>
                   <span style={{ fontSize: '9px', marginTop: '6px', color: 'var(--text-light)', fontWeight: 800 }}>T-{history.length - i}</span>
