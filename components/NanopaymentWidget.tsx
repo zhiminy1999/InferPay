@@ -64,57 +64,71 @@ export const NanopaymentWidget: React.FC = () => {
   const gasSaved = (inferenceCount * 0.0004).toFixed(4)
 
   return (
-    <div className="space-y-6">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
       {/* Nanopayments Balance Panel */}
-      <div className="brutalist-card p-6 bg-dark-card border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] relative overflow-hidden">
+      <div className="brutalist-card accent-green" style={{ position: 'relative', overflow: 'hidden' }}>
         {isLowBalance && (
-          <div className="absolute top-0 right-0 left-0 bg-red-600 text-white text-xs uppercase font-mono py-1 px-4 text-center font-bold animate-pulse">
+          <div style={{
+            backgroundColor: '#fff1f2',
+            color: '#9f1239',
+            fontSize: '12px',
+            fontWeight: 700,
+            padding: '8px var(--space-4)',
+            borderRadius: 'var(--radius-sm)',
+            border: '1px solid #ffe4e6',
+            marginBottom: 'var(--space-4)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
+          }}>
             ⚠️ Low Nanopayments Balance! Please Deposit USDC to Prevent Inference Interruption.
           </div>
         )}
 
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mt-3 md:mt-0 gap-4">
+        <h3 className="card-title">Gateway <i>Nanopayments Balance</i></h3>
+
+        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'flex-start', gap: 'var(--space-5)', marginTop: 'var(--space-4)' }}>
           <div>
-            <h3 className="text-zinc-500 text-xs uppercase font-mono tracking-wider">Gateway Nanopayments Balance</h3>
-            <div className="text-3xl font-black font-mono tracking-tighter mt-1 text-white">
+            <div style={{ fontSize: '28px', fontWeight: 800, fontFamily: 'var(--font-serif)', fontStyle: 'italic', color: 'var(--accent-coral)', letterSpacing: '-0.02em' }}>
               {parseFloat(gatewayBalanceFormatted).toFixed(4)}{' '}
-              <span className="text-sm font-bold text-accent-green">USDC</span>
+              <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--accent-green)' }}>USDC</span>
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-6 border-l border-zinc-800 pl-6">
+          <div style={{ display: 'flex', gap: 'var(--space-6)', borderLeft: '1px solid var(--border)', paddingLeft: 'var(--space-6)' }}>
             <div>
-              <div className="text-[10px] text-zinc-500 uppercase font-mono">Total Spend</div>
-              <div className="text-md font-bold font-mono text-zinc-300">${spendRate}</div>
+              <div className="brutalist-label" style={{ marginBottom: '4px' }}>Total Spend</div>
+              <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-main)' }}>${spendRate}</div>
             </div>
             <div>
-              <div className="text-[10px] text-zinc-500 uppercase font-mono">API Requests</div>
-              <div className="text-md font-bold font-mono text-zinc-300">{inferenceCount}</div>
+              <div className="brutalist-label" style={{ marginBottom: '4px' }}>API Requests</div>
+              <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-main)' }}>{inferenceCount}</div>
             </div>
             <div>
-              <div className="text-[10px] text-zinc-500 uppercase font-mono">Gas Saved</div>
-              <div className="text-md font-bold font-mono text-accent-green">${gasSaved}</div>
+              <div className="brutalist-label" style={{ marginBottom: '4px' }}>Gas Saved</div>
+              <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--accent-green)' }}>${gasSaved}</div>
             </div>
           </div>
         </div>
       </div>
 
       {/* x402 Live Simulation Console */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="brutalist-card p-6 bg-dark-card border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex flex-col justify-between">
+      <div className="brutalist-split">
+        <div className="brutalist-card accent-purple" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
           <div>
-            <h3 className="text-lg font-bold uppercase mb-2 tracking-wide text-zinc-300">Nanopayed AI Inference Simulator</h3>
-            <p className="text-xs text-zinc-500 font-mono mb-4">
+            <h3 className="card-title">Nanopayed AI <i>Inference Simulator</i></h3>
+            <p className="card-desc">
               Trigger sub-cent pay-per-request calls using native x402 HTTP headers.
             </p>
 
-            <div className="space-y-4 mb-6">
-              <div>
-                <label className="block text-xs font-mono uppercase mb-1 text-zinc-400">Select Inference Model</label>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)', marginBottom: 'var(--space-5)' }}>
+              <div className="brutalist-form-group">
+                <label className="brutalist-label">Select Inference Model</label>
                 <select
                   value={selectedModel}
                   onChange={(e) => setSelectedModel(e.target.value)}
-                  className="w-full bg-black border border-black p-2 font-mono text-white text-sm"
+                  className="brutalist-input"
+                  style={{ fontSize: '13px' }}
                 >
                   <option value="llm_llama">Llama 3.1 8B Sentiment Analysis ($0.0010/call)</option>
                   <option value="vision_gpu">NVIDIA GPU Vision Payout Matcher ($0.0010/call)</option>
@@ -123,10 +137,15 @@ export const NanopaymentWidget: React.FC = () => {
               </div>
 
               {lastResponse && (
-                <div className="border border-black p-3 bg-zinc-900 font-mono text-xs">
-                  <div className="text-accent-green uppercase font-bold mb-1">Inference Response:</div>
-                  <div className="text-white italic">"{lastResponse.result}"</div>
-                  <div className="text-[10px] text-zinc-500 mt-2 flex justify-between">
+                <div style={{
+                  backgroundColor: 'var(--bg-inner)',
+                  border: '1px solid var(--border)',
+                  borderRadius: 'var(--radius-sm)',
+                  padding: 'var(--space-3)'
+                }}>
+                  <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--accent-green)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '4px' }}>Inference Response:</div>
+                  <div style={{ fontSize: '13px', fontStyle: 'italic', color: 'var(--text-main)' }}>"{lastResponse.result}"</div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: 'var(--text-light)', marginTop: '8px' }}>
                     <span>Billed: {lastResponse.billed} USDC</span>
                     <span>Status: {lastResponse.status}</span>
                   </div>
@@ -135,21 +154,32 @@ export const NanopaymentWidget: React.FC = () => {
             </div>
           </div>
 
-          <button
-            onClick={handleTriggerInference}
-            disabled={isLoading}
-            className="w-full bg-accent-green text-black uppercase font-bold text-sm py-3 border-2 border-black hover:bg-emerald-400 transition-colors disabled:opacity-50"
-          >
-            {isLoading ? 'Processing Gasless Nanopayment...' : 'Call API ($0.0010 USDC)'}
-          </button>
+          <div className="bracket-button-wrap" style={{ width: '100%' }}>
+            <button
+              onClick={handleTriggerInference}
+              disabled={isLoading}
+              className="btn-brutalist btn-brutalist-pink"
+              style={{ width: '100%' }}
+            >
+              {isLoading ? 'Processing Gasless Nanopayment...' : 'Call API ($0.0010 USDC)'}
+            </button>
+          </div>
         </div>
 
         {/* Header Negotiation Logs */}
-        <div className="brutalist-card p-6 bg-zinc-950 border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-          <h3 className="text-xs font-bold uppercase font-mono mb-2 tracking-wider text-zinc-400">x402 Protocol Headers Negotiation Logs</h3>
-          <div className="bg-black border border-zinc-900 p-4 h-64 overflow-y-auto font-mono text-[10px] text-zinc-400 space-y-1">
+        <div className="brutalist-card accent-cyan">
+          <h3 className="card-title" style={{ fontSize: '14px' }}>x402 Protocol Headers <i>Negotiation Logs</i></h3>
+          <div className="brutalist-chat-room" style={{ height: '260px', fontFamily: 'monospace', fontSize: '11px' }}>
             {executionLogs.map((log, i) => (
-              <div key={i} className={log.includes('PAYMENT-SIGNATURE') ? 'text-zinc-300' : log.includes('Success') || log.includes('200') ? 'text-accent-green' : log.includes('402') ? 'text-amber-500' : ''}>
+              <div key={i} style={{
+                padding: '4px 8px',
+                borderRadius: 'var(--radius-sm)',
+                color: log.includes('PAYMENT-SIGNATURE') ? 'var(--text-main)' :
+                       log.includes('Success') || log.includes('200') ? 'var(--accent-green)' :
+                       log.includes('402') ? '#d97706' : 'var(--text-muted)',
+                fontWeight: log.includes('200') || log.includes('PAYMENT-SIGNATURE') ? 600 : 400,
+                borderBottom: '1px solid var(--border)'
+              }}>
                 {log}
               </div>
             ))}
@@ -158,46 +188,46 @@ export const NanopaymentWidget: React.FC = () => {
       </div>
 
       {/* Settlement History */}
-      <div className="brutalist-card p-6 bg-dark-card border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-        <h3 className="text-lg font-bold uppercase mb-4 tracking-wider text-zinc-300">Gateway Settlement History</h3>
+      <div className="brutalist-card accent-yellow">
+        <h3 className="card-title">Gateway <i>Settlement History</i></h3>
         {history.length === 0 ? (
-          <div className="text-zinc-500 text-xs font-mono py-4 text-center">No transaction logs available.</div>
+          <div style={{ color: 'var(--text-muted)', fontSize: '13px', padding: 'var(--space-4) 0', textAlign: 'center' }}>No transaction logs available.</div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left font-mono text-xs">
+          <div style={{ overflowX: 'auto' }}>
+            <table className="brutalist-table">
               <thead>
-                <tr className="border-b-2 border-zinc-800 text-zinc-500 uppercase">
-                  <th className="py-2">Type</th>
-                  <th className="py-2">Amount</th>
-                  <th className="py-2">Activity Description</th>
-                  <th className="py-2">Settlement Mode</th>
-                  <th className="py-2 text-right">Details</th>
+                <tr>
+                  <th>Type</th>
+                  <th>Amount</th>
+                  <th>Activity Description</th>
+                  <th>Settlement Mode</th>
+                  <th style={{ textAlign: 'right' }}>Details</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-800">
+              <tbody>
                 {history.map((item, idx) => (
-                  <tr key={idx} className="hover:bg-zinc-900/40">
-                    <td className="py-3 font-bold">
-                      <span className={`px-2 py-0.5 text-[10px] uppercase border ${
-                        item.type === 'deposit' ? 'bg-emerald-950/50 border-accent-green text-accent-green' :
-                        item.type === 'withdrawal' ? 'bg-zinc-800 border-zinc-600 text-zinc-300' :
-                        'bg-blue-950/50 border-blue-500 text-blue-400'
+                  <tr key={idx}>
+                    <td>
+                      <span className={`badge-brutalist ${
+                        item.type === 'deposit' ? 'green' :
+                        item.type === 'withdrawal' ? 'yellow' :
+                        'cyan'
                       }`}>
                         {item.type}
                       </span>
                     </td>
-                    <td className="py-3 text-white font-bold">{item.amount} USDC</td>
-                    <td className="py-3 text-zinc-400">{item.description || (item.type === 'deposit' ? 'Vault Funding Transfer' : 'Withdrawal Cashout')}</td>
-                    <td className="py-3">
-                      <span className="text-zinc-500">
+                    <td style={{ fontWeight: 700 }}>{item.amount} USDC</td>
+                    <td style={{ color: 'var(--text-muted)' }}>{item.description || (item.type === 'deposit' ? 'Vault Funding Transfer' : 'Withdrawal Cashout')}</td>
+                    <td>
+                      <span style={{ color: 'var(--text-light)', fontSize: '12px' }}>
                         {item.type === 'spend' ? '⚡ Gasless Offchain' : '⛓️ On-Chain (1s Finality)'}
                       </span>
                     </td>
-                    <td className="py-3 text-right">
-                      <span className="text-[10px] text-zinc-500 block">
+                    <td style={{ textAlign: 'right' }}>
+                      <span style={{ fontSize: '10px', color: 'var(--text-light)', display: 'block' }}>
                         {item.txHash ? `Tx: ${item.txHash.slice(0, 10)}...` : item.payoutHash ? `Batch: ${item.payoutHash.slice(0, 10)}...` : ''}
                       </span>
-                      <span className="text-[9px] text-zinc-600 block">
+                      <span style={{ fontSize: '9px', color: 'var(--text-light)', display: 'block' }}>
                         {new Date(item.timestamp).toLocaleString()}
                       </span>
                     </td>
