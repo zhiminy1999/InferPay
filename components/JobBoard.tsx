@@ -119,7 +119,7 @@ export function JobBoard({
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
           <button
             onClick={() => setShowCreateForm(!showCreateForm)}
-            className="btn-brutalist btn-coral"
+            className="btn-brutalist btn-brutalist-pink"
             style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
           >
             <PlusCircle size={16} />
@@ -161,10 +161,10 @@ export function JobBoard({
             <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginBottom: '20px' }}>
               <div style={{ display: 'flex', gap: '10px', width: '100%' }}>
                 <div style={{ position: 'relative', flex: 1 }}>
-                  <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                  <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-light)' }} />
                   <input
                     type="text"
-                    className="input-brutalist"
+                    className="brutalist-input"
                     placeholder="Filter jobs by description keywords..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -174,11 +174,11 @@ export function JobBoard({
               </div>
 
               {/* Tabs */}
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', borderBottom: '2px solid var(--text)', paddingBottom: '10px' }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', borderBottom: '1px solid var(--border)', paddingBottom: '10px' }}>
                 {(['all', 'my', 'open', 'active', 'completed'] as const).map((tab) => (
                   <button
                     key={tab}
-                    className={`btn-brutalist ${activeTab === tab ? 'btn-brutalist-coral' : 'btn-brutalist-muted'}`}
+                    className={`btn-brutalist ${activeTab === tab ? 'btn-brutalist-pink' : 'btn-brutalist-muted'}`}
                     style={{ fontSize: '12px', padding: '6px 12px' }}
                     onClick={() => setActiveTab(tab)}
                   >
@@ -211,13 +211,14 @@ export function JobBoard({
                       key={job.id}
                       onClick={() => setSelectedJob(job)}
                       style={{
-                        padding: '12px',
-                        border: isSelected ? '3px solid var(--accent-coral)' : '2px solid var(--text)',
-                        backgroundColor: isSelected ? 'rgba(255,107,107,0.05)' : 'var(--window-bg)',
+                        padding: '15px',
+                        border: '1px solid',
+                        borderColor: isSelected ? 'var(--accent-coral)' : 'var(--border)',
+                        backgroundColor: isSelected ? 'var(--bg-inner)' : 'var(--bg-card)',
                         cursor: 'pointer',
-                        transform: isSelected ? 'translate(-2px, -2px)' : 'none',
-                        boxShadow: isSelected ? '4px 4px 0px var(--text)' : 'none',
-                        transition: 'all 0.15s ease-out'
+                        borderRadius: 'var(--radius-md)',
+                        boxShadow: isSelected ? 'var(--shadow-hover)' : 'var(--shadow-soft)',
+                        transition: 'all 0.2s ease',
                       }}
                       className="job-item-hover"
                     >

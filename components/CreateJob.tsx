@@ -103,12 +103,12 @@ export function CreateJob({
       </div>
 
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-        <div>
-          <label style={{ display: 'block', fontWeight: 650, marginBottom: '6px', fontSize: '13px' }}>
+        <div className="brutalist-form-group">
+          <label className="brutalist-label">
             Job Description & Deliverables
           </label>
           <textarea
-            className="input-brutalist"
+            className="brutalist-input"
             placeholder="Describe the job goals, requirements, outputs, and format required..."
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -119,82 +119,90 @@ export function CreateJob({
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-          <div>
-            <label style={{ display: 'block', fontWeight: 650, marginBottom: '6px', fontSize: '13px' }}>
+          <div className="brutalist-form-group">
+            <label className="brutalist-label">
               Service Provider (Agent Wallet)
             </label>
             <select
-              className="input-brutalist"
+              className="brutalist-input"
               value={provider}
               onChange={(e) => setProvider(e.target.value)}
               style={{ width: '100%', cursor: 'pointer' }}
               required
             >
-              <option value="">Select Provider Agent...</option>
+              <option value="" style={{ color: 'var(--text-main)' }}>Select Provider Agent...</option>
               {agents.map((agent) => (
-                <option key={`prov-${agent.wallet}`} value={agent.wallet}>
+                <option key={`prov-${agent.wallet}`} value={agent.wallet} style={{ color: 'var(--text-main)' }}>
                   {agent.name} ({agent.wallet.substring(0, 8)}...{agent.wallet.substring(38)})
                 </option>
               ))}
             </select>
-            <div style={{ marginTop: '4px', fontSize: '11px', color: 'var(--text-muted)' }}>
+            <div style={{ marginTop: '6px', fontSize: '11px', color: 'var(--text-light)' }}>
               Agent performing the tasks. Will set the job budget request.
             </div>
           </div>
 
-          <div>
-            <label style={{ display: 'block', fontWeight: 650, marginBottom: '6px', fontSize: '13px' }}>
+          <div className="brutalist-form-group">
+            <label className="brutalist-label">
               Job Evaluator / Auditor (Agent/Human)
             </label>
             <select
-              className="input-brutalist"
+              className="brutalist-input"
               value={evaluator}
               onChange={(e) => setEvaluator(e.target.value)}
               style={{ width: '100%', cursor: 'pointer' }}
               required
             >
-              <option value="">Select Evaluator Agent...</option>
+              <option value="" style={{ color: 'var(--text-main)' }}>Select Evaluator Agent...</option>
               {agents.map((agent) => (
-                <option key={`eval-${agent.wallet}`} value={agent.wallet}>
+                <option key={`eval-${agent.wallet}`} value={agent.wallet} style={{ color: 'var(--text-main)' }}>
                   {agent.name} ({agent.wallet.substring(0, 8)}...{agent.wallet.substring(38)})
                 </option>
               ))}
             </select>
-            <div style={{ marginTop: '4px', fontSize: '11px', color: 'var(--text-muted)' }}>
+            <div style={{ marginTop: '6px', fontSize: '11px', color: 'var(--text-light)' }}>
               Evaluates final deliverables and releases the USDC escrow payment.
             </div>
           </div>
         </div>
 
-        <div>
-          <label style={{ display: 'block', fontWeight: 650, marginBottom: '6px', fontSize: '13px' }}>
+        <div className="brutalist-form-group">
+          <label className="brutalist-label">
             Job Delivery Expiration Days
           </label>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <Calendar size={18} style={{ color: 'var(--text-muted)' }} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+            <Calendar size={18} style={{ color: 'var(--text-light)' }} />
             <input
               type="range"
               min="1"
               max="30"
               value={deadlineDays}
               onChange={(e) => setDeadlineDays(Number(e.target.value))}
-              style={{ flex: 1, accentColor: 'var(--accent-coral)' }}
+              className="slider-brutalist"
+              style={{ flex: 1 }}
             />
-            <span style={{ fontWeight: 700, minWidth: '60px', textAlign: 'right' }}>
+            <span style={{ fontWeight: 700, minWidth: '60px', textAlign: 'right', color: 'var(--text-main)' }}>
               {deadlineDays} Days
             </span>
           </div>
         </div>
 
         {errorMsg && (
-          <div className="alert-brutalist" style={{ backgroundColor: 'rgba(255,107,107,0.1)', borderColor: 'var(--accent-coral)', color: 'var(--accent-coral)', padding: '10px', fontSize: '13px' }}>
+          <div style={{
+            backgroundColor: '#fef2f2',
+            border: '1px solid #fee2e2',
+            color: '#b91c1c',
+            padding: '12px',
+            fontSize: '13px',
+            borderRadius: 'var(--radius-sm)'
+          }}>
             {errorMsg}
           </div>
         )}
 
         <button
           type="submit"
-          className="btn-brutalist btn-coral-pulsing"
+          className="btn-brutalist btn-brutalist-pink"
           disabled={loading || !isConnected}
           style={{ width: '100%', justifyContent: 'center' }}
         >

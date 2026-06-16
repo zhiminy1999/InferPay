@@ -143,20 +143,20 @@ export function JobDetail({
   const isHighValue = Number(job.budget) > 25000
 
   return (
-    <div className={`brutalist-card ${statusInfo.class}`} style={{ border: '3px solid var(--text)' }}>
+    <div className={`brutalist-card ${statusInfo.class}`}>
       {/* Header and status */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '10px', marginBottom: '15px' }}>
         <div>
-          <span style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)' }}>
+          <span style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-light)' }}>
             ERC-8183 Job ID #{job.id}
           </span>
           <h4 style={{ margin: '4px 0 0 0', fontSize: '18px', fontWeight: 800 }}>On-Chain Job Ledger</h4>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 12px', border: '2px solid var(--text)', background: 'var(--window-bg)', fontWeight: 750, fontSize: '13px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 12px', border: '1px solid var(--border)', background: 'var(--bg-inner)', fontWeight: 650, fontSize: '13px', borderRadius: 'var(--radius-sm)' }}>
           {statusInfo.icon}
           <span>{statusInfo.label}</span>
           {job.disputed && (
-            <span style={{ backgroundColor: 'var(--accent-red)', color: 'white', padding: '2px 6px', fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', marginLeft: '5px', border: '1px solid var(--text)' }}>
+            <span style={{ backgroundColor: 'var(--accent-coral)', color: 'white', padding: '2px 6px', fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', marginLeft: '5px', borderRadius: 'var(--radius-sm)' }}>
               Disputed
             </span>
           )}
@@ -164,40 +164,40 @@ export function JobDetail({
       </div>
 
       {/* Description */}
-      <div style={{ backgroundColor: 'var(--window-bg)', border: '2px solid var(--text)', padding: '12px', marginBottom: '15px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700, fontSize: '13px', color: 'var(--text-muted)', marginBottom: '6px' }}>
+      <div style={{ backgroundColor: 'var(--bg-inner)', border: '1px solid var(--border)', padding: '12px', marginBottom: '15px', borderRadius: 'var(--radius-sm)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 700, fontSize: '13px', color: 'var(--text-light)', marginBottom: '6px' }}>
           <FileText size={14} />
           <span>Specifications & Terms</span>
         </div>
-        <p style={{ margin: 0, fontSize: '14px', lineHeight: 1.5, wordBreak: 'break-word', fontWeight: 550 }}>
+        <p style={{ margin: 0, fontSize: '14px', lineHeight: 1.5, wordBreak: 'break-word', fontWeight: 550, color: 'var(--text-main)' }}>
           {job.description}
         </p>
       </div>
 
       {/* Roles Grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '15px', marginBottom: '20px' }}>
-        <div style={{ border: '2px solid var(--text)', padding: '10px', backgroundColor: 'var(--window-bg)' }}>
-          <div style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', color: 'var(--text-muted)' }}>Client (Funding)</div>
-          <div style={{ fontSize: '13px', fontWeight: 750, wordBreak: 'break-all' }} title={job.client}>
+        <div style={{ border: '1px solid var(--border)', padding: '10px', backgroundColor: 'var(--bg-inner)', borderRadius: 'var(--radius-sm)' }}>
+          <div style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', color: 'var(--text-light)', marginBottom: '4px' }}>Client (Funding)</div>
+          <div style={{ fontSize: '13px', fontWeight: 750, wordBreak: 'break-all', color: 'var(--text-main)' }} title={job.client}>
             {formatAddress(job.client)} {isClient && <span style={{ color: 'var(--accent-coral)' }}>(You)</span>}
           </div>
         </div>
-        <div style={{ border: '2px solid var(--text)', padding: '10px', backgroundColor: 'var(--window-bg)' }}>
-          <div style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', color: 'var(--text-muted)' }}>Provider (Worker)</div>
-          <div style={{ fontSize: '13px', fontWeight: 750, wordBreak: 'break-all' }} title={job.provider}>
+        <div style={{ border: '1px solid var(--border)', padding: '10px', backgroundColor: 'var(--bg-inner)', borderRadius: 'var(--radius-sm)' }}>
+          <div style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', color: 'var(--text-light)', marginBottom: '4px' }}>Provider (Worker)</div>
+          <div style={{ fontSize: '13px', fontWeight: 750, wordBreak: 'break-all', color: 'var(--text-main)' }} title={job.provider}>
             {formatAddress(job.provider)} {isProvider && <span style={{ color: 'var(--accent-coral)' }}>(You)</span>}
           </div>
         </div>
-        <div style={{ border: '2px solid var(--text)', padding: '10px', backgroundColor: 'var(--window-bg)' }}>
-          <div style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', color: 'var(--text-muted)' }}>Evaluator (Auditor)</div>
-          <div style={{ fontSize: '13px', fontWeight: 750, wordBreak: 'break-all' }} title={job.evaluator}>
+        <div style={{ border: '1px solid var(--border)', padding: '10px', backgroundColor: 'var(--bg-inner)', borderRadius: 'var(--radius-sm)' }}>
+          <div style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', color: 'var(--text-light)', marginBottom: '4px' }}>Evaluator (Auditor)</div>
+          <div style={{ fontSize: '13px', fontWeight: 750, wordBreak: 'break-all', color: 'var(--text-main)' }} title={job.evaluator}>
             {formatAddress(job.evaluator)} {isEvaluator && <span style={{ color: 'var(--accent-coral)' }}>(You)</span>}
           </div>
         </div>
       </div>
 
       {/* Financial info */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'var(--text)', color: 'var(--window-bg)', padding: '12px 15px', marginBottom: '20px', border: '2px solid var(--text)' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'var(--text-main)', color: 'var(--bg-card)', padding: '12px 15px', marginBottom: '20px', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }}>
         <span style={{ fontWeight: 800, fontSize: '14px', textTransform: 'uppercase' }}>Job Escrow Pool</span>
         <span style={{ fontSize: '20px', fontWeight: 900 }}>
           {Number(job.budget) > 0 ? `${Number(job.budget).toLocaleString()} USDC` : 'Budget Proposed Pending'}
@@ -206,10 +206,10 @@ export function JobDetail({
 
       {/* Warning check for high value approval */}
       {isHighValue && job.status === 0 && (
-        <div className="alert-brutalist accent-yellow" style={{ marginBottom: '15px', padding: '12px', borderLeft: '4px solid var(--accent-yellow)', display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+        <div style={{ marginBottom: '15px', padding: '12px', borderLeft: '4px solid var(--accent-yellow)', backgroundColor: '#fffbeb', display: 'flex', alignItems: 'flex-start', gap: '10px', borderRadius: 'var(--radius-sm)' }}>
           <ShieldAlert size={18} style={{ color: 'var(--accent-yellow)', flexShrink: 0, marginTop: '2px' }} />
           <div>
-            <div style={{ fontWeight: 800, fontSize: '13px' }}>High-Value Budget (&gt; 25k USDC)</div>
+            <div style={{ fontWeight: 800, fontSize: '13px', color: 'var(--text-main)' }}>High-Value Budget (&gt; 25k USDC)</div>
             <div style={{ fontSize: '11.5px', color: 'var(--text-muted)' }}>
               This budget exceeds the $25,000 threshold. Under smart contract governance rules, funding requires multi-agent consensus validation before the escrow can be authorized.
             </div>
@@ -219,23 +219,23 @@ export function JobDetail({
 
       {/* Timeline deliverables hash */}
       {job.status >= 2 && (
-        <div style={{ border: '2px dashed var(--text)', padding: '12px', marginBottom: '20px', backgroundColor: 'rgba(0,0,0,0.02)' }}>
-          <div style={{ fontWeight: 800, fontSize: '12px', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '4px' }}>
+        <div style={{ border: '1px dashed var(--border)', padding: '12px', marginBottom: '20px', backgroundColor: 'var(--bg-inner)', borderRadius: 'var(--radius-sm)' }}>
+          <div style={{ fontWeight: 800, fontSize: '12px', textTransform: 'uppercase', color: 'var(--text-light)', marginBottom: '4px' }}>
             Deliverable Hash (IPFS / Verification Root)
           </div>
-          <code style={{ fontSize: '12.5px', wordBreak: 'break-all', display: 'block', backgroundColor: 'var(--window-bg)', padding: '6px', border: '1px solid var(--text)', fontFamily: 'monospace' }}>
+          <code style={{ fontSize: '12.5px', wordBreak: 'break-all', display: 'block', backgroundColor: 'var(--bg-card)', padding: '6px', border: '1px solid var(--border)', fontFamily: 'monospace', color: 'var(--text-main)' }}>
             {job.deliverable}
           </code>
         </div>
       )}
 
       {/* Action forms/buttons depending on roles & status */}
-      <div style={{ marginTop: '15px', borderTop: '2px solid var(--text)', paddingTop: '15px' }}>
+      <div style={{ marginTop: '15px', borderTop: '1px solid var(--border)', paddingTop: '15px' }}>
         
         {/* DISPUTE ACTIONS (For Platform Admins/Owners) */}
         {job.disputed && (
-          <div style={{ border: '2px solid var(--accent-red)', padding: '12px', backgroundColor: 'rgba(255,107,107,0.05)', marginBottom: '15px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 800, color: 'var(--accent-red)', fontSize: '13px', marginBottom: '8px' }}>
+          <div style={{ border: '1px solid #ef4444', padding: '12px', backgroundColor: '#fef2f2', marginBottom: '15px', borderRadius: 'var(--radius-sm)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 800, color: '#b91c1c', fontSize: '13px', marginBottom: '8px' }}>
               <Scale size={16} />
               <span>ON-CHAIN DISPUTE RESOLUTION PENDING</span>
             </div>
@@ -247,7 +247,7 @@ export function JobDetail({
                 <div style={{ display: 'flex', gap: '10px' }}>
                   <button
                     onClick={() => handleResolveDisputeSubmit(true)}
-                    className="btn-brutalist btn-green"
+                    className="btn-brutalist btn-brutalist-green"
                     disabled={loading}
                     style={{ flex: 1, padding: '8px', justifyContent: 'center' }}
                   >
@@ -255,7 +255,7 @@ export function JobDetail({
                   </button>
                   <button
                     onClick={() => handleResolveDisputeSubmit(false)}
-                    className="btn-brutalist btn-coral"
+                    className="btn-brutalist btn-brutalist-pink"
                     disabled={loading}
                     style={{ flex: 1, padding: '8px', justifyContent: 'center' }}
                   >
@@ -279,21 +279,23 @@ export function JobDetail({
               <div>
                 {isProvider ? (
                   <form onSubmit={handleSetBudgetSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    <div style={{ fontWeight: 800, fontSize: '13px' }}>Propose Pricing (USDC)</div>
-                    <div style={{ display: 'flex', gap: '10px' }}>
-                      <input
-                        type="number"
-                        step="0.01"
-                        className="input-brutalist"
-                        placeholder="e.g. 1500"
-                        value={budgetInput}
-                        onChange={(e) => setBudgetInput(e.target.value)}
-                        style={{ flex: 1 }}
-                        required
-                      />
-                      <button type="submit" className="btn-brutalist btn-coral" disabled={loading}>
-                        Lock Budget Request
-                      </button>
+                    <div className="brutalist-form-group">
+                      <label className="brutalist-label">Propose Pricing (USDC)</label>
+                      <div style={{ display: 'flex', gap: '10px' }}>
+                        <input
+                          type="number"
+                          step="0.01"
+                          className="brutalist-input"
+                          placeholder="e.g. 1500"
+                          value={budgetInput}
+                          onChange={(e) => setBudgetInput(e.target.value)}
+                          style={{ flex: 1 }}
+                          required
+                        />
+                        <button type="submit" className="btn-brutalist btn-brutalist-pink" disabled={loading}>
+                          Lock Budget Request
+                        </button>
+                      </div>
                     </div>
                   </form>
                 ) : (
@@ -309,13 +311,13 @@ export function JobDetail({
               <div>
                 {isClient ? (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    <div style={{ fontWeight: 800, fontSize: '13px' }}>Deposit Funds in Escrow</div>
+                    <div style={{ fontWeight: 800, fontSize: '13px', color: 'var(--text-main)' }}>Deposit Funds in Escrow</div>
                     <p style={{ margin: 0, fontSize: '12px', color: 'var(--text-muted)' }}>
                       The provider has set the budget request to <strong>{job.budget} USDC</strong>. Click below to approve USDC allowance and deposit funds into escrow.
                     </p>
                     <button
                       onClick={handleFundSubmit}
-                      className="btn-brutalist btn-coral-pulsing"
+                      className="btn-brutalist btn-brutalist-pink"
                       disabled={loading}
                       style={{ width: '100%', justifyContent: 'center' }}
                     >
@@ -337,16 +339,18 @@ export function JobDetail({
           <div>
             {isProvider ? (
               <form onSubmit={handleDeliverableSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                <div style={{ fontWeight: 800, fontSize: '13px' }}>Submit Deliverables & Proof of Work</div>
-                <textarea
-                  className="input-brutalist"
-                  placeholder="Paste URL to deliverables, GitHub repository, files, or summary of outputs..."
-                  value={deliverableText}
-                  onChange={(e) => setDeliverableText(e.target.value)}
-                  rows={3}
-                  required
-                />
-                <button type="submit" className="btn-brutalist btn-coral" disabled={loading} style={{ width: '100%', justifyContent: 'center' }}>
+                <div className="brutalist-form-group">
+                  <label className="brutalist-label">Submit Deliverables & Proof of Work</label>
+                  <textarea
+                    className="brutalist-input"
+                    placeholder="Paste URL to deliverables, GitHub repository, files, or summary of outputs..."
+                    value={deliverableText}
+                    onChange={(e) => setDeliverableText(e.target.value)}
+                    rows={3}
+                    required
+                  />
+                </div>
+                <button type="submit" className="btn-brutalist btn-brutalist-pink" disabled={loading} style={{ width: '100%', justifyContent: 'center' }}>
                   Submit Work For Evaluation
                 </button>
               </form>
@@ -357,7 +361,7 @@ export function JobDetail({
                 </div>
                 {/* Client can cancel if expired */}
                 {isClient && isExpired && (
-                  <button onClick={handleRejectSubmit} className="btn-brutalist btn-coral" disabled={loading}>
+                  <button onClick={handleRejectSubmit} className="btn-brutalist btn-brutalist-pink" disabled={loading}>
                     Cancel & Refund Escrow (Deadline Passed)
                   </button>
                 )}
@@ -371,11 +375,11 @@ export function JobDetail({
           <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
             {isEvaluator ? (
               <div>
-                <div style={{ fontWeight: 800, fontSize: '13px', marginBottom: '8px' }}>Auditor Evaluation Actions</div>
-                <div style={{ marginBottom: '10px' }}>
+                <div className="brutalist-form-group">
+                  <label className="brutalist-label">Auditor Evaluation Actions</label>
                   <input
                     type="text"
-                    className="input-brutalist"
+                    className="brutalist-input"
                     placeholder="Enter audit/rejection reason (optional)..."
                     value={actionReason}
                     onChange={(e) => setActionReason(e.target.value)}
@@ -385,7 +389,7 @@ export function JobDetail({
                 <div style={{ display: 'flex', gap: '10px' }}>
                   <button
                     onClick={handleCompleteSubmit}
-                    className="btn-brutalist btn-green"
+                    className="btn-brutalist btn-brutalist-green"
                     disabled={loading}
                     style={{ flex: 1, justifyContent: 'center' }}
                   >
@@ -393,7 +397,7 @@ export function JobDetail({
                   </button>
                   <button
                     onClick={handleRejectSubmit}
-                    className="btn-brutalist btn-coral"
+                    className="btn-brutalist btn-brutalist-pink"
                     disabled={loading}
                     style={{ flex: 1, justifyContent: 'center' }}
                   >
@@ -409,7 +413,7 @@ export function JobDetail({
 
             {/* Dispute opening options for Client and Provider */}
             {(isClient || isProvider) && (
-              <div style={{ borderTop: '1px solid var(--text)', paddingTop: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ borderTop: '1px solid var(--border)', paddingTop: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
                   Stuck or disagree on deliverables quality?
                 </span>
