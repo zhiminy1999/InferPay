@@ -873,3 +873,37 @@ body {
   }
 }
 
+/* =======================================================
+   Responsive Utilities (Tailwind Compatibility Layer)
+   ======================================================= */
+.hidden {
+  display: none !important;
+}
+
+@media (max-width: 767px) {
+  .flex-col {
+    flex-direction: column !important;
+  }
+}
+
+@media (min-width: 640px) {
+  .sm\:flex-row {
+    flex-direction: row !important;
+  }
+  .sm\:grid {
+    display: grid !important;
+  }
+}
+
+@media (min-width: 768px) {
+  .md\:flex {
+    display: flex !important;
+  }
+  .md\:hidden {
+    display: none !important;
+  }
+  .md\:grid {
+    display: grid !important;
+  }
+}
+
