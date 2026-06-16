@@ -49,7 +49,7 @@ export const CCTP_CONFIG = {
     messageTransmitter: '0x7865c0E2d1ab353503845b4B5c56c2452FBA2F76',
   },
   arc_testnet: {
-    tokenMessenger: '0xe88C3C586B7f23c945dB4A6bBAECc0211a7681A7', // Mock messenger/transmitter on Arc
-    messageTransmitter: '0xe88C3C586B7f23c945dB4A6bBAECc0211a7681A7',
+    tokenMessenger: '0x8FE6B999Dc680CcFDD5Bf7EB0974218be2542DAA', // Official TokenMessengerV2 on Arc Testnet
+    messageTransmitter: '0xE737e5cEBEEBa77EFE34D4aa090756590b1CE275', // Official MessageTransmitterV2 on Arc Testnet
   },
 }

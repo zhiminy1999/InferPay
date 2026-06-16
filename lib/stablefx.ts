@@ -1,4 +1,4 @@
-import { getAddress } from 'viem'
+import { getAddress, keccak256, toHex } from 'viem'
 
 export interface FXQuote {
   id: string
@@ -76,7 +76,7 @@ export const StableFXClient = {
     const rate = await this.fetchExchangeRate(fromCurrency, toCurrency)
     const rawAmount = parseFloat(amount)
     const outAmount = (rawAmount * rate).toFixed(2)
-    const quoteId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+    const quoteId = keccak256(toHex(`${fromCurrency}:${toCurrency}:${amount}:${recipientAddress}:${Date.now()}`)).slice(2, 30)
 
     const fromToken = fromCurrency === 'USDC' ? USDC_ADDR : EURC_ADDR
     const toToken = toCurrency === 'USDC' ? USDC_ADDR : EURC_ADDR
@@ -86,7 +86,9 @@ export const StableFXClient = {
     const fromAmountRaw = BigInt(Math.floor(rawAmount * 1000000)).toString()
     const toAmountRaw = BigInt(Math.floor(parseFloat(outAmount) * 1000000)).toString()
 
-    const nonce = Math.floor(Math.random() * 1000000000)
+    const nonceArray = new Uint8Array(4)
+    crypto.getRandomValues(nonceArray)
+    const nonce = new DataView(nonceArray.buffer).getUint32(0)
     const deadline = Math.floor(Date.now() / 1000) + 3600 // 1 hour
 
     // Permit2 EIP-712 standard typed data schema
@@ -180,9 +182,10 @@ export const StableFXClient = {
     userAddress: string,
     signature: string
   ): Promise<FXTrade> {
-    const contractTradeId = Math.floor(Math.random() * 1000).toString()
+    const contractTradeId = keccak256(toHex(`${quote.id}:${userAddress}:${Date.now()}`)).slice(2, 12)
+    const tradeId = keccak256(toHex(`trade:${quote.id}:${signature}`)).slice(2, 30)
     return {
-      id: Math.random().toString(36).substring(2, 15),
+      id: tradeId,
       contractTradeId,
       from: quote.from,
       to: quote.to,
@@ -201,6 +204,11 @@ export const StableFXClient = {
     const token = fromCurrency === 'USDC' ? USDC_ADDR : EURC_ADDR
     const amtRaw = BigInt(Math.floor(parseFloat(amount) * 1000000)).toString()
     const deadline = Math.floor(Date.now() / 1000) + 3600
+
+    // Generate cryptographically secure nonce
+    const nonceArr = new Uint8Array(4)
+    crypto.getRandomValues(nonceArr)
+    const fundingNonce = new DataView(nonceArr.buffer).getUint32(0)
 
     return {
       typedData: {
@@ -237,7 +245,7 @@ export const StableFXClient = {
             amount: amtRaw,
           },
           spender: getAddress(POOL_ADDR),
-          nonce: Math.floor(Math.random() * 10000000),
+          nonce: fundingNonce,
           deadline,
           witness: {
             id: contractTradeId,
