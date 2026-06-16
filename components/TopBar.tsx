@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { Cpu, RefreshCw, Droplet, Key, Fingerprint, ShieldCheck, ArrowLeftRight } from 'lucide-react'
+import Link from 'next/link'
 import { StableFXClient } from '@/lib/stablefx'
 
 interface TopBarProps {
@@ -50,10 +51,10 @@ export function TopBar({
   return (
     <header className="app-topbar">
       <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-        <div className="topbar-logo">
+        <Link href="/" className="topbar-logo" style={{ textDecoration: 'none', cursor: 'pointer' }}>
           <Cpu size={22} style={{ strokeWidth: 2 }} />
           <span>Infer<i>Pay</i></span>
-        </div>
+        </Link>
         <div className="network-badge">
           <div className="network-dot"></div>
           <span>Live on Arc Network (Test Mode)</span>
