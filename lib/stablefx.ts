@@ -48,15 +48,10 @@ export const StableFXClient = {
    */
   async fetchExchangeRate(fromCurrency: string, toCurrency: string): Promise<number> {
     try {
-      const response = await fetch('https://open.er-api.com/v6/latest/USD')
+      const response = await fetch(`/api/rate?from=${fromCurrency}&to=${toCurrency}`)
       const data = await response.json()
-      if (data && data.rates) {
-        if (fromCurrency === 'USDC' && toCurrency === 'EURC') {
-          // Typically 1 USD is ~0.92 EUR
-          return Number(data.rates.EUR) || 0.925
-        } else if (fromCurrency === 'EURC' && toCurrency === 'USDC') {
-          return 1 / (Number(data.rates.EUR) || 0.925)
-        }
+      if (data && data.rate !== undefined) {
+        return Number(data.rate)
       }
     } catch (err) {
       console.warn('Failed to fetch public rate API, using fallback:', err)

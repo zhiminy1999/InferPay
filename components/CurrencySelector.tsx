@@ -1,4 +1,5 @@
 import React from 'react'
+import { USDCIcon, EURCIcon } from './Icons'
 
 interface CurrencySelectorProps {
   selected: 'USDC' | 'EURC'
@@ -45,7 +46,7 @@ export const CurrencySelector: React.FC<CurrencySelectorProps> = ({
             border: selected === 'USDC' ? undefined : '1px solid transparent'
           }}
         >
-          <span>🇺🇸</span>
+          <USDCIcon size={14} />
           <span>USDC</span>
         </button>
         <button
@@ -65,7 +66,7 @@ export const CurrencySelector: React.FC<CurrencySelectorProps> = ({
             border: selected === 'EURC' ? undefined : '1px solid transparent'
           }}
         >
-          <span>🇪🇺</span>
+          <EURCIcon size={14} />
           <span>EURC</span>
         </button>
       </div>
