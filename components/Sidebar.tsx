@@ -1,22 +1,48 @@
 'use client'
 
 import React from 'react'
-import { Lock, ArrowRightLeft, Coins, FileText, Shield, Zap, Users, Briefcase, History, Sparkles } from 'lucide-react'
+import { Lock, ArrowRightLeft, Coins, FileText, Shield, Zap, Users, Briefcase, History, Sparkles, X } from 'lucide-react'
 
 interface SidebarProps {
   activeTab: 'escrow' | 'intent' | 'yield' | 'payroll' | 'consensus' | 'directory' | 'jobs' | 'nanopayments' | 'marketplace' | 'analytics' | 'history'
   setActiveTab: (tab: 'escrow' | 'intent' | 'yield' | 'payroll' | 'consensus' | 'directory' | 'jobs' | 'nanopayments' | 'marketplace' | 'analytics' | 'history') => void
+  mobileOpen?: boolean
+  onCloseMobile?: () => void
 }
 
-export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
+export function Sidebar({ activeTab, setActiveTab, mobileOpen = false, onCloseMobile }: SidebarProps) {
+  const handleItemClick = (tab: any) => {
+    setActiveTab(tab)
+    if (onCloseMobile) {
+      onCloseMobile()
+    }
+  }
+
   return (
-    <aside className="app-sidebar">
+    <aside className={`app-sidebar ${mobileOpen ? 'mobile-open' : ''}`}>
+      {/* Mobile Close Button */}
+      {onCloseMobile && (
+        <button 
+          onClick={onCloseMobile}
+          className="sidebar-mobile-close btn-brutalist btn-brutalist-muted"
+          style={{
+            position: 'absolute',
+            top: '12px',
+            right: '12px',
+            padding: '6px',
+            display: 'none' // Controlled by CSS media queries
+          }}
+        >
+          <X size={15} />
+        </button>
+      )}
+
       <div className="sidebar-section">
         <div className="sidebar-label">Your Tools</div>
         
         <div 
           className={`sidebar-menu-item ${activeTab === 'escrow' ? 'active' : ''}`}
-          onClick={() => setActiveTab('escrow')}
+          onClick={() => handleItemClick('escrow')}
         >
           <div className="sidebar-icon-wrap">
             <Lock size={15} />
@@ -26,7 +52,7 @@ export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
 
         <div 
           className={`sidebar-menu-item ${activeTab === 'intent' ? 'active' : ''}`}
-          onClick={() => setActiveTab('intent')}
+          onClick={() => handleItemClick('intent')}
         >
           <div className="sidebar-icon-wrap">
             <ArrowRightLeft size={15} />
@@ -36,7 +62,7 @@ export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
 
         <div 
           className={`sidebar-menu-item ${activeTab === 'yield' ? 'active' : ''}`}
-          onClick={() => setActiveTab('yield')}
+          onClick={() => handleItemClick('yield')}
         >
           <div className="sidebar-icon-wrap">
             <Coins size={15} />
@@ -46,7 +72,7 @@ export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
 
         <div 
           className={`sidebar-menu-item ${activeTab === 'payroll' ? 'active' : ''}`}
-          onClick={() => setActiveTab('payroll')}
+          onClick={() => handleItemClick('payroll')}
         >
           <div className="sidebar-icon-wrap">
             <FileText size={15} />
@@ -56,7 +82,7 @@ export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
 
         <div 
           className={`sidebar-menu-item ${activeTab === 'consensus' ? 'active' : ''}`}
-          onClick={() => setActiveTab('consensus')}
+          onClick={() => handleItemClick('consensus')}
         >
           <div className="sidebar-icon-wrap">
             <Shield size={15} />
@@ -66,7 +92,7 @@ export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
 
         <div 
           className={`sidebar-menu-item ${activeTab === 'directory' ? 'active' : ''}`}
-          onClick={() => setActiveTab('directory')}
+          onClick={() => handleItemClick('directory')}
         >
           <div className="sidebar-icon-wrap">
             <Users size={15} />
@@ -76,7 +102,7 @@ export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
 
         <div 
           className={`sidebar-menu-item ${activeTab === 'jobs' ? 'active' : ''}`}
-          onClick={() => setActiveTab('jobs')}
+          onClick={() => handleItemClick('jobs')}
         >
           <div className="sidebar-icon-wrap">
             <Briefcase size={15} />
@@ -86,7 +112,7 @@ export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
 
         <div 
           className={`sidebar-menu-item ${activeTab === 'nanopayments' ? 'active' : ''}`}
-          onClick={() => setActiveTab('nanopayments')}
+          onClick={() => handleItemClick('nanopayments')}
         >
           <div className="sidebar-icon-wrap">
             <Zap size={15} />
@@ -96,7 +122,7 @@ export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
 
         <div 
           className={`sidebar-menu-item ${activeTab === 'marketplace' ? 'active' : ''}`}
-          onClick={() => setActiveTab('marketplace')}
+          onClick={() => handleItemClick('marketplace')}
         >
           <div className="sidebar-icon-wrap">
             <Sparkles size={15} style={{ color: 'var(--accent-pink)' }} />
@@ -106,7 +132,7 @@ export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
 
         <div 
           className={`sidebar-menu-item ${activeTab === 'analytics' ? 'active' : ''}`}
-          onClick={() => setActiveTab('analytics')}
+          onClick={() => handleItemClick('analytics')}
         >
           <div className="sidebar-icon-wrap">
             <Coins size={15} style={{ color: 'var(--accent-green)' }} />
@@ -116,7 +142,7 @@ export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
 
         <div 
           className={`sidebar-menu-item ${activeTab === 'history' ? 'active' : ''}`}
-          onClick={() => setActiveTab('history')}
+          onClick={() => handleItemClick('history')}
         >
           <div className="sidebar-icon-wrap text-accent-pink font-bold">
             <History size={15} />

@@ -1,9 +1,10 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { Cpu, RefreshCw, Droplet, Key, Fingerprint, ShieldCheck, ArrowLeftRight } from 'lucide-react'
+import { Cpu, RefreshCw, Droplet, Key, Fingerprint, ShieldCheck, ArrowLeftRight, Menu } from 'lucide-react'
 import Link from 'next/link'
 import { StableFXClient } from '@/lib/stablefx'
+import { USDCIcon, EURCIcon, ArcIcon } from './Icons'
 
 interface TopBarProps {
   isConnected: boolean
@@ -16,6 +17,7 @@ interface TopBarProps {
   onOpenAuthModal: () => void
   onOpenBridge: () => void
   disconnect: () => void
+  onToggleSidebar?: () => void
 }
 
 export function TopBar({
@@ -28,7 +30,8 @@ export function TopBar({
   walletType,
   onOpenAuthModal,
   onOpenBridge,
-  disconnect
+  disconnect,
+  onToggleSidebar
 }: TopBarProps) {
   const [rate, setRate] = useState<number>(1.08)
 
@@ -50,13 +53,29 @@ export function TopBar({
 
   return (
     <header className="app-topbar">
-      <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        {onToggleSidebar && (
+          <button 
+            onClick={onToggleSidebar}
+            className="mobile-menu-toggle btn-brutalist btn-brutalist-muted"
+            style={{
+              padding: '6px',
+              display: 'none', // Controlled by CSS media queries
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: '32px',
+              width: '32px'
+            }}
+          >
+            <Menu size={16} />
+          </button>
+        )}
         <Link href="/" className="topbar-logo" style={{ textDecoration: 'none', cursor: 'pointer' }}>
           <Cpu size={22} style={{ strokeWidth: 2 }} />
           <span>Infer<i>Pay</i></span>
         </Link>
-        <div className="network-badge">
-          <div className="network-dot"></div>
+        <div className="network-badge" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <ArcIcon size={14} />
           <span>Live on Arc Network (Test Mode)</span>
         </div>
       </div>
@@ -69,7 +88,7 @@ export function TopBar({
             style={{ padding: '6px 12px', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '5px' }}
           >
             <ArrowLeftRight size={11} />
-            <span>🌉 Bridge USDC via CCTP</span>
+            <span>Bridge USDC via CCTP</span>
           </button>
         )}
 
@@ -81,7 +100,7 @@ export function TopBar({
           style={{ padding: '6px 12px', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '5px' }}
         >
           {isFaucetLoading ? <RefreshCw size={11} className="spin" /> : <Droplet size={11} />}
-          <span>💰 Get Free Test Funds</span>
+          <span>Get Free Test Funds</span>
         </button>
 
         {isConnected ? (
@@ -103,8 +122,14 @@ export function TopBar({
                   <ShieldCheck size={14} style={{ color: 'var(--accent-green)' }} />
                 )}
               </div>
-              <div style={{ fontSize: '12px', fontWeight: 650, color: 'var(--accent-coral)' }}>
-                Balance: ${usdcBalance} USD · €{eurcBalance} EUR <span style={{ color: 'var(--text-light)', fontSize: '10px', fontWeight: 500 }}>(Combined: ${combinedValuation} USD @ 1 EUR = {rate.toFixed(3)} USD)</span>
+              <div style={{ fontSize: '12px', fontWeight: 650, color: 'var(--accent-coral)', display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'flex-end' }}>
+                <span>Balance:</span>
+                <USDCIcon size={13} style={{ display: 'inline' }} />
+                <span>{usdcBalance} USD</span>
+                <span>·</span>
+                <EURCIcon size={13} style={{ display: 'inline' }} />
+                <span>{eurcBalance} EUR</span>
+                <span style={{ color: 'var(--text-light)', fontSize: '10px', fontWeight: 500 }}>(Combined: ${combinedValuation} USD @ 1 EUR = {rate.toFixed(3)} USD)</span>
               </div>
             </div>
             <button className="btn-brutalist btn-brutalist-muted" onClick={disconnect} style={{ padding: '6px 12px', fontSize: '11px' }}>

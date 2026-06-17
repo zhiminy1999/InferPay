@@ -47,6 +47,7 @@ export default function InferPayDashboard() {
   const [showFaucetModal, setShowFaucetModal] = useState<boolean>(false)
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false)
   const [showBridgeModal, setShowBridgeModal] = useState<boolean>(false)
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState<boolean>(false)
 
   // Shared hooks
   const { activities, addActivity } = useActivityFeed()
@@ -137,12 +138,34 @@ export default function InferPayDashboard() {
         onOpenAuthModal={() => setIsAuthModalOpen(true)}
         onOpenBridge={() => setShowBridgeModal(true)}
         disconnect={handleDisconnectAll}
+        onToggleSidebar={() => setMobileSidebarOpen(!mobileSidebarOpen)}
       />
+
+      {/* Mobile Sidebar backdrop overlay */}
+      {mobileSidebarOpen && (
+        <div 
+          className="mobile-sidebar-backdrop"
+          onClick={() => setMobileSidebarOpen(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(20, 20, 22, 0.4)',
+            backdropFilter: 'blur(3px)',
+            zIndex: 999,
+            animation: 'fadeIn 0.2s ease-out'
+          }}
+        />
+      )}
 
       {/* Main Workspace */}
       <div className="app-workspace">
         {/* Left Menu Sidebar */}
-        <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+        <Sidebar 
+          activeTab={activeTab} 
+          setActiveTab={setActiveTab} 
+          mobileOpen={mobileSidebarOpen}
+          onCloseMobile={() => setMobileSidebarOpen(false)}
+        />
 
         {/* Center Panel */}
         <main className="app-content">

@@ -548,6 +548,81 @@ body {
 }
 
 /* Visual Inputs */
+.filter-grid-brutalist {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--space-4);
+}
+
+.grid-2-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+@media (max-width: 640px) {
+  .grid-2-col {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+.grid-3-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 15px;
+}
+@media (max-width: 1024px) {
+  .grid-3-col {
+    grid-template-columns: 1fr 1fr !important;
+  }
+}
+@media (max-width: 640px) {
+  .grid-3-col {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+.metrics-grid-brutalist {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-4);
+}
+@media (max-width: 1024px) {
+  .metrics-grid-brutalist {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+@media (max-width: 640px) {
+  .metrics-grid-brutalist {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+.marketplace-split {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 20px;
+}
+@media (max-width: 1024px) {
+  .marketplace-split {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+.job-board-split {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+.job-board-split.single {
+  grid-template-columns: 1fr !important;
+}
+@media (max-width: 1024px) {
+  .job-board-split {
+    grid-template-columns: 1fr !important;
+  }
+}
+
 .brutalist-form-group {
   margin-bottom: var(--space-4);
 }
@@ -866,10 +941,153 @@ body {
   50% { opacity: 0.3; }
 }
 
-/* Responsive overrides for the 3-column grids */
+/* =======================================================
+   InferPay Mobile-First Responsive Overrides
+   ======================================================= */
+
+/* Responsive overrides for 3-column splits */
 @media (max-width: 1100px) {
   .brutalist-split {
     grid-template-columns: 1fr !important;
+    gap: var(--space-4) !important;
+  }
+}
+
+/* Tablet & Mobile Layout Shifts */
+@media (max-width: 1024px) {
+  .app-workspace {
+    flex-direction: column !important;
+    overflow-y: auto !important;
+    height: calc(100vh - 68px) !important;
+    height: calc(100dvh - 68px) !important;
+  }
+
+  .app-sidebar {
+    position: fixed !important;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 280px !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    background-color: var(--bg-main) !important;
+    z-index: 10000 !important;
+    border-right: 1px solid var(--border) !important;
+    padding: var(--space-6) var(--space-4) !important;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: var(--shadow-hover) !important;
+    background-image: 
+      linear-gradient(rgba(226, 223, 217, 0.4) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(226, 223, 217, 0.4) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
+  .app-sidebar.mobile-open {
+    transform: translateX(0) !important;
+  }
+
+  .sidebar-mobile-close {
+    display: flex !important;
+  }
+
+  .app-assistant-feed {
+    display: none !important; /* Hide sidebar log feed on smaller devices */
+  }
+
+  .app-content {
+    width: 100% !important;
+    overflow: visible !important;
+    flex: none !important;
+  }
+
+  .mobile-menu-toggle {
+    display: inline-flex !important;
+  }
+
+  .content-header {
+    padding: 0 var(--space-4) !important;
+  }
+
+  .content-body {
+    padding: var(--space-4) !important;
+  }
+
+  .filter-grid-brutalist {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+}
+
+/* Small Screens (Mobile Portait & Landscape) */
+@media (max-width: 768px) {
+  .app-topbar {
+    height: auto !important;
+    min-height: 68px;
+    padding: var(--space-3) var(--space-4) !important;
+    flex-wrap: wrap !important;
+    gap: var(--space-3) !important;
+  }
+
+  .app-topbar > div {
+    width: 100% !important;
+    justify-content: space-between !important;
+    gap: 10px !important;
+  }
+
+  /* Hide secondary badge/valuation text to save space */
+  .app-topbar span[style*="Combined:"],
+  .app-topbar div[style*="Combined:"] {
+    display: none !important;
+  }
+
+  .network-badge {
+    display: none !important; /* Hide on mobile to prioritize account balance */
+  }
+
+  .filter-grid-brutalist {
+    grid-template-columns: 1fr !important;
+    gap: var(--space-3) !important;
+  }
+
+  /* Table responsiveness wrapper */
+  .table-responsive {
+    width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background-color: var(--bg-card);
+  }
+
+  .brutalist-table {
+    min-width: 600px !important; /* Ensure table remains readable instead of squishing */
+  }
+
+  /* Modals padding and centering */
+  .modal-container {
+    width: 95vw !important;
+    max-width: 480px !important;
+    padding: var(--space-4) !important;
+    margin: 10px !important;
+    max-height: 90vh !important;
+    max-height: 90dvh !important;
+    overflow-y: auto !important;
+  }
+}
+
+/* Very Small Mobile Devices (e.g. iPhone SE / 320px) */
+@media (max-width: 480px) {
+  .btn-brutalist {
+    padding: 8px var(--space-2) !important;
+    font-size: 12px !important;
+  }
+
+  .card-title {
+    font-size: 16px !important;
+  }
+
+  .card-desc {
+    font-size: 12px !important;
   }
 }
 
@@ -906,4 +1124,122 @@ body {
     display: grid !important;
   }
 }
+
+/* =======================================================
+   Centralized Animation & Loading Tokens
+   ======================================================= */
+
+/* Keyframe animations */
+@keyframes shimmer-move {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes pulse-subtle {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+@keyframes spin-smooth {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes slide-up-fade {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Base Skeleton definitions */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--bg-inner) 25%,
+    rgba(226, 223, 217, 0.6) 37%,
+    var(--bg-inner) 63%
+  );
+  background-size: 200% 100%;
+  animation: shimmer-move 1.5s infinite linear, pulse-subtle 2s infinite ease-in-out;
+  border-radius: var(--radius-sm);
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.skeleton-text {
+  height: 12px;
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.skeleton-text.short {
+  width: 60%;
+}
+
+.skeleton-text.heading {
+  height: 18px;
+  margin-bottom: 12px;
+  width: 40%;
+}
+
+.skeleton-circle {
+  border-radius: 50% !important;
+  width: 40px;
+  height: 40px;
+}
+
+.skeleton-rect {
+  width: 100%;
+  height: 100px;
+}
+
+/* Spinner Utilities */
+.spinner-inline {
+  animation: spin-smooth 0.8s linear infinite;
+  display: inline-block;
+  will-change: transform;
+}
+
+/* Prevents page layout jumps by enforcing stable dimensions */
+.loading-transition-wrapper {
+  transition: opacity 0.25s ease-in-out, transform 0.25s ease-in-out;
+}
+
+.transition-fade-in {
+  animation: slide-up-fade 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Accessibility overrides */
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: pulse-subtle 2s infinite ease-in-out !important;
+    background: var(--bg-inner) !important;
+  }
+  .spinner-inline {
+    animation-duration: 2s !important;
+  }
+  .transition-fade-in {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
 
