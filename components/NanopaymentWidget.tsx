@@ -193,7 +193,7 @@ export const NanopaymentWidget: React.FC = () => {
         {history.length === 0 ? (
           <div style={{ color: 'var(--text-muted)', fontSize: '13px', padding: 'var(--space-4) 0', textAlign: 'center' }}>No transaction logs available.</div>
         ) : (
-          <div style={{ overflowX: 'auto' }}>
+          <div className="table-responsive">
             <table className="brutalist-table">
               <thead>
                 <tr>

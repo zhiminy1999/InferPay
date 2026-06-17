@@ -147,18 +147,62 @@ export const AutonomousAgent: React.FC = () => {
     addLog(' - Gateway settled. Deducted micropayment successfully.', 'success')
     addLog(` - Generated payment receipt: ${settle.proof['X-402-Receipt']}`, 'success')
 
+    // Call Swarm Coordinator API
+    addLog(' - Calling Swarm Coordinator API to coordinate sub-task tasks...', 'info')
+    let agentData: any = null
+    try {
+      const agentRes = await fetch('/api/agent', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          task: `Gather and verify research reports matching capability: ${capability}`,
+          capability,
+          userAddress: '0x08Ec3EEfC622b8a8742fC8Ab48E832c236bc360B'
+        })
+      })
+      agentData = await agentRes.json()
+      for (const step of agentData.steps) {
+        addLog(`[${step.agent}] ${step.message}`, 'info')
+        await new Promise(r => setTimeout(r, 800))
+      }
+    } catch (err) {
+      console.error('Coordinator call failed:', err)
+    }
+
     setCurrentStep(5)
-    await new Promise(r => setTimeout(r, 1500))
+    await new Promise(r => setTimeout(r, 1000))
 
     // Step 5: RECEIVE SERVICE RESULT
-    addLog('🚀 Step 5: Resubmitting request with payment receipt header...', 'info')
+    addLog('🚀 Step 5: Resubmitting request with payment receipt header to search corpus...', 'info')
     addLog(` - Attached: [X-402-Receipt: ${settle.proof['X-402-Receipt']}]`, 'info')
-    addLog(' - Provider status: 200 OK (Payment Verified)', 'success')
     
-    if (settle.result) {
-      setServiceOutput(settle.result)
-      addLog('Result Payload: ' + settle.result, 'success')
+    let matchedResults = ''
+    try {
+      const searchRes = await fetch('/api/search', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'PAYMENT-SIGNATURE': settle.proof['X-402-Receipt'],
+          'PAYMENT-BUYER-ADDRESS': '0x08Ec3EEfC622b8a8742fC8Ab48E832c236bc360B',
+          'PAYMENT-NONCE': '0x' + settle.proof['X-402-Receipt'].slice(2, 66),
+          'PAYMENT-VALID-AFTER': '0',
+          'PAYMENT-VALID-BEFORE': Math.floor(Date.now()/1000 + 3600).toString(),
+          'PAYMENT-DESTINATION': '0x7a304A671e21b79528659dC0D775e53FE233b2B0'
+        },
+        body: JSON.stringify({ query: agentData?.query || 'USDC' })
+      })
+      const searchData = await searchRes.json()
+      if (searchData.success && searchData.results) {
+        matchedResults = searchData.results.join('\n')
+        addLog(`[Royalty Split]: Verified 20% royalty fee split (${searchData.meta.royaltySplit}) successfully routed to publisher: 0x7a30...b2b0`, 'success')
+      }
+    } catch (err) {
+      console.error('Corpus search failed:', err)
     }
+
+    const finalResult = matchedResults || (settle.result || '')
+    setServiceOutput(finalResult)
+    addLog('Result Payload Loaded: ' + finalResult.substring(0, 150) + '...', 'success')
 
     addLog('✅ Autonomous task execution complete!', 'success')
     setIsRunning(false)
@@ -251,7 +295,7 @@ export const AutonomousAgent: React.FC = () => {
         <h3 className="card-title" style={{ marginBottom: 0 }}>Autonomous Agent <i>Simulator (x402 Protocol)</i></h3>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 'var(--space-5)' }}>
+      <div className="grid-3-col">
         {/* Left pane: configs */}
         <div style={{
           backgroundColor: 'var(--bg-inner)',

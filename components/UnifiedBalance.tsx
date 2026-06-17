@@ -1,6 +1,7 @@
 import React from 'react'
 import { useBridge } from '../hooks/useBridge'
-import { Coins, Layers, ArrowRight } from 'lucide-react'
+import { Layers } from 'lucide-react'
+import { EthereumIcon, BaseIcon, ArcIcon, USDCIcon } from './Icons'
 
 export const UnifiedBalance: React.FC = () => {
   const { balances } = useBridge()
@@ -21,7 +22,10 @@ export const UnifiedBalance: React.FC = () => {
 
       <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'flex-start', gap: 'var(--space-6)' }}>
         <div>
-          <div className="brutalist-label" style={{ marginBottom: '4px' }}>Total Cumulative USDC Balance</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
+            <USDCIcon size={18} />
+            <span className="brutalist-label" style={{ marginBottom: 0 }}>Total Cumulative USDC Balance</span>
+          </div>
           <div style={{ fontSize: '28px', fontWeight: 800, fontFamily: 'var(--font-serif)', fontStyle: 'italic', color: 'var(--accent-coral)', letterSpacing: '-0.02em' }}>
             ${unifiedTotal} <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-muted)' }}>USDC</span>
           </div>
@@ -35,10 +39,13 @@ export const UnifiedBalance: React.FC = () => {
             border: '1px solid var(--border)',
             borderRadius: 'var(--radius-sm)',
             padding: 'var(--space-3)',
-            minWidth: '120px'
+            minWidth: '130px'
           }}>
-            <div className="brutalist-label" style={{ marginBottom: '2px' }}>Ethereum Sepolia</div>
-            <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-main)' }}>${parseFloat(balances.ethereum_sepolia).toFixed(2)}</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+              <EthereumIcon size={16} />
+              <span className="brutalist-label" style={{ marginBottom: 0 }}>Ethereum Sepolia</span>
+            </div>
+            <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-main)', marginTop: '4px' }}>${parseFloat(balances.ethereum_sepolia).toFixed(2)}</div>
             <div style={{ fontSize: '10px', color: 'var(--text-light)' }}>Domain ID: 0</div>
           </div>
 
@@ -48,10 +55,13 @@ export const UnifiedBalance: React.FC = () => {
             border: '1px solid var(--border)',
             borderRadius: 'var(--radius-sm)',
             padding: 'var(--space-3)',
-            minWidth: '120px'
+            minWidth: '130px'
           }}>
-            <div className="brutalist-label" style={{ marginBottom: '2px' }}>Base Sepolia</div>
-            <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-main)' }}>${parseFloat(balances.base_sepolia).toFixed(2)}</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+              <BaseIcon size={16} />
+              <span className="brutalist-label" style={{ marginBottom: 0 }}>Base Sepolia</span>
+            </div>
+            <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-main)', marginTop: '4px' }}>${parseFloat(balances.base_sepolia).toFixed(2)}</div>
             <div style={{ fontSize: '10px', color: 'var(--text-light)' }}>Domain ID: 6</div>
           </div>
 
@@ -62,10 +72,13 @@ export const UnifiedBalance: React.FC = () => {
             borderLeft: '3px solid var(--accent-green)',
             borderRadius: 'var(--radius-sm)',
             padding: 'var(--space-3)',
-            minWidth: '120px'
+            minWidth: '130px'
           }}>
-            <div className="brutalist-label" style={{ marginBottom: '2px', color: 'var(--accent-green)' }}>Arc Testnet</div>
-            <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-main)' }}>${parseFloat(balances.arc_testnet).toFixed(2)}</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+              <ArcIcon size={16} />
+              <span className="brutalist-label" style={{ marginBottom: 0, color: 'var(--accent-green)' }}>Arc Testnet</span>
+            </div>
+            <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-main)', marginTop: '4px' }}>${parseFloat(balances.arc_testnet).toFixed(2)}</div>
             <div style={{ fontSize: '10px', color: 'var(--text-light)' }}>Domain ID: 26</div>
           </div>
         </div>

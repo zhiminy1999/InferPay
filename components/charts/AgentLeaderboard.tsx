@@ -26,7 +26,7 @@ export const AgentLeaderboard: React.FC<AgentLeaderboardProps> = ({ agents }) =>
         <span style={{ fontSize: '10px', color: 'var(--text-light)', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 700 }}>Ranked by volume</span>
       </div>
 
-      <div style={{ overflowX: 'auto' }}>
+      <div className="table-responsive">
         <table className="brutalist-table">
           <thead>
             <tr>

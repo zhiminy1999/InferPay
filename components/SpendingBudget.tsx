@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { RefreshCw, Sparkles, Lock, EyeOff, Eye, AlertTriangle, Play, ExternalLink } from 'lucide-react'
 import { useAgentEscrow } from '@/hooks/useAgentEscrow'
 import { CurrencySelector } from './CurrencySelector'
+import { generateEphemeralKeypair } from '@/lib/wallet-utils'
 
 interface SpendingBudgetProps {
   isConnected: boolean
@@ -91,8 +92,9 @@ export function SpendingBudget({
       addActivity('Setting up AI budget (Demo)', 'Creating a separate simulated spending account.', '🔑', 'info')
       await new Promise(resolve => setTimeout(resolve, 800))
       
-      const mockAddress = '0x' + Array.from({length: 40}, () => Math.floor(Math.random()*16).toString(16)).join('')
-      const mockPrivateKey = '0x' + Array.from({length: 64}, () => Math.floor(Math.random()*16).toString(16)).join('')
+      const keypair = generateEphemeralKeypair()
+      const mockAddress = keypair.address
+      const mockPrivateKey = keypair.privateKey
       
       setPiggyBankAddress(mockAddress)
       setEphemeralPrivateKey(mockPrivateKey)
