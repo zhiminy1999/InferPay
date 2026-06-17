@@ -5,7 +5,9 @@ import { Search, Plus, ListFilter, Cpu, PlusCircle, History, Sparkles, X, Brain 
 import { useMarketplace, AIService } from '@/hooks/useMarketplace'
 import { ServiceCard } from './ServiceCard'
 import { AutonomousAgent } from './AutonomousAgent'
+import { AgentSwarmControl } from './AgentSwarmControl'
 import { useNanopayments } from '@/hooks/useNanopayments'
+import { CardSkeleton } from './LoadingSystem'
 
 export const Marketplace: React.FC = () => {
   const {
@@ -148,8 +150,11 @@ export const Marketplace: React.FC = () => {
       {/* Autonomous execution playground */}
       <AutonomousAgent />
 
+      {/* ERC-8004 AI Swarm Orchestration */}
+      <AgentSwarmControl />
+
       {/* Main Directory & Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '20px' }}>
+      <div className="marketplace-split">
         {/* Left Side: Directory & Filter */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
           <div style={{
@@ -191,16 +196,17 @@ export const Marketplace: React.FC = () => {
           </div>
 
           {isLoading ? (
-            <div className="brutalist-card" style={{ padding: '48px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '13px' }}>
-              <Brain style={{ color: 'var(--accent-coral)', margin: '0 auto 8px' }} size={20} className="spin" />
-              Searching available compute agents...
+            <div className="grid-2-col" style={{ width: '100%' }}>
+              {Array.from({ length: 4 }).map((_, i) => (
+                <CardSkeleton key={`market-skel-${i}`} />
+              ))}
             </div>
           ) : services.length === 0 ? (
             <div className="brutalist-card" style={{ padding: '48px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '13px' }}>
               No service matching your search criteria was discovered.
             </div>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-4)' }}>
+            <div className="grid-2-col">
               {services.map(service => (
                 <ServiceCard
                   key={service.id}

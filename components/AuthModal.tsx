@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react'
 import { Key, ShieldAlert, Fingerprint, Chrome, RefreshCw, X } from 'lucide-react'
+import { ButtonLoading } from './LoadingSystem'
 
 interface AuthModalProps {
   isOpen: boolean
@@ -63,15 +64,16 @@ export function AuthModal({
               Select your preferred method to authenticate with InferPay. Smart Contract Accounts (SCA) support biometric passkeys with sponsored gas.
             </p>
 
-            <button
+            <ButtonLoading
               onClick={handleMetaMaskConnect}
-              className="btn-brutalist btn-brutalist-pink"
-              style={{ justifyContent: 'center', height: '48px', fontWeight: 800 }}
-              disabled={loading}
+              isLoading={loading}
+              loadingText="Connecting MetaMask..."
+              variantClass="btn-brutalist btn-brutalist-pink"
+              style={{ justifyContent: 'center', height: '48px', fontWeight: 800, width: '100%' }}
             >
               <Chrome size={18} />
               <span>Connect MetaMask</span>
-            </button>
+            </ButtonLoading>
 
             <div style={{ display: 'flex', alignItems: 'center', margin: '10px 0' }}>
               <div style={{ flex: 1, height: '1px', backgroundColor: 'var(--border)' }}></div>
@@ -79,7 +81,7 @@ export function AuthModal({
               <div style={{ flex: 1, height: '1px', backgroundColor: 'var(--border)' }}></div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+            <div className="grid-2-col">
               <button
                 onClick={() => setAuthMode('passkey_reg')}
                 className="btn-brutalist btn-brutalist-muted"
@@ -131,15 +133,16 @@ export function AuthModal({
               >
                 Back
               </button>
-              <button
+              <ButtonLoading
                 type="submit"
-                className="btn-brutalist btn-brutalist-pink"
-                disabled={loading}
+                isLoading={loading}
+                loadingText="Registering..."
+                variantClass="btn-brutalist btn-brutalist-pink"
                 style={{ flex: 2, justifyContent: 'center' }}
               >
-                {loading ? <RefreshCw size={14} className="spin" /> : <Key size={14} />}
+                <Key size={14} />
                 <span>Register Biometrics</span>
-              </button>
+              </ButtonLoading>
             </div>
           </form>
         )}
@@ -174,15 +177,16 @@ export function AuthModal({
               >
                 Back
               </button>
-              <button
+              <ButtonLoading
                 type="submit"
-                className="btn-brutalist btn-brutalist-pink"
-                disabled={loading}
+                isLoading={loading}
+                loadingText="Authenticating..."
+                variantClass="btn-brutalist btn-brutalist-pink"
                 style={{ flex: 2, justifyContent: 'center' }}
               >
-                {loading ? <RefreshCw size={14} className="spin" /> : <Fingerprint size={14} />}
+                <Fingerprint size={14} />
                 <span>Authenticate</span>
-              </button>
+              </ButtonLoading>
             </div>
           </form>
         )}

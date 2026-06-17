@@ -7,6 +7,7 @@ import { TreasuryChart } from './charts/TreasuryChart'
 import { SpendingBreakdown } from './charts/SpendingBreakdown'
 import { AgentLeaderboard } from './charts/AgentLeaderboard'
 import { ComplianceAlerts } from './ComplianceAlerts'
+import { MetricsSkeleton, Skeleton } from './LoadingSystem'
 
 export const AnalyticsDashboard: React.FC = () => {
   const {
@@ -124,9 +125,32 @@ export const AnalyticsDashboard: React.FC = () => {
       </div>
 
       {isLoading ? (
-        <div className="brutalist-card" style={{ padding: '80px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '13px' }}>
-          <RefreshCw style={{ color: 'var(--accent-coral)', margin: '0 auto 12px' }} size={24} className="spin" />
-          Aggregating financial ledgers and generating charts...
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', animation: 'fadeIn 0.25s ease-out' }}>
+          <MetricsSkeleton />
+          <div className="brutalist-split">
+            <div className="brutalist-card" style={{ padding: '20px', height: '320px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <Skeleton variant="title" width="40%" />
+              <Skeleton variant="rect" style={{ flex: 1 }} />
+            </div>
+            <div className="brutalist-card" style={{ padding: '20px', height: '320px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <Skeleton variant="title" width="30%" />
+              <Skeleton variant="rect" style={{ flex: 1 }} />
+            </div>
+          </div>
+          <div className="brutalist-split">
+            <div className="brutalist-card" style={{ padding: '20px', height: '240px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <Skeleton variant="title" width="50%" />
+              <Skeleton variant="text" width="95%" />
+              <Skeleton variant="text" width="90%" />
+              <Skeleton variant="text" width="85%" />
+            </div>
+            <div className="brutalist-card" style={{ padding: '20px', height: '240px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <Skeleton variant="title" width="35%" />
+              <Skeleton variant="text" width="90%" />
+              <Skeleton variant="text" width="80%" />
+              <Skeleton variant="text" width="85%" />
+            </div>
+          </div>
         </div>
       ) : error ? (
         <div className="brutalist-card" style={{ padding: '48px', textAlign: 'center', color: '#9f1239', fontSize: '13px', backgroundColor: '#fff1f2', borderColor: '#ffe4e6' }}>
@@ -139,7 +163,7 @@ export const AnalyticsDashboard: React.FC = () => {
       ) : (
         <>
           {/* Key Metrics Widgets Grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 'var(--space-4)' }}>
+          <div className="metrics-grid-brutalist">
             {/* Total Treasury */}
             <div style={{
               backgroundColor: 'var(--bg-card)',

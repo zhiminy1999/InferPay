@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useTransactionHistory, TransactionRecord } from '../hooks/useTransactionHistory'
 import { Download, RefreshCw, Filter, Calendar, ExternalLink, Info, Database } from 'lucide-react'
+import { Skeleton } from './LoadingSystem'
 
 export const TransactionHistory: React.FC = () => {
   const {
@@ -90,7 +91,7 @@ export const TransactionHistory: React.FC = () => {
           <h3 className="card-title" style={{ marginBottom: 0, fontSize: '15px' }}>Transaction History <i>Filters</i></h3>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 'var(--space-4)' }}>
+        <div className="filter-grid-brutalist">
           {/* Type */}
           <div className="brutalist-form-group">
             <label className="brutalist-label">Module / Type</label>
@@ -169,7 +170,7 @@ export const TransactionHistory: React.FC = () => {
       </div>
 
       {/* Main Table */}
-      <div style={{ overflowX: 'auto' }}>
+      <div className="table-responsive">
         <table className="brutalist-table">
           <thead>
             <tr>
@@ -185,12 +186,18 @@ export const TransactionHistory: React.FC = () => {
           </thead>
           <tbody>
             {loading ? (
-              <tr>
-                <td colSpan={8} style={{ padding: '32px', textAlign: 'center', color: 'var(--text-muted)' }}>
-                  <RefreshCw className="spin" size={14} style={{ display: 'inline-block', marginRight: '8px' }} />
-                  Loading persistent transaction registry...
-                </td>
-              </tr>
+              Array.from({ length: 5 }).map((_, r) => (
+                <tr key={`tx-skeleton-${r}`}>
+                  <td><Skeleton width="70px" height={15} /></td>
+                  <td><Skeleton width="85px" height={15} /></td>
+                  <td><Skeleton width="60px" height={15} /></td>
+                  <td><Skeleton width="110px" height={15} style={{ fontFamily: 'monospace' }} /></td>
+                  <td><Skeleton width="90px" height={15} style={{ fontFamily: 'monospace' }} /></td>
+                  <td><Skeleton width="45px" height={15} /></td>
+                  <td><Skeleton width="75px" height={15} /></td>
+                  <td style={{ textAlign: 'right' }}><Skeleton width="45px" height={22} /></td>
+                </tr>
+              ))
             ) : error ? (
               <tr>
                 <td colSpan={8} style={{ padding: '32px', textAlign: 'center', color: '#9f1239' }}>

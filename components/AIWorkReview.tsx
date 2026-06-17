@@ -5,6 +5,9 @@ import { RefreshCw, Check, ShieldCheck } from 'lucide-react'
 import { useAgentRegistry } from '@/hooks/useAgentRegistry'
 import { useJobEscrow } from '@/hooks/useJobEscrow'
 import { CurrencySelector } from './CurrencySelector'
+import { parseUnits } from 'viem'
+import { erc20Abi, USDC_ADDRESS_ARC, EURC_ADDRESS_ARC } from '@/lib/contracts'
+import { ButtonLoading } from './LoadingSystem'
 
 interface AIWorkReviewProps {
   isConnected: boolean
@@ -171,14 +174,39 @@ export function AIWorkReview({
     addActivity('Reviewing AI work', `Checking the work report from ${selectedInv.agentName}.`, '⏳', 'info')
 
     try {
-      setTimeout(() => {
+      if (isConnected && walletClient && address && publicClient) {
+        const tokenAddress = currency === 'EURC' ? EURC_ADDRESS_ARC : USDC_ADDRESS_ARC
+        const requiredAmount = parseUnits(selectedInv.amount.toString(), 6)
+
+        addActivity('Initiating Payment', `Sending ${selectedInv.amount} ${currency} to agent at ${selectedInv.agentWallet.slice(0, 8)}...`, '💸', 'info')
+
+        const hash = await walletClient.writeContract({
+          address: tokenAddress,
+          abi: erc20Abi,
+          functionName: 'transfer',
+          args: [selectedInv.agentWallet as `0x${string}`, requiredAmount],
+          account: address as `0x${string}`,
+          chain: null
+        })
+
+        addActivity('Transaction Submitted', `Transaction hash: ${hash.slice(0, 10)}... Waiting for confirmation.`, '⛓️', 'info')
+        await publicClient.waitForTransactionReceipt({ hash })
+
+        setInvoices(prev => prev.map(inv => inv.id === selectedInvoiceId ? { ...inv, status: 'PAID' } : inv))
+        addActivity('Report verified', 'This work report has been confirmed as authentic and untampered.', '🛡️', 'success')
+        addActivity('Payment settled', `${selectedInv.amount} ${currency} successfully paid to ${selectedInv.agentName} (Tx: ${hash.slice(0, 8)}...).`, '✅', 'success')
+      } else {
+        // Fallback for demo/unconnected state
+        await new Promise((resolve) => setTimeout(resolve, 2000))
         setInvoices(prev => prev.map(inv => inv.id === selectedInvoiceId ? { ...inv, status: 'PAID' } : inv))
         addActivity('Report verified', 'This work report has been confirmed as authentic and untampered.', '🛡️', 'success')
         addActivity('Payment sent', `${selectedInv.amount} ${selectedInv.currency} has been sent to ${selectedInv.agentName}.`, '💸', 'success')
-        setIsPayrollLoading(false)
-      }, 2000)
-    } catch (err) {
-      addActivity('Payment failed', 'Something went wrong during the payment process.', '❌', 'danger')
+      }
+    } catch (err: any) {
+      console.error(err)
+      const msg = err.shortMessage || err.message || 'Transaction failed'
+      addActivity('Payment failed', msg, '❌', 'danger')
+    } finally {
       setIsPayrollLoading(false)
     }
   }
@@ -203,50 +231,52 @@ export function AIWorkReview({
         <h3 className="card-title">Review Your AI Assistants’ <i>Work Reports</i></h3>
         <p className="card-desc">Your AI assistants submit reports showing what they accomplished. Review their work and approve payment with a single click.</p>
 
-        <table className="brutalist-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>AI Assistant (ERC-8004)</th>
-              <th>On-chain Reputation</th>
-              <th>What They Did</th>
-              <th>Amount</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {invoices.map(inv => (
-              <tr 
-                key={inv.id} 
-                onClick={() => setSelectedInvoiceId(inv.id)}
-                className={selectedInvoiceId === inv.id ? 'selected' : ''}
-                style={{ cursor: 'pointer' }}
-              >
-                <td style={{ fontFamily: 'var(--font-sans)', fontWeight: 'bold' }}>{inv.id}</td>
-                <td>
-                  <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <strong>{inv.agentName}</strong>
-                    <span style={{ fontSize: '10px', color: 'var(--text-light)', fontFamily: 'monospace' }}>
-                      {inv.agentWallet.slice(0, 10)}...{inv.agentWallet.slice(-6)}
-                    </span>
-                  </div>
-                </td>
-                <td>
-                  <span className="badge-brutalist green" style={{ fontSize: '11px' }}>
-                    {getReputationScore(inv.agentWallet, inv.defaultReputation)}/100
-                  </span>
-                </td>
-                <td style={{ fontSize: '12px' }}>{inv.description}</td>
-                <td><strong style={{ color: 'var(--accent-coral)' }}>{inv.amount} {inv.currency}</strong></td>
-                <td>
-                  <span className={`badge-brutalist ${inv.status === 'PAID' ? 'green' : 'yellow'}`}>
-                    {inv.status === 'PAID' ? 'Paid ✓' : 'Needs Review'}
-                  </span>
-                </td>
+        <div className="table-responsive">
+          <table className="brutalist-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>AI Assistant (ERC-8004)</th>
+                <th>On-chain Reputation</th>
+                <th>What They Did</th>
+                <th>Amount</th>
+                <th>Status</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {invoices.map(inv => (
+                <tr 
+                  key={inv.id} 
+                  onClick={() => setSelectedInvoiceId(inv.id)}
+                  className={selectedInvoiceId === inv.id ? 'selected' : ''}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <td style={{ fontFamily: 'var(--font-sans)', fontWeight: 'bold' }}>{inv.id}</td>
+                  <td>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      <strong>{inv.agentName}</strong>
+                      <span style={{ fontSize: '10px', color: 'var(--text-light)', fontFamily: 'monospace' }}>
+                        {inv.agentWallet.slice(0, 10)}...{inv.agentWallet.slice(-6)}
+                      </span>
+                    </div>
+                  </td>
+                  <td>
+                    <span className="badge-brutalist green" style={{ fontSize: '11px' }}>
+                      {getReputationScore(inv.agentWallet, inv.defaultReputation)}/100
+                    </span>
+                  </td>
+                  <td style={{ fontSize: '12px' }}>{inv.description}</td>
+                  <td><strong style={{ color: 'var(--accent-coral)' }}>{inv.amount} {inv.currency}</strong></td>
+                  <td>
+                    <span className={`badge-brutalist ${inv.status === 'PAID' ? 'green' : 'yellow'}`}>
+                      {inv.status === 'PAID' ? 'Paid ✓' : 'Needs Review'}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* Selected invoice proof cards */}
@@ -326,10 +356,15 @@ export function AIWorkReview({
                 {selectedInvoice.status === 'PENDING' ? (
                   <>
                     <div className="bracket-button-wrap">
-                      <button className="btn-brutalist btn-brutalist-pink" onClick={triggerPayrollApproval} disabled={isPayrollLoading}>
-                        {isPayrollLoading ? <RefreshCw size={12} className="spin" /> : <Check size={12} />}
+                      <ButtonLoading
+                        isLoading={isPayrollLoading}
+                        loadingText="Processing..."
+                        onClick={triggerPayrollApproval}
+                        variantClass="btn-brutalist btn-brutalist-pink"
+                      >
+                        <Check size={12} />
                         <span>Approve & Send Payment</span>
-                      </button>
+                      </ButtonLoading>
                     </div>
                     <div style={{ fontSize: '11px', color: 'var(--text-light)', fontWeight: 600 }}>
                       Quick tip: You can also press <kbd style={{ background: 'var(--bg-inner)', border: '1px solid var(--border)', padding: '2px 5px', borderRadius: '4px' }}>Shift + Enter</kbd> to approve instantly.

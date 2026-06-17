@@ -118,7 +118,7 @@ export function CreateJob({
           />
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+        <div className="grid-2-col">
           <div className="brutalist-form-group">
             <label className="brutalist-label">
               Service Provider (Agent Wallet)

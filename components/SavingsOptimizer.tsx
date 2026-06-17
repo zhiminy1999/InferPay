@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react'
 import { Sparkles, RefreshCw, ArrowRightLeft, TrendingUp, AlertTriangle, ArrowRight, ShieldCheck } from 'lucide-react'
 import { useStableFX } from '@/hooks/useStableFX'
 import { SwapHistory } from './SwapHistory'
+import { ButtonLoading } from './LoadingSystem'
+import { USDCIcon, EURCIcon } from './Icons'
 
 interface SavingsOptimizerProps {
   isConnected: boolean
@@ -124,9 +126,12 @@ export function SavingsOptimizer({
 
           {/* Form */}
           <form onSubmit={handleGetQuoteSubmit} style={{ marginTop: '15px' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '15px' }}>
+            <div className="grid-2-col" style={{ marginBottom: '15px' }}>
               <div className="brutalist-form-group">
-                <label className="brutalist-label">Source Asset</label>
+                <label className="brutalist-label" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  {fromCurrency === 'USDC' ? <USDCIcon size={14} /> : <EURCIcon size={14} />}
+                  <span>Source Asset</span>
+                </label>
                 <select
                   className="brutalist-input"
                   value={fromCurrency}
@@ -142,7 +147,10 @@ export function SavingsOptimizer({
               </div>
 
               <div className="brutalist-form-group">
-                <label className="brutalist-label">Destination Asset</label>
+                <label className="brutalist-label" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  {toCurrency === 'USDC' ? <USDCIcon size={14} /> : <EURCIcon size={14} />}
+                  <span>Destination Asset</span>
+                </label>
                 <div
                   className="brutalist-input"
                   style={{
@@ -152,10 +160,11 @@ export function SavingsOptimizer({
                     backgroundColor: 'var(--bg-inner)',
                     fontWeight: 700,
                     padding: '0 10px',
-                    color: 'var(--text-main)'
+                    color: 'var(--text-main)',
+                    gap: '8px'
                   }}
                 >
-                  {toCurrency}
+                  <span>{toCurrency}</span>
                 </div>
               </div>
             </div>
@@ -176,14 +185,15 @@ export function SavingsOptimizer({
                   style={{ flex: 1, fontSize: '16px', fontWeight: 750 }}
                   required
                 />
-                <button
+                <ButtonLoading
                   type="submit"
-                  className="btn-brutalist btn-brutalist-muted"
-                  disabled={loading}
+                  isLoading={loading && !quote}
+                  loadingText="Quoting..."
+                  variantClass="btn-brutalist btn-brutalist-muted"
                   style={{ minWidth: '120px', justifyContent: 'center' }}
                 >
-                  {loading ? <RefreshCw size={14} className="spin" /> : 'Get Quote'}
-                </button>
+                  Get Quote
+                </ButtonLoading>
               </div>
             </div>
           </form>
@@ -242,15 +252,16 @@ export function SavingsOptimizer({
                 </div>
               </div>
 
-              <button
+              <ButtonLoading
                 onClick={handleExecuteSwapSubmit}
-                className="btn-brutalist btn-brutalist-pink"
-                disabled={loading}
+                isLoading={loading}
+                loadingText="Settling Atomically..."
+                variantClass="btn-brutalist btn-brutalist-pink"
                 style={{ width: '100%', justifyContent: 'center', marginTop: '15px' }}
               >
-                {loading ? <RefreshCw size={14} className="spin" /> : <ArrowRight size={14} />}
+                <ArrowRight size={14} />
                 <span>Confirm & Settle Swap</span>
-              </button>
+              </ButtonLoading>
             </div>
           )}
         </div>

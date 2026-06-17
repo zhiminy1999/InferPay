@@ -5,6 +5,7 @@ import { Briefcase, Search, RefreshCw, PlusCircle, Landmark, Award } from 'lucid
 import { useJobEscrow, Job } from '@/hooks/useJobEscrow'
 import { CreateJob } from './CreateJob'
 import { JobDetail } from './JobDetail'
+import { Skeleton } from './LoadingSystem'
 
 interface JobBoardProps {
   isConnected: boolean
@@ -153,7 +154,7 @@ export function JobBoard({
           addActivity={addActivity}
         />
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: selectedJob ? '1.2fr 1fr' : '1fr', gap: '20px', alignItems: 'start' }}>
+        <div className={`job-board-split ${selectedJob ? '' : 'single'}`}>
           
           {/* List panel */}
           <div className="brutalist-card accent-cyan">
@@ -190,9 +191,34 @@ export function JobBoard({
 
             {/* List items */}
             {isSyncing && jobs.length === 0 ? (
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', padding: '40px 0' }}>
-                <RefreshCw size={24} className="spin text-coral" />
-                <span style={{ fontWeight: 650 }}>Syncing active jobs...</span>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div
+                    key={`job-skel-${i}`}
+                    style={{
+                      padding: '15px',
+                      border: '1px solid var(--border)',
+                      backgroundColor: 'var(--bg-card)',
+                      borderRadius: 'var(--radius-md)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '10px'
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div style={{ display: 'flex', gap: '8px', width: '60%' }}>
+                        <Skeleton width="50px" height={16} />
+                        <Skeleton width="40px" height={16} />
+                      </div>
+                      <Skeleton width="60px" height={16} />
+                    </div>
+                    <Skeleton variant="text" width="95%" />
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <Skeleton width="80px" height={12} />
+                      <Skeleton width="100px" height={12} />
+                    </div>
+                  </div>
+                ))}
               </div>
             ) : filteredJobs.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-muted)' }}>

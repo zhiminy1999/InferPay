@@ -21,7 +21,7 @@ export function SwapHistory({ history }: SwapHistoryProps) {
           No FX trades executed yet. Optimize funds to record transactions on the ledger.
         </div>
       ) : (
-        <div style={{ overflowX: 'auto' }}>
+        <div className="table-responsive">
           <table className="brutalist-table">
             <thead>
               <tr>

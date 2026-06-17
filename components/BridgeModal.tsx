@@ -2,6 +2,8 @@ import React, { useState } from 'react'
 import { useBridge, BridgeStep } from '../hooks/useBridge'
 import { BRIDGE_CHAINS } from '../lib/bridge-config'
 import { X, ArrowRight, RefreshCw, CheckCircle, ShieldAlert, ExternalLink, HelpCircle } from 'lucide-react'
+import { EthereumIcon, BaseIcon, ArcIcon, USDCIcon } from './Icons'
+import { ButtonLoading } from './LoadingSystem'
 
 interface BridgeModalProps {
   isOpen: boolean
@@ -49,11 +51,11 @@ export const BridgeModal: React.FC<BridgeModalProps> = ({ isOpen, onClose }) => 
     
     let stepStatus: 'pending' | 'running' | 'success' | 'error' = 'pending'
     
-    if (status === 'error' && currentStep === step) {
+    if ((status as string) === 'error' && currentStep === step) {
       stepStatus = 'error'
-    } else if (status === 'loading' && currentStep === step) {
+    } else if ((status as string) === 'loading' && currentStep === step) {
       stepStatus = 'running'
-    } else if (thisIndex < currentIndex || status === 'success') {
+    } else if (thisIndex < currentIndex || (status as string) === 'success') {
       stepStatus = 'success'
     }
 
@@ -165,7 +167,7 @@ export const BridgeModal: React.FC<BridgeModalProps> = ({ isOpen, onClose }) => 
               {/* Source Chain Selector */}
               <div>
                 <label className="brutalist-label">Select Source Chain</label>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                <div className="grid-2-col">
                   <button
                     onClick={() => setSourceChain('ethereum_sepolia')}
                     className="btn-brutalist"
@@ -181,7 +183,10 @@ export const BridgeModal: React.FC<BridgeModalProps> = ({ isOpen, onClose }) => 
                       boxShadow: sourceChain === 'ethereum_sepolia' ? 'var(--shadow-hover)' : 'none',
                     }}
                   >
-                    <span style={{ fontWeight: 700, fontSize: '13px' }}>Ethereum Sepolia</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <EthereumIcon size={16} />
+                      <span style={{ fontWeight: 700, fontSize: '13px' }}>Ethereum Sepolia</span>
+                    </div>
                     <span style={{ fontSize: '10px', marginTop: '6px', opacity: 0.8 }}>
                       Balance: ${parseFloat(balances.ethereum_sepolia).toFixed(2)} USDC
                     </span>
@@ -202,7 +207,10 @@ export const BridgeModal: React.FC<BridgeModalProps> = ({ isOpen, onClose }) => 
                       boxShadow: sourceChain === 'base_sepolia' ? 'var(--shadow-hover)' : 'none',
                     }}
                   >
-                    <span style={{ fontWeight: 700, fontSize: '13px' }}>Base Sepolia</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <BaseIcon size={16} />
+                      <span style={{ fontWeight: 700, fontSize: '13px' }}>Base Sepolia</span>
+                    </div>
                     <span style={{ fontSize: '10px', marginTop: '6px', opacity: 0.8 }}>
                       Balance: ${parseFloat(balances.base_sepolia).toFixed(2)} USDC
                     </span>
@@ -220,9 +228,12 @@ export const BridgeModal: React.FC<BridgeModalProps> = ({ isOpen, onClose }) => 
                 justifyContent: 'space-between',
                 alignItems: 'center'
               }}>
-                <div>
-                  <span style={{ color: 'var(--text-light)' }}>Destination Blockchain</span>
-                  <div style={{ fontWeight: 700, color: 'var(--text-main)', marginTop: '2px' }}>ARC TESTNET</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <ArcIcon size={24} />
+                  <div>
+                    <span style={{ color: 'var(--text-light)' }}>Destination Blockchain</span>
+                    <div style={{ fontWeight: 700, color: 'var(--text-main)', marginTop: '2px' }}>ARC TESTNET</div>
+                  </div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
                   <span style={{ color: 'var(--text-light)' }}>Bridging Mode</span>
@@ -240,8 +251,11 @@ export const BridgeModal: React.FC<BridgeModalProps> = ({ isOpen, onClose }) => 
                     onChange={(e) => setInputAmount(e.target.value)}
                     className="brutalist-input"
                     placeholder="10.00"
-                    style={{ paddingRight: '60px' }}
+                    style={{ paddingRight: '70px', paddingLeft: '35px' }}
                   />
+                  <div style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }}>
+                    <USDCIcon size={16} />
+                  </div>
                   <span style={{
                     position: 'absolute',
                     right: '16px',
@@ -286,14 +300,16 @@ export const BridgeModal: React.FC<BridgeModalProps> = ({ isOpen, onClose }) => 
                 </div>
               </div>
 
-              <button
+              <ButtonLoading
                 onClick={handleStartBridge}
+                isLoading={status === ('loading' as string)}
+                loadingText="Initiating CCTP Bridge..."
                 disabled={parseFloat(inputAmount) <= 0 || parseFloat(inputAmount) > parseFloat(sourceBalance)}
-                className="btn-brutalist btn-brutalist-pink"
+                variantClass="btn-brutalist btn-brutalist-pink"
                 style={{ width: '100%', padding: '12px', height: '45px', justifyContent: 'center' }}
               >
                 Initiate CCTP Bridge Transfer
-              </button>
+              </ButtonLoading>
             </div>
           ) : (
             // Bridging in progress
@@ -314,7 +330,7 @@ export const BridgeModal: React.FC<BridgeModalProps> = ({ isOpen, onClose }) => 
                 <div style={{ textAlign: 'right' }}>
                   <span style={{ color: 'var(--text-light)' }}>Estimated remaining time</span>
                   <div style={{ fontWeight: 700, color: 'var(--accent-coral)', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'flex-end' }}>
-                    {status === 'success' ? (
+                    {(status as string) === 'success' ? (
                       <span style={{ color: 'var(--accent-green)' }}>Complete</span>
                     ) : (
                       <>
@@ -367,7 +383,7 @@ export const BridgeModal: React.FC<BridgeModalProps> = ({ isOpen, onClose }) => 
                 {renderStepRow('mint', '4. Mint USDC on Arc', 'Claim the USDC to credit your Arc Testnet account.', 'mint', BRIDGE_CHAINS.arc_testnet)}
               </div>
 
-              {status === 'success' && (
+              {(status as string) === 'success' && (
                 <div style={{
                   border: '1px solid var(--accent-green)',
                   backgroundColor: '#f0fdf4',
