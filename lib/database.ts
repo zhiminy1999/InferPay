@@ -327,6 +327,30 @@ async function syncWriteToSupabase(sql: string, args: any[]) {
     } else {
       console.log(`[Database Sync]: Successfully replicated insert in "${table}" to Supabase`)
     }
+  } else if (lower.includes('update')) {
+    const tableMatch = cleanSql.match(/update\s+(\w+)/i)
+    if (!tableMatch) return
+    const table = tableMatch[1].toLowerCase()
+
+    // Extract SET columns, e.g., "SET status = ?, amount = ?"
+    const setMatch = cleanSql.match(/set\s+([^where]+)/i)
+    if (!setMatch) return
+    const setColumns = setMatch[1].split(',').map(c => c.split('=')[0].trim().toLowerCase())
+
+    const updatePayload: any = {}
+    setColumns.forEach((col, idx) => {
+      updatePayload[col] = args[idx]
+    })
+
+    // The last argument is typically the WHERE parameter (id)
+    const id = args[args.length - 1]
+
+    const { error } = await supabase.from(table).update(updatePayload).eq('id', id)
+    if (error) {
+      console.warn(`[Database Sync Update Error for ${table}]:`, error.message)
+    } else {
+      console.log(`[Database Sync]: Successfully replicated update in "${table}" to Supabase`)
+    }
   }
 }
 

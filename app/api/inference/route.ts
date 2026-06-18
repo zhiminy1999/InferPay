@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAddress, verifyTypedData, parseUnits } from 'viem'
 import { VENDOR_ADDRESS } from '@/lib/addresses'
 import { USDC_ADDRESS_ARC } from '@/lib/contracts'
+import { db } from '@/lib/database'
 
 export async function POST(req: NextRequest) {
   try {
@@ -85,28 +86,101 @@ export async function POST(req: NextRequest) {
 
     console.log(`Gateway: Verified real offchain EIP-712 payment signature from ${buyerAddress} for ${price} USDC`)
 
-    // Sample inference answers for different AI models
-    const modelAnswers: Record<string, string[]> = {
-      llm_llama: [
-        "Based on sentiment analysis of USDC flows on Arc, volatility will remain under 1.2% this week.",
-        "Consensus threshold of 2/3 agents met. Allocating treasury swap triggers to EURC balances.",
-        "Smart contracts audits completed. AgentEscrow is secured and certified for deployment."
-      ],
-      vision_gpu: [
-        "Invoice matching detects 100% item matching. Safe to disburse $250 SaaS payout.",
-        "Treasury Optimizer alerts: Yield rates on EURC decreased to 3.8%. Commencing swap back to USDC.",
-        "GPU scaling invoice matches active session log. Approving Smart Bill Pay 90% payout."
-      ],
-      stable_fx: [
-        "Circle StableFX quote fetched: 1.0924 EURC per USDC. Executed trade successfully on-chain.",
-        "Crosschain balance aggregation finalized: $12,450 cumulative treasury USDC identified.",
-        "Treasury reserves rebalanced. Yield optimized and registered."
-      ]
+    const modelId = body?.modelId || 'llm_llama'
+
+    // Write payment to database
+    try {
+      const id = 'pay_nanopayment_' + Date.now()
+      db.prepare(`
+        INSERT INTO payments (id, tx_hash, block_number, timestamp, wallet_address, amount, status, metadata)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `).run(
+        id,
+        signature,
+        0,
+        Math.floor(Date.now() / 1000),
+        buyerAddress,
+        parseFloat(price),
+        'SUCCESS',
+        JSON.stringify({ modelId, source: 'Gateway Nanopayments', nonce })
+      )
+    } catch (dbErr: any) {
+      console.warn('[Database Logging Error]:', dbErr.message)
     }
 
-    const modelId = body?.modelId || 'llm_llama'
-    const answers = modelAnswers[modelId] || modelAnswers.llm_llama
-    const resultText = answers[Math.floor(Math.random() * answers.length)]
+    // Write activity log to database
+    try {
+      const id = 'activity_' + Date.now()
+      db.prepare(`
+        INSERT INTO activity_log (id, tx_hash, block_number, timestamp, wallet_address, amount, status, metadata)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `).run(
+        id,
+        signature,
+        0,
+        Math.floor(Date.now() / 1000),
+        buyerAddress,
+        parseFloat(price),
+        'SUCCESS',
+        JSON.stringify({ action: 'Nanopayment Inference Billed', modelId, price })
+      )
+    } catch (dbErr: any) {
+      console.warn('[Database Logging Error]:', dbErr.message)
+    }
+
+    // Try live AI inference execution if API key is present
+    let resultText = ''
+    const apiKey = process.env.DEEPSEEK_API_KEY || ''
+    if (apiKey) {
+      try {
+        const { default: OpenAI } = await import('openai')
+        const openai = new OpenAI({
+          baseURL: 'https://api.deepseek.com',
+          apiKey
+        })
+        let systemPrompt = "You are the Llama 3.1 8B Sentiment Analysis model. Respond with a concise one-sentence prediction/analysis of USDC stablecoin stability, volatility, or rates on Arc Testnet."
+        if (modelId === 'vision_gpu') {
+          systemPrompt = "You are the NVIDIA GPU Vision Payout Matcher model. Respond with a concise one-sentence invoice matching/verification success confirmation."
+        } else if (modelId === 'stable_fx') {
+          systemPrompt = "You are the Circle StableFX FX Quote Tracker model. Respond with a concise one-sentence currency swap quote analysis."
+        }
+
+        const response = await openai.chat.completions.create({
+          model: 'deepseek-chat',
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: 'Execute live model inference.' }
+          ]
+        })
+        resultText = response.choices[0]?.message?.content || 'Inference executed.'
+      } catch (liveErr) {
+        console.warn('[Live Inference API Error]: falling back to offline answers:', liveErr)
+      }
+    }
+
+    if (!resultText) {
+      // Sample inference answers for different AI models
+      const modelAnswers: Record<string, string[]> = {
+        llm_llama: [
+          "Based on sentiment analysis of USDC flows on Arc, volatility will remain under 1.2% this week.",
+          "Consensus threshold of 2/3 agents met. Allocating treasury swap triggers to EURC balances.",
+          "Smart contracts audits completed. AgentEscrow is secured and certified for deployment."
+        ],
+        vision_gpu: [
+          "Invoice matching detects 100% item matching. Safe to disburse $250 SaaS payout.",
+          "Treasury Optimizer alerts: Yield rates on EURC decreased to 3.8%. Commencing swap back to USDC.",
+          "GPU scaling invoice matches active session log. Approving Smart Bill Pay 90% payout."
+        ],
+        stable_fx: [
+          "Circle StableFX quote fetched: 1.0924 EURC per USDC. Executed trade successfully on-chain.",
+          "Crosschain balance aggregation finalized: $12,450 cumulative treasury USDC identified.",
+          "Treasury reserves rebalanced. Yield optimized and registered."
+        ]
+      }
+
+      const answers = modelAnswers[modelId] || modelAnswers.llm_llama
+      resultText = answers[Math.floor(Math.random() * answers.length)]
+    }
 
     // Return resource and PAYMENT-RESPONSE header confirming success
     const response = NextResponse.json({
