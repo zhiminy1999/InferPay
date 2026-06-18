@@ -760,6 +760,7 @@ export default function LandingPage() {
           {/* Links 3 */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <span style={{ fontWeight: 700, color: 'var(--text-main)', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Legal</span>
+            <Link href="/security" style={{ textDecoration: 'none', color: 'inherit', fontWeight: 600 }}>🛡️ Security Hub</Link>
             <Link href="/privacy" style={{ textDecoration: 'none', color: 'inherit' }}>Privacy Policy</Link>
             <Link href="/terms" style={{ textDecoration: 'none', color: 'inherit' }}>Terms of Service</Link>
           </div>
