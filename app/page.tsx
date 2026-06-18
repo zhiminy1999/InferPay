@@ -124,8 +124,7 @@ export default function LandingPage() {
       minHeight: '100vh', 
       color: 'var(--text-main)',
       fontFamily: 'var(--font-sans)',
-      position: 'relative',
-      overflowX: 'hidden'
+      position: 'relative'
     }}>
       {/* Dynamic Grid Overlay */}
       <div style={{
@@ -262,7 +261,7 @@ export default function LandingPage() {
       )}
 
       {/* Main Content */}
-      <main style={{ position: 'relative', zIndex: 1 }}>
+      <main style={{ position: 'relative', zIndex: 1, overflowX: 'hidden' }}>
         
         {/* HERO SECTION */}
         <section style={{
