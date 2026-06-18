@@ -97,15 +97,35 @@ export default function InferPayDashboard() {
 
   // --- Feature A: Faucet for stablecoins ---
   const handleFaucet = async () => {
-    if (isConnected) {
-      // Show official Circle Faucet Guide Modal for real on-chain assets
-      setShowFaucetModal(true)
-      addActivity('Getting test funds', 'Opening the official faucet so you can add test money to your account.', '💧', 'info')
+    setIsFaucetLoading(true)
+    if (isConnected && address) {
+      addActivity('Requesting faucet funds', 'Transferring 10 USDC & 10 EURC on Arc Testnet...', '💧', 'info')
+      try {
+        const res = await fetch('/api/faucet', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ targetAddress: address }),
+        })
+        const data = await res.json()
+        if (res.ok && data.success) {
+          addActivity('Faucet funded', 'Received 10 USDC & 10 EURC on Arc Testnet!', '🎉', 'success')
+          
+          // Fetch new balances
+          if (setUsdcBalance && setEurcBalance) {
+            setUsdcBalance((Number(usdcBalance) + 10).toFixed(2))
+            setEurcBalance((Number(eurcBalance) + 10).toFixed(2))
+          }
+        } else {
+          throw new Error(data.error || 'Faucet request failed')
+        }
+      } catch (err: any) {
+        addActivity('Faucet failed', err.message || 'Could not fund wallet.', '❌', 'danger')
+      } finally {
+        setIsFaucetLoading(false)
+      }
     } else {
       // Demo Mode: Mint simulated assets and persist in localStorage
-      setIsFaucetLoading(true)
       addActivity('Adding demo funds', 'Depositing $1,000 USD & €1,000 EUR into your demo account.', '💧', 'info')
-      
       try {
         await new Promise(resolve => setTimeout(resolve, 1000))
         const newUsdc = (Number(usdcBalance) + 1000).toFixed(2)

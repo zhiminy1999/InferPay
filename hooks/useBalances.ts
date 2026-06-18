@@ -18,6 +18,22 @@ export function useBalances({ isConnected, address, publicClient, addActivity }:
   // Fetch real on-chain balances when wallet connects
   // No localStorage simulation — only real Arc Testnet data
 
+  // Load simulated balances for Demo Mode
+  useEffect(() => {
+    if (!isConnected) {
+      const storedUsdc = localStorage.getItem('inferpay_sim_usdc') || '1000.00'
+      const storedEurc = localStorage.getItem('inferpay_sim_eurc') || '1000.00'
+      setUsdcBalance(storedUsdc)
+      setEurcBalance(storedEurc)
+      if (!localStorage.getItem('inferpay_sim_usdc')) {
+        localStorage.setItem('inferpay_sim_usdc', '1000.00')
+      }
+      if (!localStorage.getItem('inferpay_sim_eurc')) {
+        localStorage.setItem('inferpay_sim_eurc', '1000.00')
+      }
+    }
+  }, [isConnected])
+
   // Get On-chain Real Balances when connected
   useEffect(() => {
     const getOnChainBalances = async () => {

@@ -7,6 +7,7 @@ import { createWalletClient, http } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { arcTestnet } from 'viem/chains'
 import { AGENT_REGISTRY_ADDRESS, agentRegistryAbi } from '@/lib/agent-registry'
+import { AGENT_CONSENSUS_ADDRESS, agentConsensusAbi } from '@/lib/contracts'
 
 interface ApprovalCommitteeProps {
   isConnected: boolean
@@ -230,25 +231,8 @@ export function ApprovalCommittee({
         while (true) {
           try {
             await publicClient.readContract({
-              address: '0xDD4861565Fb8aCa5BB2Ce43032e614De888584b7',
-              abi: [
-                {
-                  "inputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-                  "name": "proposals",
-                  "outputs": [
-                    { "internalType": "uint256", "name": "id", "type": "uint256" },
-                    { "internalType": "address payable", "name": "recipient", "type": "address" },
-                    { "internalType": "uint256", "name": "amount", "type": "uint256" },
-                    { "internalType": "string", "name": "purpose", "type": "string" },
-                    { "internalType": "uint256", "name": "approvalsCount", "type": "uint256" },
-                    { "internalType": "bool", "name": "executed", "type": "bool" },
-                    { "internalType": "bool", "name": "rejected", "type": "bool" },
-                    { "internalType": "uint256", "name": "creationTime", "type": "uint256" }
-                  ],
-                  "stateMutability": "view",
-                  "type": "function"
-                }
-              ],
+              address: AGENT_CONSENSUS_ADDRESS,
+              abi: agentConsensusAbi,
               functionName: 'proposals',
               args: [BigInt(nextId)]
             })
