@@ -46,7 +46,7 @@ export function Sidebar({ activeTab, setActiveTab, mobileOpen = false, onCloseMo
         >
           <div className="sidebar-icon-wrap" style={{ color: 'var(--accent-coral)' }}>
             <Cpu size={15} />
-            <span>0. AI Agent Workspace</span>
+            <span>AI Agent Workspace</span>
           </div>
         </div>
 
@@ -56,7 +56,7 @@ export function Sidebar({ activeTab, setActiveTab, mobileOpen = false, onCloseMo
         >
           <div className="sidebar-icon-wrap">
             <Lock size={15} />
-            <span>1. AI Spending Budget</span>
+            <span>AI Spending Budget</span>
           </div>
         </div>
 
@@ -66,7 +66,7 @@ export function Sidebar({ activeTab, setActiveTab, mobileOpen = false, onCloseMo
         >
           <div className="sidebar-icon-wrap">
             <ArrowRightLeft size={15} />
-            <span>2. Smart Bill Pay</span>
+            <span>Smart Bill Pay</span>
           </div>
         </div>
 
@@ -76,7 +76,7 @@ export function Sidebar({ activeTab, setActiveTab, mobileOpen = false, onCloseMo
         >
           <div className="sidebar-icon-wrap">
             <Coins size={15} />
-            <span>3. Savings Optimizer</span>
+            <span>Savings Optimizer</span>
           </div>
         </div>
 
@@ -86,7 +86,7 @@ export function Sidebar({ activeTab, setActiveTab, mobileOpen = false, onCloseMo
         >
           <div className="sidebar-icon-wrap">
             <FileText size={15} />
-            <span>4. Review & Pay AI Work</span>
+            <span>Review & Pay AI Work</span>
           </div>
         </div>
 
@@ -96,7 +96,7 @@ export function Sidebar({ activeTab, setActiveTab, mobileOpen = false, onCloseMo
         >
           <div className="sidebar-icon-wrap">
             <Shield size={15} />
-            <span>5. Approval Committee</span>
+            <span>Approval Committee</span>
           </div>
         </div>
 
@@ -106,7 +106,7 @@ export function Sidebar({ activeTab, setActiveTab, mobileOpen = false, onCloseMo
         >
           <div className="sidebar-icon-wrap">
             <Users size={15} />
-            <span>6. Agent Directory</span>
+            <span>Agent Directory</span>
           </div>
         </div>
 
@@ -116,7 +116,7 @@ export function Sidebar({ activeTab, setActiveTab, mobileOpen = false, onCloseMo
         >
           <div className="sidebar-icon-wrap">
             <Briefcase size={15} />
-            <span>7. Autonomous Jobs</span>
+            <span>Autonomous Jobs</span>
           </div>
         </div>
 
@@ -126,7 +126,7 @@ export function Sidebar({ activeTab, setActiveTab, mobileOpen = false, onCloseMo
         >
           <div className="sidebar-icon-wrap">
             <Zap size={15} />
-            <span>8. Gateway Nanopayments</span>
+            <span>Gateway Nanopayments</span>
           </div>
         </div>
 
@@ -136,7 +136,7 @@ export function Sidebar({ activeTab, setActiveTab, mobileOpen = false, onCloseMo
         >
           <div className="sidebar-icon-wrap">
             <Sparkles size={15} style={{ color: 'var(--accent-pink)' }} />
-            <span>9. Agent Marketplace</span>
+            <span>Agent Marketplace</span>
           </div>
         </div>
 
@@ -146,7 +146,7 @@ export function Sidebar({ activeTab, setActiveTab, mobileOpen = false, onCloseMo
         >
           <div className="sidebar-icon-wrap">
             <Coins size={15} style={{ color: 'var(--accent-green)' }} />
-            <span>10. Treasury Analytics</span>
+            <span>Treasury Analytics</span>
           </div>
         </div>
 
@@ -156,7 +156,7 @@ export function Sidebar({ activeTab, setActiveTab, mobileOpen = false, onCloseMo
         >
           <div className="sidebar-icon-wrap text-accent-pink font-bold">
             <History size={15} />
-            <span>11. Transaction Audit Trail</span>
+            <span>Transaction Audit Trail</span>
           </div>
         </div>
       </div>

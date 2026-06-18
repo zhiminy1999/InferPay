@@ -1,67 +1,109 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getAddress } from 'viem'
+import { agentExecutor } from '../../../src/workflows/swarm-graph'
+import { HumanMessage } from '@langchain/core/messages'
+import { db } from '../../../lib/database'
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
     const { task, capability, userAddress } = body
 
-    if (!task || !userAddress) {
-      return NextResponse.json({ error: 'Missing task or userAddress parameters' }, { status: 400 })
+    if (!task && !capability) {
+      return NextResponse.json({ error: 'Missing task or capability parameters' }, { status: 400 })
     }
 
-    console.log(`[Swarm Coordinator]: Executing task "${task}" for user ${userAddress}`)
+    const targetTask = task || `Gather and verify research reports matching capability: ${capability || 'coding'}`
+    const walletAddress = userAddress || '0x7a304A671e21b79528659dC0D775e53FE233b2B0'
 
-    // Formulate search query based on capability
-    let query = 'USDC'
-    if (task.toLowerCase().includes('eurc') || task.toLowerCase().includes('euro')) {
-      query = 'EURC'
-    } else if (task.toLowerCase().includes('cctp') || task.toLowerCase().includes('bridge')) {
-      query = 'CCTP'
-    } else if (task.toLowerCase().includes('permit2') || task.toLowerCase().includes('signature')) {
-      query = 'Permit2'
-    } else if (task.toLowerCase().includes('agent')) {
-      query = 'Agent'
+    console.log(`[LangGraph Swarm Coordinator]: Executing task "${targetTask}" for user ${walletAddress}`)
+
+    const targetThreadId = 'session_' + Date.now()
+
+    // Invoke stateful LangGraph agent
+    const result = await agentExecutor.invoke(
+      {
+        messages: [new HumanMessage(targetTask)],
+        walletAddress: walletAddress,
+        status: 'pending'
+      },
+      {
+        configurable: {
+          thread_id: targetThreadId
+        }
+      }
+    )
+
+    // Save activity logs to database
+    try {
+      const logId = 'log_' + Date.now()
+      db.prepare(`
+        INSERT INTO activity_log (id, tx_hash, block_number, timestamp, wallet_address, amount, status, metadata)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `).run(
+        logId,
+        '0x' + Array.from({ length: 32 }, () => Math.floor(Math.random() * 256).toString(16).padStart(2, '0')).join(''),
+        0,
+        Math.floor(Date.now() / 1000),
+        walletAddress,
+        0,
+        'COMPLETED',
+        JSON.stringify({
+          task: targetTask,
+          threadId: targetThreadId,
+          steps: result.plannerSteps
+        })
+      )
+    } catch (dbErr: any) {
+      console.warn('[Database Logging Error]:', dbErr.message)
     }
 
-    // Step-by-step trace simulation to return to frontend for live visualization
-    const steps = [
-      {
-        id: 'step-1',
-        agent: 'Coordinator Agent',
+    // Format steps tracing output for the client visualization interface
+    const steps = result.plannerSteps.map((stepName: string, index: number) => {
+      let agent = 'Tool Execution Agent'
+      let message = `Executed task tool: "${stepName}".`
+      
+      if (stepName === 'query_balance') {
+        agent = 'Balance Inquirer Agent'
+        message = 'Queried live wallet and escrow stablecoin balances.'
+      } else if (stepName === 'swap_tokens') {
+        agent = 'Trading Swarm Agent'
+        message = 'Executed stablecoin token exchange on StableFX.'
+      } else if (stepName === 'bridge_cctp') {
+        agent = 'Bridge Operator Agent'
+        message = 'Triggered cross-chain CCTP stablecoin transfer.'
+      } else if (stepName === 'record_payment') {
+        agent = 'Ledger Auditor Agent'
+        message = 'Recorded transaction logs to the database tables.'
+      }
+
+      return {
+        id: `step-${index + 1}`,
+        agent,
         status: 'completed',
-        message: `Analyzing user task: "${task}". Dispatching sub-task to Research Agent with target keyword: "${query}".`,
-        timestamp: new Date().toLocaleTimeString()
-      },
-      {
-        id: 'step-2',
-        agent: 'Research Agent',
-        status: 'completed',
-        message: `Hiring Search Service via x402 Protocol. Generating payment request header for "/api/search".`,
-        timestamp: new Date().toLocaleTimeString()
-      },
-      {
-        id: 'step-3',
-        agent: 'Search Service',
-        status: 'completed',
-        message: `HTTP 402 Challenge resolved. Cryptographic signature verified. Billed 0.002 USDC from Gateway.`,
-        timestamp: new Date().toLocaleTimeString()
-      },
-      {
-        id: 'step-4',
-        agent: 'Translation Agent',
-        status: 'completed',
-        message: `Translating raw search snippets into clean documentation. Billed 0.001 USDC.`,
-        timestamp: new Date().toLocaleTimeString()
-      },
-      {
-        id: 'step-5',
-        agent: 'Verifier Agent',
-        status: 'completed',
-        message: `Performing ERC-8004 identity matching. Task completed safely under policy guidelines.`,
+        message,
         timestamp: new Date().toLocaleTimeString()
       }
-    ]
+    })
+
+    // Add Coordinator Agent initial planning step
+    steps.unshift({
+      id: 'step-0',
+      agent: 'Coordinator Agent v2',
+      status: 'completed',
+      message: `Analyzing task "${targetTask}" with stateful LangGraph. Generated execution graph: [${result.plannerSteps.join(' -> ')}].`,
+      timestamp: new Date().toLocaleTimeString()
+    })
+
+    let query = 'USDC'
+    if (targetTask.toLowerCase().includes('eurc') || targetTask.toLowerCase().includes('euro')) {
+      query = 'EURC'
+    } else if (targetTask.toLowerCase().includes('cctp') || targetTask.toLowerCase().includes('bridge')) {
+      query = 'CCTP'
+    } else if (targetTask.toLowerCase().includes('permit2') || targetTask.toLowerCase().includes('signature')) {
+      query = 'Permit2'
+    } else if (targetTask.toLowerCase().includes('agent')) {
+      query = 'Agent'
+    }
 
     return NextResponse.json({
       success: true,

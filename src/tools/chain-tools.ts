@@ -1,7 +1,7 @@
 import { tool } from '@langchain/core/tools'
 import { z } from 'zod'
 import { db } from '../../lib/database'
-import { USDC_ADDRESS_ARC, erc20Abi } from '../../lib/contracts'
+import { USDC_ADDRESS_ARC, EURC_ADDRESS_ARC, erc20Abi } from '../../lib/contracts'
 import { createPublicClient, http, formatUnits, parseUnits, getAddress } from 'viem'
 
 // Initialize the Viem public client for on-chain queries on Arc Testnet
@@ -18,33 +18,21 @@ export const queryBalanceTool = tool(
       let decimals = 6
 
       if (token && token.toLowerCase() === 'eurc') {
-        // EURC address on Arc Testnet (mock or real)
-        const EURC_ADDRESS = '0x2774C37cf66C6366666cE008c2334F3333333333'
-        try {
-          const res = await publicClient.readContract({
-            address: EURC_ADDRESS as `0x${string}`,
-            abi: erc20Abi,
-            functionName: 'balanceOf',
-            args: [address]
-          })
-          balanceBigInt = BigInt(res)
-        } catch {
-          // Fallback mockup
-          balanceBigInt = parseUnits('120.5', 6)
-        }
+        const res = await publicClient.readContract({
+          address: EURC_ADDRESS_ARC as `0x${string}`,
+          abi: erc20Abi,
+          functionName: 'balanceOf',
+          args: [address]
+        })
+        balanceBigInt = BigInt(res)
       } else {
-        // USDC on Arc Testnet
-        try {
-          const res = await publicClient.readContract({
-            address: USDC_ADDRESS_ARC as `0x${string}`,
-            abi: erc20Abi,
-            functionName: 'balanceOf',
-            args: [address]
-          })
-          balanceBigInt = BigInt(res)
-        } catch {
-          balanceBigInt = parseUnits('420.5', 6)
-        }
+        const res = await publicClient.readContract({
+          address: USDC_ADDRESS_ARC as `0x${string}`,
+          abi: erc20Abi,
+          functionName: 'balanceOf',
+          args: [address]
+        })
+        balanceBigInt = BigInt(res)
       }
 
       const formatted = formatUnits(balanceBigInt, decimals)
