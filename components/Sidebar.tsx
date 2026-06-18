@@ -1,11 +1,11 @@
 'use client'
 
 import React from 'react'
-import { Lock, ArrowRightLeft, Coins, FileText, Shield, Zap, Users, Briefcase, History, Sparkles, X } from 'lucide-react'
+import { Lock, ArrowRightLeft, Coins, FileText, Shield, Zap, Users, Briefcase, History, Sparkles, X, Cpu } from 'lucide-react'
 
 interface SidebarProps {
-  activeTab: 'escrow' | 'intent' | 'yield' | 'payroll' | 'consensus' | 'directory' | 'jobs' | 'nanopayments' | 'marketplace' | 'analytics' | 'history'
-  setActiveTab: (tab: 'escrow' | 'intent' | 'yield' | 'payroll' | 'consensus' | 'directory' | 'jobs' | 'nanopayments' | 'marketplace' | 'analytics' | 'history') => void
+  activeTab: 'agents' | 'escrow' | 'intent' | 'yield' | 'payroll' | 'consensus' | 'directory' | 'jobs' | 'nanopayments' | 'marketplace' | 'analytics' | 'history'
+  setActiveTab: (tab: 'agents' | 'escrow' | 'intent' | 'yield' | 'payroll' | 'consensus' | 'directory' | 'jobs' | 'nanopayments' | 'marketplace' | 'analytics' | 'history') => void
   mobileOpen?: boolean
   onCloseMobile?: () => void
 }
@@ -40,6 +40,16 @@ export function Sidebar({ activeTab, setActiveTab, mobileOpen = false, onCloseMo
       <div className="sidebar-section">
         <div className="sidebar-label">Your Tools</div>
         
+        <div 
+          className={`sidebar-menu-item ${activeTab === 'agents' ? 'active' : ''}`}
+          onClick={() => handleItemClick('agents')}
+        >
+          <div className="sidebar-icon-wrap" style={{ color: 'var(--accent-coral)' }}>
+            <Cpu size={15} />
+            <span>0. AI Agent Workspace</span>
+          </div>
+        </div>
+
         <div 
           className={`sidebar-menu-item ${activeTab === 'escrow' ? 'active' : ''}`}
           onClick={() => handleItemClick('escrow')}

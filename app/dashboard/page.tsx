@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Lock, ArrowRightLeft, Coins, FileText, Shield, Briefcase, Users, History, Zap } from 'lucide-react'
+import { Lock, ArrowRightLeft, Coins, FileText, Shield, Briefcase, Users, History, Zap, Cpu } from 'lucide-react'
 import { useWeb3 } from '@/lib/web3-provider'
 import { useActivityFeed } from '@/hooks/useActivityFeed'
 import { useBalances } from '@/hooks/useBalances'
@@ -27,6 +27,7 @@ import { UnifiedBalance } from '@/components/UnifiedBalance'
 import { TransactionHistory } from '@/components/TransactionHistory'
 import Marketplace from '@/components/Marketplace'
 import AnalyticsDashboard from '@/components/AnalyticsDashboard'
+import AgentWorkspace from '@/components/AgentWorkspace'
 
 export default function InferPayDashboard() {
   const {
@@ -41,7 +42,7 @@ export default function InferPayDashboard() {
   } = useWeb3()
 
   // Tab views
-  const [activeTab, setActiveTab] = useState<'escrow' | 'intent' | 'yield' | 'payroll' | 'consensus' | 'directory' | 'jobs' | 'nanopayments' | 'marketplace' | 'analytics' | 'history'>('escrow')
+  const [activeTab, setActiveTab] = useState<'agents' | 'escrow' | 'intent' | 'yield' | 'payroll' | 'consensus' | 'directory' | 'jobs' | 'nanopayments' | 'marketplace' | 'analytics' | 'history'>('agents')
   
   // Faucet, Auth, and Bridge modal states
   const [showFaucetModal, setShowFaucetModal] = useState<boolean>(false)
@@ -171,6 +172,7 @@ export default function InferPayDashboard() {
         <main className="app-content">
           <div className="content-header">
             <div className="content-title">
+              {activeTab === 'agents' && <><Cpu size={17} /><span>Stateful Multi-Agent <i>Autonomous Workspace</i></span></>}
               {activeTab === 'escrow' && <><Lock size={17} /><span>Set a <i>Spending Budget</i> for Your AI</span></>}
               {activeTab === 'intent' && <><ArrowRightLeft size={17} /><span>Incoming Bills — <i>Auto-Pay & Save</i></span></>}
               {activeTab === 'yield' && <><Coins size={17} /><span>Grow Your <i>Idle Cash</i> Automatically</span></>}
@@ -188,6 +190,10 @@ export default function InferPayDashboard() {
 
           <div className="content-body" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             {isConnected && <UnifiedBalance />}
+
+            {activeTab === 'agents' && (
+              <AgentWorkspace />
+            )}
 
             {activeTab === 'escrow' && (
               <SpendingBudget
