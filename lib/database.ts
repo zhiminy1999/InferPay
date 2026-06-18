@@ -1,7 +1,32 @@
 import fs from 'fs'
 import path from 'path'
+import { createClient } from '@supabase/supabase-js'
 
-// Fallback Database implementation in case better-sqlite3 fails to install/compile on Windows
+// -------------------------------------------------------------
+// Supabase Cloud Sync Configuration
+// -------------------------------------------------------------
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+
+let supabase: any = null
+if (supabaseUrl && supabaseKey) {
+  try {
+    supabase = createClient(supabaseUrl, supabaseKey, {
+      auth: {
+        persistSession: false
+      }
+    })
+    console.log('[Database]: Supabase client connected successfully to:', supabaseUrl)
+  } catch (err) {
+    console.warn('[Database]: Failed to initialize Supabase client:', err)
+  }
+} else {
+  console.warn('[Database]: Supabase credentials missing from environment. Operating in local-only mode.')
+}
+
+// -------------------------------------------------------------
+// Fallback Database implementation (JSON)
+// -------------------------------------------------------------
 class FallbackDB {
   private filepath: string
   private data: any
@@ -43,8 +68,6 @@ class FallbackDB {
 
   prepare(sql: string) {
     const self = this
-    
-    // Parse placeholders
     const cleanSql = sql.replace(/\s+/g, ' ').trim()
     
     return {
@@ -56,7 +79,6 @@ class FallbackDB {
             const table = tableMatch[1].toLowerCase()
             const list = self.data[table]
             if (list) {
-              // Extract columns
               const colPart = cleanSql.match(/\(([^)]+)\)\s*values/i)
               if (colPart) {
                 const cols = colPart[1].split(',').map(c => c.trim())
@@ -64,7 +86,6 @@ class FallbackDB {
                 cols.forEach((col, idx) => {
                   row[col] = args[idx]
                 })
-                // Ensure ID
                 if (!row.id) {
                   row.id = Date.now().toString() + Math.floor(Math.random() * 1000).toString()
                 }
@@ -74,7 +95,6 @@ class FallbackDB {
             }
           }
         } else if (lower.includes('update')) {
-          // MOCK update
           const tableMatch = cleanSql.match(/update\s+(\w+)/i)
           if (tableMatch) {
             const table = tableMatch[1].toLowerCase()
@@ -98,8 +118,6 @@ class FallbackDB {
         if (tableMatch) {
           const table = tableMatch[1].toLowerCase()
           let list = self.data[table] || []
-          
-          // Simple mock filter logic
           if (cleanSql.includes('where wallet_address =')) {
             const addr = args[0]
             list = list.filter((x: any) => x.wallet_address === addr)
@@ -116,19 +134,21 @@ class FallbackDB {
   }
 }
 
-let db: any
+// -------------------------------------------------------------
+// Database Instance Initialization (better-sqlite3 / FallbackDB)
+// -------------------------------------------------------------
+let localDb: any
 
 try {
-  // We use require instead of import to load dynamically and support the runtime fallback
   const Database = require('better-sqlite3')
   const dir = path.join(process.cwd(), 'data')
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true })
   }
-  db = new Database(path.join(dir, 'inferpay.db'))
+  localDb = new Database(path.join(dir, 'inferpay.db'))
   
   // Create tables using SQLite schema
-  db.exec(`
+  localDb.exec(`
     CREATE TABLE IF NOT EXISTS sessions (
       id TEXT PRIMARY KEY,
       tx_hash TEXT,
@@ -218,7 +238,140 @@ try {
   `)
 } catch (e) {
   console.warn('Native better-sqlite3 not available, falling back to JSON persistence:', e)
-  db = new FallbackDB()
+  localDb = new FallbackDB()
 }
 
+// -------------------------------------------------------------
+// Supabase Syncing Logic
+// -------------------------------------------------------------
+async function syncFromSupabase() {
+  if (!supabase) return
+  console.log('[Database Sync]: Pulling cloud backups from Supabase...')
+  const tables = ['sessions', 'proposals', 'jobs', 'payments', 'swaps', 'bridges', 'activity_log', 'services']
+
+  for (const table of tables) {
+    try {
+      const { data, error } = await supabase.from(table).select('*')
+      if (error) {
+        console.warn(`[Database Sync]: Failed to pull table "${table}" from Supabase:`, error.message)
+        continue
+      }
+      if (data && data.length > 0) {
+        let syncedCount = 0
+        for (const row of data) {
+          // Check if record exists locally
+          const exists = localDb.prepare(`SELECT id FROM ${table} WHERE id = ?`).get(row.id)
+          if (!exists) {
+            const columns = Object.keys(row)
+            const placeholders = columns.map(() => '?').join(', ')
+            const values = columns.map(col => {
+              const val = row[col]
+              return typeof val === 'object' && val !== null ? JSON.stringify(val) : val
+            })
+            localDb.prepare(`
+              INSERT INTO ${table} (${columns.join(', ')})
+              VALUES (${placeholders})
+            `).run(...values)
+            syncedCount++
+          }
+        }
+        if (syncedCount > 0) {
+          console.log(`[Database Sync]: Restored ${syncedCount} rows for table "${table}" from Supabase cache`)
+        }
+      }
+    } catch (err: any) {
+      console.warn(`[Database Sync]: Sync failure on table "${table}":`, err.message)
+    }
+  }
+  console.log('[Database Sync]: Local caches are up to date with Supabase cloud!')
+}
+
+async function syncWriteToSupabase(sql: string, args: any[]) {
+  const cleanSql = sql.replace(/\s+/g, ' ').trim()
+  const lower = cleanSql.toLowerCase()
+
+  if (lower.includes('insert into')) {
+    const tableMatch = cleanSql.match(/insert into\s+(\w+)/i)
+    if (!tableMatch) return
+    const table = tableMatch[1].toLowerCase()
+
+    const colPart = cleanSql.match(/\(([^)]+)\)\s*values/i)
+    if (!colPart) return
+    const cols = colPart[1].split(',').map(c => c.trim())
+
+    const row: any = {}
+    cols.forEach((col, idx) => {
+      row[col] = args[idx]
+    })
+
+    if (!row.id) {
+      row.id = Date.now().toString() + Math.floor(Math.random() * 1000).toString()
+    }
+
+    const { error } = await supabase.from(table).upsert([row])
+    if (error) {
+      console.warn(`[Database Sync Write Error for ${table}]:`, error.message)
+    } else {
+      console.log(`[Database Sync]: Successfully replicated insert in "${table}" to Supabase`)
+    }
+  }
+}
+
+// Trigger background startup pull sync
+syncFromSupabase().catch(err => {
+  console.error('[Database Sync]: Async sync failed:', err)
+})
+
+// -------------------------------------------------------------
+// Statement and Database Wrappers
+// -------------------------------------------------------------
+class StatementWrapper {
+  private stmt: any
+  private sql: string
+
+  constructor(stmt: any, sql: string) {
+    this.stmt = stmt
+    this.sql = sql
+  }
+
+  run(...args: any[]) {
+    // 1. Write locally
+    const result = this.stmt.run(...args)
+
+    // 2. Sync asynchronously to Supabase
+    if (supabase) {
+      syncWriteToSupabase(this.sql, args).catch((err: any) => {
+        console.warn('[Supabase Sync Error]:', err.message)
+      })
+    }
+
+    return result
+  }
+
+  all(...args: any[]) {
+    return this.stmt.all(...args)
+  }
+
+  get(...args: any[]) {
+    if (this.stmt.get) {
+      return this.stmt.get(...args)
+    }
+    const rows = this.stmt.all(...args)
+    return rows.length > 0 ? rows[0] : undefined
+  }
+}
+
+class DatabaseWrapper {
+  prepare(sql: string) {
+    const cleanSql = sql.replace(/\s+/g, ' ').trim()
+    const stmt = localDb.prepare(cleanSql)
+    return new StatementWrapper(stmt, cleanSql)
+  }
+
+  exec(sql: string) {
+    return localDb.exec(sql)
+  }
+}
+
+const db = new DatabaseWrapper()
 export { db }
