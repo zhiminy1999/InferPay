@@ -17,7 +17,8 @@ import {
   CheckCircle2,
   Menu,
   X,
-  Play
+  Play,
+  Cpu
 } from 'lucide-react'
 
 export default function LandingPage() {
@@ -25,6 +26,73 @@ export default function LandingPage() {
   const [waitlistStatus, setWaitlistStatus] = useState<'idle' | 'loading' | 'success'>('idle')
   const [activeFeatureTab, setActiveFeatureTab] = useState<'escrow' | 'intent' | 'yield' | 'nanopay'>('escrow')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
+  // Interactive Simulator States
+  const [simState, setSimState] = useState<'idle' | 'executing'>('idle')
+  const [simAction, setSimAction] = useState<'swap' | 'invoice' | null>(null)
+  const [simLogs, setSimLogs] = useState<string[]>([
+    'SYSTEM: InferPay Agent Node v1.0.4 initialized.',
+    'NETWORK: Connected to Arc Testnet. Gas settings locked.',
+    'POLICY: Operational AI Vault active. Standing by for instructions...'
+  ])
+  const [simBalance, setSimBalance] = useState(12450.80)
+
+  const runSimSwap = () => {
+    if (simState === 'executing') return
+    setSimState('executing')
+    setSimAction('swap')
+    setSimLogs(['[0.0s] 🛰️ Initiating atomic treasury auto-swap...'])
+    
+    const steps = [
+      { time: 400, log: '[0.4s] 🔑 Checking Permit2 spending allowance: 500 USDC limit...' },
+      { time: 800, log: '[0.8s] 📝 Constructing signature verification request...' },
+      { time: 1200, log: '[1.2s] ⛓️ Submitting swap execution to Arc Testnet...' },
+      { time: 1600, log: '[1.6s] 🔄 Swapping 150.00 USDC to 139.50 EURC (Rate: 0.9300)' },
+      { time: 2000, log: '[2.0s] 🏁 Atomic settlement complete! Block #849104' },
+      { time: 2400, log: 'POLICY: Operational AI Vault standing by.' }
+    ]
+
+    steps.forEach((step, idx) => {
+      setTimeout(() => {
+        setSimLogs(prev => [...prev, step.log])
+        if (idx === 4) {
+          setSimBalance(prev => prev - 150.00)
+        }
+        if (idx === steps.length - 1) {
+          setSimState('idle')
+          setSimAction(null)
+        }
+      }, step.time)
+    })
+  }
+
+  const runSimInvoice = () => {
+    if (simState === 'executing') return
+    setSimState('executing')
+    setSimAction('invoice')
+    setSimLogs(['[0.0s] 📥 Triaging agent billing invoice #841...'])
+
+    const steps = [
+      { time: 400, log: '[0.4s] 🛡️ Checking AgentRegistry ERC-8004 capabilities & reputation score: 98/100...' },
+      { time: 800, log: '[0.8s] 💸 Verifying daily spending limits... Approved (120 USDC < 500 USDC limit).' },
+      { time: 1200, log: '[1.2s] ⚡ Dispensing atomic payout on Arc chain...' },
+      { time: 1600, log: '[1.6s] 🔒 Payment dispatched to agent 0x9f12...3e4f. Transaction hash logged.' },
+      { time: 2000, log: 'POLICY: Operational AI Vault standing by.' }
+    ]
+
+    steps.forEach((step, idx) => {
+      setTimeout(() => {
+        setSimLogs(prev => [...prev, step.log])
+        if (idx === 3) {
+          setSimBalance(prev => prev - 120.00)
+        }
+        if (idx === steps.length - 1) {
+          setSimState('idle')
+          setSimAction(null)
+        }
+      }, step.time)
+    })
+  }
 
   const handleJoinWaitlist = (e: React.FormEvent) => {
     e.preventDefault()
@@ -290,126 +358,217 @@ export default function LandingPage() {
             backgroundColor: 'var(--bg-card)',
             padding: 0,
             overflow: 'hidden',
-            boxShadow: 'var(--shadow-soft)'
+            boxShadow: 'var(--shadow-soft)',
+            borderWidth: '2px'
           }}>
-            {/* Window bar */}
+            {/* Terminal Top Ribbon (No browser dots, no url bar) */}
             <div style={{
               backgroundColor: 'var(--bg-inner)',
-              borderBottom: '1px solid var(--border)',
+              borderBottom: '2px solid var(--border)',
               padding: '12px 20px',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'space-between'
+              justifyContent: 'space-between',
+              fontFamily: 'monospace',
+              fontSize: '11.5px',
+              fontWeight: 750,
+              letterSpacing: '0.03em',
+              color: 'var(--text-main)'
             }}>
-              <div style={{ display: 'flex', gap: '6px' }}>
-                <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#ef4444', display: 'block' }}></span>
-                <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#eab308', display: 'block' }}></span>
-                <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#22c55e', display: 'block' }}></span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{ 
+                  width: '8px', 
+                  height: '8px', 
+                  borderRadius: '50%', 
+                  backgroundColor: simState === 'executing' ? 'var(--accent-coral)' : 'var(--accent-green)', 
+                  display: 'inline-block' 
+                }} className={simState === 'executing' ? 'blink' : ''}></span>
+                <span>NODE: 0x9f12...3e4f</span>
               </div>
-              <div style={{
-                fontSize: '11px',
-                fontWeight: 700,
-                color: 'var(--text-muted)',
-                backgroundColor: 'var(--bg-card)',
-                padding: '3px 20px',
-                borderRadius: '100px',
-                border: '1px solid var(--border)',
-                letterSpacing: '0.05em'
-              }}>
-                app.inferpay.xyz/dashboard
+              <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }} className="hidden sm:flex">
+                <span>CHAIN: ARC-TESTNET</span>
+                <span style={{ color: 'var(--text-light)' }}>|</span>
+                <span>STATUS: OPERATIONAL</span>
               </div>
-              <div style={{ width: '40px' }} />
+              <div>
+                <span className="badge-brutalist green" style={{ fontSize: '9.5px', padding: '2px 8px', textTransform: 'uppercase' }}>
+                  Live blockfeed
+                </span>
+              </div>
             </div>
 
             {/* Dashboard Mockup Grid */}
             <div style={{
               display: 'grid',
-              gridTemplateColumns: '220px 1fr',
-              minHeight: '420px',
+              gridTemplateColumns: '1fr 1fr',
+              minHeight: '440px',
               backgroundColor: 'var(--bg-main)'
             }} className="flex flex-col md:grid">
               
-              {/* Fake Sidebar */}
+              {/* Left Control Panel: Status & Simulation Triggers */}
               <div style={{
+                padding: '30px',
                 borderRight: '1px solid var(--border)',
-                padding: '20px 15px',
-                backgroundColor: 'var(--bg-card)',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '15px'
-              }} className="hidden md:flex">
-                <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-light)', letterSpacing: '0.05em' }}>Agent Systems</div>
-                
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 10px', borderRadius: 'var(--radius-sm)', backgroundColor: 'var(--bg-inner)', border: '1px solid var(--border)', fontSize: '12.5px', fontWeight: 700 }}>
-                    <Lock size={14} style={{ color: 'var(--accent-coral)' }} />
-                    <span>AI Spending Budget</span>
+                justifyContent: 'space-between',
+                gap: '24px'
+              }}>
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '15px' }}>
+                    <div>
+                      <h3 style={{ margin: 0, fontFamily: 'var(--font-serif)', fontSize: '22px', fontWeight: 800 }}>
+                        Operational <i>AI Vault</i>
+                      </h3>
+                      <p style={{ margin: '4px 0 0', fontSize: '12.5px', color: 'var(--text-muted)' }}>
+                        Automated policy parameters enforced via Arc smart contracts.
+                      </p>
+                    </div>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 10px', borderRadius: 'var(--radius-sm)', fontSize: '12.5px', fontWeight: 500, color: 'var(--text-muted)' }}>
-                    <ArrowRightLeft size={14} />
-                    <span>Smart Bill Pay</span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 10px', borderRadius: 'var(--radius-sm)', fontSize: '12.5px', fontWeight: 500, color: 'var(--text-muted)' }}>
-                    <Coins size={14} />
-                    <span>Savings Optimizer</span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 10px', borderRadius: 'var(--radius-sm)', fontSize: '12.5px', fontWeight: 500, color: 'var(--text-muted)' }}>
-                    <Shield size={14} />
-                    <span>Approval Committee</span>
+
+                  {/* Operational Settings Grid */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '20px' }}>
+                    <div style={{ 
+                      backgroundColor: 'var(--bg-card)', 
+                      padding: '14px 18px', 
+                      borderRadius: 'var(--radius-sm)', 
+                      border: '1px solid var(--border)',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center'
+                    }}>
+                      <div>
+                        <div style={{ fontSize: '10px', fontWeight: 800, color: 'var(--text-light)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Daily Spending Limit</div>
+                        <div style={{ fontSize: '18px', fontWeight: 850, marginTop: '2px' }}>500.00 USDC</div>
+                      </div>
+                      <span className="badge-brutalist pink" style={{ fontSize: '10px' }}>Permit2 Guarded</span>
+                    </div>
+
+                    <div style={{ 
+                      backgroundColor: 'var(--bg-card)', 
+                      padding: '14px 18px', 
+                      borderRadius: 'var(--radius-sm)', 
+                      border: '1px solid var(--border)',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center'
+                    }}>
+                      <div>
+                        <div style={{ fontSize: '10px', fontWeight: 800, color: 'var(--text-light)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Vault Available Balance</div>
+                        <div style={{ fontSize: '18px', fontWeight: 850, color: 'var(--accent-green)', marginTop: '2px' }}>
+                          {simBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USDC
+                        </div>
+                      </div>
+                      <span className="badge-brutalist green" style={{ fontSize: '10px' }}>Liquid</span>
+                    </div>
                   </div>
                 </div>
 
-                <div style={{ marginTop: 'auto', padding: '10px', backgroundColor: 'var(--bg-inner)', borderRadius: 'var(--radius-sm)', border: '1px dashed var(--border)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '11px', fontWeight: 700, color: 'var(--text-muted)' }}>
-                    <Zap size={11} style={{ color: 'var(--accent-coral)' }} /> Gas Costs
+                {/* Simulation Action Box */}
+                <div style={{ 
+                  padding: '20px', 
+                  borderRadius: 'var(--radius-md)', 
+                  border: '1px solid var(--border)', 
+                  backgroundColor: 'var(--bg-inner)',
+                  boxShadow: '3px 3px 0px var(--border)'
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                    <strong style={{ fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <Cpu size={14} style={{ color: 'var(--accent-coral)' }} />
+                      <span>Simulate Intent Execution:</span>
+                    </strong>
+                    <span style={{ fontSize: '10px', color: 'var(--text-light)', fontFamily: 'monospace' }}>ARC consensus</span>
                   </div>
-                  <div style={{ fontSize: '14px', fontWeight: 800, marginTop: '2px' }}>0.0004 USDC</div>
-                  <div style={{ fontSize: '9.5px', color: 'var(--text-light)', marginTop: '2px' }}>Sub-second finality on Arc</div>
+                  
+                  <div style={{ display: 'flex', gap: '12px' }} className="flex flex-col sm:flex-row">
+                    <button 
+                      onClick={runSimSwap}
+                      disabled={simState === 'executing'}
+                      className="btn-brutalist btn-brutalist-pink" 
+                      style={{ 
+                        padding: '10px 15px', 
+                        fontSize: '12.5px', 
+                        flex: 1, 
+                        justifyContent: 'center',
+                        opacity: simState === 'executing' && simAction !== 'swap' ? 0.5 : 1
+                      }}
+                    >
+                      {simState === 'executing' && simAction === 'swap' ? 'Swapping...' : 'Trigger Auto-Swap'}
+                    </button>
+                    <button 
+                      onClick={runSimInvoice}
+                      disabled={simState === 'executing'}
+                      className="btn-brutalist" 
+                      style={{ 
+                        padding: '10px 15px', 
+                        fontSize: '12.5px', 
+                        backgroundColor: 'var(--bg-card)', 
+                        color: 'var(--text-main)', 
+                        flex: 1,
+                        justifyContent: 'center',
+                        opacity: simState === 'executing' && simAction !== 'invoice' ? 0.5 : 1
+                      }}
+                    >
+                      {simState === 'executing' && simAction === 'invoice' ? 'Dispensing...' : 'Approve Invoice'}
+                    </button>
+                  </div>
                 </div>
               </div>
 
-              {/* Fake Dashboard Body */}
-              <div style={{ padding: '30px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                  <div>
-                    <h3 style={{ margin: 0, fontFamily: 'var(--font-serif)', fontSize: '20px', fontWeight: 700 }}>
-                      Operational <i>AI Vault</i>
-                    </h3>
-                    <p style={{ margin: '2px 0 0', fontSize: '12px', color: 'var(--text-muted)' }}>Policy rules enforced by Arc smart contracts</p>
+              {/* Right Panel: Live Blockchain Node Console logs */}
+              <div style={{
+                padding: '30px',
+                backgroundColor: '#0c0a09',
+                color: '#34d399',
+                fontFamily: 'monospace',
+                fontSize: '12px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                gap: '20px'
+              }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', overflowY: 'auto', maxHeight: '320px' }}>
+                  <div style={{ borderBottom: '1px dashed #1e293b', paddingBottom: '8px', color: '#94a3b8', display: 'flex', justifyContent: 'space-between' }}>
+                    <span>AGENT INSTANCE LOG FEED</span>
+                    <span>v1.0.4</span>
                   </div>
-                  <span className="badge-brutalist success">● Active Policy</span>
+                  
+                  {simLogs.map((log, index) => {
+                    let logColor = '#34d399' // default console green
+                    if (log.startsWith('SYSTEM')) logColor = '#a855f7' // purple
+                    if (log.startsWith('NETWORK')) logColor = '#38bdf8' // blue
+                    if (log.startsWith('POLICY')) logColor = '#eab308' // yellow
+                    if (log.includes('complete') || log.includes('dispatched')) logColor = '#f472b6' // pink
+                    
+                    return (
+                      <div 
+                        key={index} 
+                        style={{ 
+                          lineHeight: '1.5', 
+                          color: logColor,
+                          animation: 'slideUp 0.15s ease-out'
+                        }}
+                      >
+                        {log}
+                      </div>
+                    )
+                  })}
                 </div>
 
-                {/* Simulated Stats */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '15px', marginBottom: '25px' }} className="flex flex-col md:grid">
-                  <div style={{ backgroundColor: 'var(--bg-card)', padding: '15px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)' }}>
-                    <div style={{ fontSize: '10.5px', fontWeight: 700, color: 'var(--text-light)', textTransform: 'uppercase' }}>Daily Spend Limit</div>
-                    <div style={{ fontSize: '20px', fontWeight: 800, color: 'var(--text-main)', marginTop: '4px' }}>500.00 USDC</div>
+                <div style={{ 
+                  borderTop: '1px solid #1e293b', 
+                  paddingTop: '12px', 
+                  color: '#64748b', 
+                  display: 'flex', 
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  fontSize: '11px'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#34d399', display: 'inline-block' }} className="blink"></span>
+                    <span>Node latency: ~12ms</span>
                   </div>
-                  <div style={{ backgroundColor: 'var(--bg-card)', padding: '15px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)' }}>
-                    <div style={{ fontSize: '10.5px', fontWeight: 700, color: 'var(--text-light)', textTransform: 'uppercase' }}>Available Balance</div>
-                    <div style={{ fontSize: '20px', fontWeight: 800, color: 'var(--accent-green)', marginTop: '4px' }}>12,450.80 USDC</div>
-                  </div>
-                  <div style={{ backgroundColor: 'var(--bg-card)', padding: '15px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)' }}>
-                    <div style={{ fontSize: '10.5px', fontWeight: 700, color: 'var(--text-light)', textTransform: 'uppercase' }}>Gas Savings (Arc)</div>
-                    <div style={{ fontSize: '20px', fontWeight: 800, color: 'var(--accent-coral)', marginTop: '4px' }}>98.4% Less</div>
-                  </div>
-                </div>
-
-                {/* Simulated Interactive action box */}
-                <div className="bg-inner" style={{ padding: '20px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', backgroundColor: 'var(--bg-inner)' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                    <span style={{ fontSize: '12.5px', fontWeight: 700 }}>Simulate AI Intent execution:</span>
-                    <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Requires Permit2 signatures</span>
-                  </div>
-                  <div style={{ display: 'flex', gap: '10px' }} className="flex flex-col sm:flex-row">
-                    <button className="btn-brutalist btn-brutalist-pink" style={{ padding: '8px 15px', fontSize: '12px', flex: 1 }}>
-                      Trigger Auto-Swap to EURC
-                    </button>
-                    <button className="btn-brutalist" style={{ padding: '8px 15px', fontSize: '12px', backgroundColor: 'var(--bg-card)', color: 'var(--text-main)', flex: 1 }}>
-                      Approve Agent Invoice
-                    </button>
-                  </div>
+                  <span>Gas: 0.0004 USDC (98% saving)</span>
                 </div>
               </div>
 
