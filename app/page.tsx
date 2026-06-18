@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useModal } from '@/components/ModalSystem'
 import { 
   Lock, 
   ArrowRight, 
@@ -34,6 +35,7 @@ import {
 } from 'lucide-react'
 
 export default function LandingPage() {
+  const { showModal } = useModal()
   const [email, setEmail] = useState('')
   const [waitlistStatus, setWaitlistStatus] = useState<'idle' | 'loading' | 'success'>('idle')
   const [activeFeatureTab, setActiveFeatureTab] = useState<'escrow' | 'intent' | 'yield' | 'nanopay'>('escrow')
@@ -1814,7 +1816,22 @@ export default function LandingPage() {
         zIndex: 999
       }}>
         <button
-          onClick={() => alert('Support Widget: Contacting operational developer support channel...')}
+          onClick={() => showModal({
+            type: 'confirm',
+            title: 'Developer Support',
+            message: 'You are about to establish an encrypted session to the active developer support operations relayer on the Arc network. Would you like to proceed?',
+            confirmText: 'Establish Connection',
+            cancelText: 'Cancel',
+            onConfirm: async () => {
+              await new Promise(resolve => setTimeout(resolve, 1500))
+              await showModal({
+                type: 'success',
+                title: 'Connection Active',
+                message: 'Encrypted relay established. Support channels have been notified of your public key session context. An operator will route to your terminal shortly.',
+                confirmText: 'Acknowledge'
+              })
+            }
+          })}
           style={{
             width: '50px',
             height: '50px',

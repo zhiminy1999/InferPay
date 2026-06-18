@@ -22,6 +22,7 @@ import {
   Cpu
 } from 'lucide-react'
 import { ButtonLoading } from '../../components/LoadingSystem'
+import { useModal } from '../../components/ModalSystem'
 
 type SecuritySection = 
   | 'overview' 
@@ -32,8 +33,10 @@ type SecuritySection =
   | 'practices' 
   | 'disclosure' 
   | 'report'
+  | 'modal_showcase'
 
 export default function SecurityHubPage() {
+  const { showModal, showTransactionModal, updateTransactionStatus, hideModal } = useModal()
   const [activeTab, setActiveTab] = useState<SecuritySection>('overview')
   const [copiedKey, setCopiedKey] = useState(false)
   
@@ -194,7 +197,8 @@ K6Qh8X0W9zK4R8hJ5/vCjU1o1h/lC9Z7B8P9T+3sJ+Q3N4eD+9AK6Qh8X0W9zK4
               { id: 'compliance', label: 'Compliance & AML', icon: ShieldCheck },
               { id: 'practices', label: 'Security Practices', icon: Layers },
               { id: 'disclosure', label: 'Responsible Disclosure', icon: Terminal },
-              { id: 'report', label: 'Vulnerability Reporting', icon: AlertTriangle }
+              { id: 'report', label: 'Vulnerability Reporting', icon: AlertTriangle },
+              { id: 'modal_showcase', label: 'Modal System Showcase', icon: Cpu }
             ].map((tab) => {
               const IconComp = tab.icon
               const isActive = activeTab === tab.id
@@ -700,6 +704,202 @@ K6Qh8X0W9zK4R8hJ5/vCjU1o1h/lC9Z7B8P9T+3sJ+Q3N4eD+9AK6Qh8X0W9zK4
                     </ButtonLoading>
                   </form>
                 )}
+              </div>
+            )}
+
+            {activeTab === 'modal_showcase' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '28px', fontWeight: 800, margin: 0 }}>
+                  Modal System <i>Showcase</i>
+                </h2>
+                
+                <p style={{ color: 'var(--text-muted)', fontSize: '14.5px', lineHeight: '1.6', margin: 0 }}>
+                  Interactive playground to test the unified modal architecture. Explore variant states, async handling, and blockchain transaction flows.
+                </p>
+
+                <div style={{ 
+                  display: 'grid', 
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', 
+                  gap: '20px', 
+                  marginTop: '10px' 
+                }}>
+                  {/* Confirm Modal */}
+                  <div className="brutalist-card" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    <strong style={{ fontSize: '15px' }}>1. Action Confirmation</strong>
+                    <span style={{ fontSize: '12.5px', color: 'var(--text-muted)' }}>
+                      Request explicit user approval before executing tasks (e.g. authorization, wallet disconnect).
+                    </span>
+                    <button
+                      onClick={() => showModal({
+                        type: 'confirm',
+                        title: 'Authorize AI Agent Vault',
+                        message: 'Are you sure you want to authorize the autonomous AI agent to deploy contracts and spend up to 500 USDC per day from your treasury balance?',
+                        confirmText: 'Authorize Agent',
+                        cancelText: 'Cancel'
+                      })}
+                      className="btn-brutalist btn-brutalist-pink"
+                      style={{ fontSize: '12px', padding: '8px 12px', marginTop: 'auto', alignSelf: 'flex-start' }}
+                    >
+                      Trigger Confirm Modal
+                    </button>
+                  </div>
+
+                  {/* Loading / Processing */}
+                  <div className="brutalist-card" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    <strong style={{ fontSize: '15px' }}>2. Loading / Processing</strong>
+                    <span style={{ fontSize: '12.5px', color: 'var(--text-muted)' }}>
+                      Display block sync progression or async task delays. Blocks user interactions to prevent double-submits.
+                    </span>
+                    <button
+                      onClick={() => {
+                        showModal({
+                          type: 'loading',
+                          title: 'Syncing Agent Memory',
+                          message: 'Connecting to decentralized storage node network and pulling updated policy state parameters. Please wait...',
+                          preventCloseOnOverlayClick: true,
+                          showCloseButton: false
+                        });
+                        setTimeout(() => hideModal(), 3000);
+                      }}
+                      className="btn-brutalist btn-brutalist-pink"
+                      style={{ fontSize: '12px', padding: '8px 12px', marginTop: 'auto', alignSelf: 'flex-start' }}
+                    >
+                      Trigger Loading (3s)
+                    </button>
+                  </div>
+
+                  {/* Success Modal */}
+                  <div className="brutalist-card" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    <strong style={{ fontSize: '15px' }}>3. Action Success</strong>
+                    <span style={{ fontSize: '12.5px', color: 'var(--text-muted)' }}>
+                      Positive user feedback on transaction block finality or successful deployment actions.
+                    </span>
+                    <button
+                      onClick={() => showModal({
+                        type: 'success',
+                        title: 'Vault Deployed Successfully',
+                        message: 'Your new AI agent treasury vault is live at address 0x9f12...3e4f on Arc Testnet. Gas policies have been successfully registered.',
+                        confirmText: 'Back to Dashboard'
+                      })}
+                      className="btn-brutalist btn-brutalist-pink"
+                      style={{ fontSize: '12px', padding: '8px 12px', marginTop: 'auto', alignSelf: 'flex-start' }}
+                    >
+                      Trigger Success Modal
+                    </button>
+                  </div>
+
+                  {/* Error / Retry Flow */}
+                  <div className="brutalist-card" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    <strong style={{ fontSize: '15px' }}>4. Error & Retry Flow</strong>
+                    <span style={{ fontSize: '12.5px', color: 'var(--text-muted)' }}>
+                      Human-readable error explanation with fallback retry button triggers.
+                    </span>
+                    <button
+                      onClick={() => showModal({
+                        type: 'error',
+                        title: 'API Connection Refused',
+                        message: 'Unable to communicate with the Circle CCTP token swap router API due to network rate limits. Would you like to retry?',
+                        confirmText: 'Retry Connection',
+                        cancelText: 'Close',
+                        onConfirm: async () => {
+                          await new Promise(resolve => setTimeout(resolve, 1500));
+                          await showModal({
+                            type: 'success',
+                            title: 'Connection Restored',
+                            message: 'Successfully established contact with the swap routing nodes.',
+                            confirmText: 'Dismiss'
+                          });
+                        }
+                      })}
+                      className="btn-brutalist btn-brutalist-pink"
+                      style={{ fontSize: '12px', padding: '8px 12px', marginTop: 'auto', alignSelf: 'flex-start' }}
+                    >
+                      Trigger Retry Flow
+                    </button>
+                  </div>
+
+                  {/* Warning / Security Caps */}
+                  <div className="brutalist-card" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    <strong style={{ fontSize: '15px' }}>5. Risk Warning</strong>
+                    <span style={{ fontSize: '12.5px', color: 'var(--text-muted)' }}>
+                      Alert users of high-risk actions, limit breaches, or parameter deviations.
+                    </span>
+                    <button
+                      onClick={() => showModal({
+                        type: 'warning',
+                        title: 'Security Limit Exceeded',
+                        message: 'The current transaction exceeds your daily spending policy cap of 250 USDC. Continuing requires multi-signature key confirmation.',
+                        confirmText: 'Request Signature',
+                        cancelText: 'Decline'
+                      })}
+                      className="btn-brutalist btn-brutalist-pink"
+                      style={{ fontSize: '12px', padding: '8px 12px', marginTop: 'auto', alignSelf: 'flex-start' }}
+                    >
+                      Trigger Warning Modal
+                    </button>
+                  </div>
+
+                  {/* Destructive Confirmation */}
+                  <div className="brutalist-card" style={{ display: 'flex', flexDirection: 'column', gap: '12px', borderColor: '#dc2626' }}>
+                    <strong style={{ fontSize: '15px', color: '#dc2626' }}>6. Destructive Action</strong>
+                    <span style={{ fontSize: '12.5px', color: 'var(--text-muted)' }}>
+                      High-severity actions (e.g. revoking agent permissions, clearing treasury balance).
+                    </span>
+                    <button
+                      onClick={() => showModal({
+                        type: 'destructive',
+                        title: 'Revoke Agent Authority',
+                        message: 'WARNING: Revoking agent authority will cancel all pending swap intents and instantly freeze the smart account budget allocations. This action cannot be undone.',
+                        confirmText: 'Revoke Instantly',
+                        cancelText: 'Keep Authorized'
+                      })}
+                      className="btn-brutalist"
+                      style={{ fontSize: '12px', padding: '8px 12px', marginTop: 'auto', alignSelf: 'flex-start', backgroundColor: '#dc2626', color: '#ffffff', border: '1px solid #dc2626' }}
+                    >
+                      Trigger Destructive Modal
+                    </button>
+                  </div>
+
+                  {/* Transaction status */}
+                  <div className="brutalist-card" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    <strong style={{ fontSize: '15px' }}>7. Async Tx lifecycle</strong>
+                    <span style={{ fontSize: '12.5px', color: 'var(--text-muted)' }}>
+                      {'Follows a simulated Circle CCTP stablecoin transfer from Pending -> Confirming -> Success.'}
+                    </span>
+                    <button
+                      onClick={() => {
+                        const id = showTransactionModal('0x7c73a812b189873a4b92b67f1b1b110a12e2f3d4567c9c0b11a2b3c4d5e6f7a8', 'pending');
+                        setTimeout(() => updateTransactionStatus(id, 'confirming'), 2000);
+                        setTimeout(() => updateTransactionStatus(id, 'success'), 4500);
+                      }}
+                      className="btn-brutalist btn-brutalist-pink"
+                      style={{ fontSize: '12px', padding: '8px 12px', marginTop: 'auto', alignSelf: 'flex-start' }}
+                    >
+                      Trigger Tx Lifecycle (4.5s)
+                    </button>
+                  </div>
+
+                  {/* Global Insufficient balance */}
+                  <div className="brutalist-card" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    <strong style={{ fontSize: '15px' }}>8. Global Error / Balance</strong>
+                    <span style={{ fontSize: '12.5px', color: 'var(--text-muted)' }}>
+                      API timeout, network disconnected, insufficient gas/token balances.
+                    </span>
+                    <button
+                      onClick={() => showModal({
+                        type: 'destructive',
+                        title: 'Insufficient Vault Balance',
+                        message: 'Your smart account balance is 0.00 USDC. You must bridge funds or request faucet tokens to execute autonomous tasks.',
+                        confirmText: 'Open Bridge Faucet',
+                        cancelText: 'Cancel'
+                      })}
+                      className="btn-brutalist"
+                      style={{ fontSize: '12px', padding: '8px 12px', marginTop: 'auto', alignSelf: 'flex-start', backgroundColor: 'var(--text-main)', color: '#ffffff' }}
+                    >
+                      Trigger Balance Alert
+                    </button>
+                  </div>
+                </div>
               </div>
             )}
           </main>
