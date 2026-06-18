@@ -149,7 +149,7 @@ export default function LandingPage() {
         letterSpacing: '0.03em',
         borderBottom: '1px solid var(--border)'
       }}>
-        <span>🎉 InferPay wins the ARC Stablecoins Challenge! Deploying next-gen AI agent treasuries. </span>
+        <span>🚀 InferPay Devnet is now live on the Arc Chain! Build gasless AI agent vaults with native USDC. </span>
         <Link href="/docs" style={{ color: 'var(--accent-pink)', marginLeft: '6px', textDecoration: 'underline' }}>Read SDK Docs →</Link>
       </div>
 
