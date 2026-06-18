@@ -1597,10 +1597,10 @@ export default function LandingPage() {
               <a href="https://discord.com" target="_blank" rel="noopener noreferrer" className="btn-brutalist btn-brutalist-pink" style={{ textDecoration: 'none', padding: '12px 28px', fontWeight: 700 }}>
                 Join Discord
               </a>
-              <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="btn-brutalist" style={{ textDecoration: 'none', padding: '12px 28px', fontWeight: 700, backgroundColor: 'var(--bg-card)' }}>
+              <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="btn-brutalist" style={{ textDecoration: 'none', padding: '12px 28px', fontWeight: 700, backgroundColor: 'var(--bg-card)', color: 'var(--text-main)', border: '1px solid var(--border)' }}>
                 GitHub Stars
               </a>
-              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="btn-brutalist" style={{ textDecoration: 'none', padding: '12px 28px', fontWeight: 700, backgroundColor: 'var(--bg-card)' }}>
+              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="btn-brutalist" style={{ textDecoration: 'none', padding: '12px 28px', fontWeight: 700, backgroundColor: 'var(--bg-card)', color: 'var(--text-main)', border: '1px solid var(--border)' }}>
                 Follow X updates
               </a>
             </div>
@@ -1830,7 +1830,7 @@ export default function LandingPage() {
           }}
           title="Contact Support"
         >
-          <MessageSquare size={20} />
+          <HelpCircle size={20} />
         </button>
       </div>
 
@@ -1866,7 +1866,7 @@ export default function LandingPage() {
             <button 
               onClick={() => setShowCookieBanner(false)}
               className="btn-brutalist"
-              style={{ flex: 1, height: '32px', fontSize: '11px', fontWeight: 800, padding: 0, backgroundColor: 'var(--bg-inner)' }}
+              style={{ flex: 1, height: '32px', fontSize: '11px', fontWeight: 800, padding: 0, backgroundColor: 'var(--bg-inner)', color: 'var(--text-main)', border: '1px solid var(--border)' }}
             >
               Decline
             </button>
