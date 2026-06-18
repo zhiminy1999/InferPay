@@ -216,7 +216,9 @@ export const AutonomousAgent: React.FC = () => {
       alignItems: 'center',
       gap: '12px',
       padding: '10px 12px',
-      border: '1px solid var(--border)',
+      borderWidth: '1px',
+      borderStyle: 'solid',
+      borderColor: 'var(--border)',
       backgroundColor: 'var(--bg-inner)',
       borderRadius: 'var(--radius-sm)',
       transition: 'all 0.3s ease',
@@ -254,7 +256,9 @@ export const AutonomousAgent: React.FC = () => {
       fontSize: '10px',
       fontWeight: 700,
       color: 'var(--text-light)',
-      border: '1px solid var(--border)',
+      borderWidth: '1px',
+      borderStyle: 'solid',
+      borderColor: 'var(--border)',
       flexShrink: 0
     }
     if (currentStep === stepNum) {
