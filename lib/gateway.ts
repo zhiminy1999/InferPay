@@ -98,6 +98,30 @@ export class GatewayClient {
       }
     }
 
+    // Subtract off-chain nanopayments spent
+    try {
+      const paymentsRes = await fetch(`/api/payments?wallet_address=${this.userAddress}`)
+      if (paymentsRes.ok) {
+        const { data } = await paymentsRes.json()
+        if (data && Array.isArray(data)) {
+          let spentNanopayments = 0
+          for (const item of data) {
+            if (item.metadata && (item.metadata.source === 'Gateway Nanopayments' || item.metadata.source === 'AI Agent Swarm Execution')) {
+              spentNanopayments += Number(item.amount)
+            }
+          }
+          const spentUnits = parseUnits(spentNanopayments.toFixed(6), 6)
+          if (gatewayBalance >= spentUnits) {
+            gatewayBalance -= spentUnits
+          } else {
+            gatewayBalance = BigInt(0)
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to fetch off-chain nanopayments for balance deduction:', e)
+    }
+
     return {
       wallet: {
         amount: walletBalance,

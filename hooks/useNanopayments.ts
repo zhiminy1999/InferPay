@@ -48,15 +48,36 @@ export function useNanopayments() {
       setGatewayBalance(bals.gateway.available)
       setWalletBalance(bals.wallet.amount)
 
-      // Load history
-      if (typeof window !== 'undefined') {
-        const histKey = `gateway_hist_${address.toLowerCase()}`
-        const storedHist = localStorage.getItem(histKey)
-        if (storedHist) {
-          setHistory(JSON.parse(storedHist))
-        } else {
-          setHistory([])
+      // Load history from database
+      try {
+        const paymentsRes = await fetch(`/api/payments?wallet_address=${address}`)
+        if (paymentsRes.ok) {
+          const { data } = await paymentsRes.json()
+          if (data && Array.isArray(data)) {
+            let totalSpent = 0
+            let totalInferences = 0
+            const histItems: GatewayHistoryItem[] = data.map((item: any) => {
+              const isSpend = item.metadata?.source === 'Gateway Nanopayments'
+              if (isSpend) {
+                totalSpent += Number(item.amount)
+                totalInferences += 1
+              }
+              return {
+                type: isSpend ? 'spend' : 'deposit',
+                amount: item.amount.toString(),
+                description: item.metadata?.modelId ? `AI Inference: ${item.metadata.modelId}` : item.metadata?.source || 'Transfer',
+                txHash: item.tx_hash,
+                timestamp: item.timestamp * 1000,
+                settled: item.status === 'SUCCESS',
+              }
+            })
+            setHistory(histItems)
+            setSpendRate(totalSpent)
+            setInferenceCount(totalInferences)
+          }
         }
+      } catch (histErr) {
+        console.error('Failed to load gateway history from database:', histErr)
       }
     } catch (e) {
       console.error('Error refreshing gateway balances:', e)
