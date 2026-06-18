@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { 
   Lock, 
@@ -21,7 +21,16 @@ import {
   Cpu,
   Eye,
   ShieldCheck,
-  Sparkles
+  Sparkles,
+  HelpCircle,
+  Activity,
+  Terminal,
+  ChevronDown,
+  ChevronUp,
+  Globe,
+  DollarSign,
+  TrendingUp,
+  MessageSquare
 } from 'lucide-react'
 
 export default function LandingPage() {
@@ -29,6 +38,29 @@ export default function LandingPage() {
   const [waitlistStatus, setWaitlistStatus] = useState<'idle' | 'loading' | 'success'>('idle')
   const [activeFeatureTab, setActiveFeatureTab] = useState<'escrow' | 'intent' | 'yield' | 'nanopay'>('escrow')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
+  // Interactive UI / Growth States
+  const [activeFaqIndex, setActiveFaqIndex] = useState<number | null>(null)
+  const [showCookieBanner, setShowCookieBanner] = useState<boolean>(true)
+  const [activeCodeTab, setActiveCodeTab] = useState<'sdk' | 'api' | 'cli'>('sdk')
+  const [videoModalOpen, setVideoModalOpen] = useState<boolean>(false)
+
+  // Real-time metric counters
+  const [volumeCount, setVolumeCount] = useState<number>(2410850)
+  const [txCount, setTxCount] = useState<number>(125430)
+  const [walletCount, setWalletCount] = useState<number>(4210)
+
+  useEffect(() => {
+    // Animate stats values randomly over time to mimic active on-chain node processing
+    const interval = setInterval(() => {
+      setVolumeCount(prev => prev + Math.floor(Math.random() * 85) + 10)
+      setTxCount(prev => prev + Math.floor(Math.random() * 4) + 1)
+      if (Math.random() > 0.8) {
+        setWalletCount(prev => prev + 1)
+      }
+    }, 4000)
+    return () => clearInterval(interval)
+  }, [])
 
   // Interactive Simulator States
   const [simState, setSimState] = useState<'idle' | 'executing'>('idle')
@@ -104,6 +136,23 @@ export default function LandingPage() {
         zIndex: 0
       }} />
 
+      {/* Announcement Bar */}
+      <div style={{
+        backgroundColor: 'var(--text-main)',
+        color: 'var(--bg-main)',
+        padding: '8px 16px',
+        fontSize: '12px',
+        fontWeight: 700,
+        textAlign: 'center',
+        position: 'relative',
+        zIndex: 101,
+        letterSpacing: '0.03em',
+        borderBottom: '1px solid var(--border)'
+      }}>
+        <span>🎉 InferPay wins the ARC Stablecoins Challenge! Deploying next-gen AI agent treasuries. </span>
+        <Link href="/docs" style={{ color: 'var(--accent-pink)', marginLeft: '6px', textDecoration: 'underline' }}>Read SDK Docs →</Link>
+      </div>
+
       {/* Navigation Header */}
       <header style={{
         position: 'sticky',
@@ -144,12 +193,13 @@ export default function LandingPage() {
         </div>
 
         {/* Desktop Navigation Links */}
-        <nav style={{ display: 'flex', gap: '30px', alignItems: 'center' }} className="hidden md:flex">
+        <nav style={{ display: 'flex', gap: '24px', alignItems: 'center' }} className="hidden md:flex">
           <a href="#features" style={{ fontSize: '13.5px', color: 'var(--text-muted)', fontWeight: 500, textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.color = 'var(--text-main)'} onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-muted)'}>Features</a>
+          <a href="#usecases" style={{ fontSize: '13.5px', color: 'var(--text-muted)', fontWeight: 500, textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.color = 'var(--text-main)'} onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-muted)'}>Use Cases</a>
+          <a href="#developers" style={{ fontSize: '13.5px', color: 'var(--text-muted)', fontWeight: 500, textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.color = 'var(--text-main)'} onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-muted)'}>Developers</a>
+          <a href="#faq" style={{ fontSize: '13.5px', color: 'var(--text-muted)', fontWeight: 500, textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.color = 'var(--text-main)'} onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-muted)'}>FAQ</a>
           <Link href="/docs" style={{ fontSize: '13.5px', color: 'var(--text-muted)', fontWeight: 500, textDecoration: 'none', transition: 'color 0.2s' }}>Docs</Link>
-          <Link href="/faq" style={{ fontSize: '13.5px', color: 'var(--text-muted)', fontWeight: 500, textDecoration: 'none', transition: 'color 0.2s' }}>FAQ</Link>
-          <Link href="/about" style={{ fontSize: '13.5px', color: 'var(--text-muted)', fontWeight: 500, textDecoration: 'none', transition: 'color 0.2s' }}>About</Link>
-          <Link href="/contact" style={{ fontSize: '13.5px', color: 'var(--text-muted)', fontWeight: 500, textDecoration: 'none', transition: 'color 0.2s' }}>Contact</Link>
+          <Link href="/security" style={{ fontSize: '13.5px', color: 'var(--text-muted)', fontWeight: 500, textDecoration: 'none', transition: 'color 0.2s' }}>Security</Link>
         </nav>
 
         {/* Action Button */}
@@ -188,7 +238,7 @@ export default function LandingPage() {
       {mobileMenuOpen && (
         <div style={{
           position: 'fixed',
-          top: '64px',
+          top: '96px',
           left: 0,
           right: 0,
           bottom: 0,
@@ -202,10 +252,10 @@ export default function LandingPage() {
           animation: 'slideDown 0.2s ease-out'
         }}>
           <a href="#features" onClick={() => setMobileMenuOpen(false)} style={{ fontSize: '16px', fontWeight: 600, textDecoration: 'none', color: 'var(--text-main)' }}>Features</a>
+          <a href="#usecases" onClick={() => setMobileMenuOpen(false)} style={{ fontSize: '16px', fontWeight: 600, textDecoration: 'none', color: 'var(--text-main)' }}>Use Cases</a>
+          <a href="#developers" onClick={() => setMobileMenuOpen(false)} style={{ fontSize: '16px', fontWeight: 600, textDecoration: 'none', color: 'var(--text-main)' }}>Developers</a>
           <Link href="/docs" onClick={() => setMobileMenuOpen(false)} style={{ fontSize: '16px', fontWeight: 600, textDecoration: 'none', color: 'var(--text-main)' }}>Docs</Link>
-          <Link href="/faq" onClick={() => setMobileMenuOpen(false)} style={{ fontSize: '16px', fontWeight: 600, textDecoration: 'none', color: 'var(--text-main)' }}>FAQ</Link>
-          <Link href="/about" onClick={() => setMobileMenuOpen(false)} style={{ fontSize: '16px', fontWeight: 600, textDecoration: 'none', color: 'var(--text-main)' }}>About</Link>
-          <Link href="/contact" onClick={() => setMobileMenuOpen(false)} style={{ fontSize: '16px', fontWeight: 600, textDecoration: 'none', color: 'var(--text-main)' }}>Contact</Link>
+          <Link href="/security" onClick={() => setMobileMenuOpen(false)} style={{ fontSize: '16px', fontWeight: 600, textDecoration: 'none', color: 'var(--text-main)' }}>Security Hub</Link>
         </div>
       )}
 
@@ -647,125 +697,472 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* FEATURES BENTO GRID SECTION */}
-        <section id="features" style={{
+             {/* SECTION 2: SOCIAL PROOF */}
+        <section style={{
+          padding: '40px 24px 60px',
+          borderBottom: '1px solid var(--border)',
+          backgroundColor: 'var(--bg-inner)'
+        }}>
+          <div style={{ maxWidth: '1000px', margin: '0 auto', textAlign: 'center' }}>
+            <h5 style={{ 
+              fontSize: '11px', 
+              fontWeight: 800, 
+              textTransform: 'uppercase', 
+              color: 'var(--text-light)', 
+              letterSpacing: '0.08em',
+              marginBottom: '24px' 
+            }}>
+              Ecosystem Backing & Infrastructure Partners
+            </h5>
+            <div style={{ 
+              display: 'flex', 
+              justifyContent: 'center', 
+              alignItems: 'center', 
+              gap: '40px', 
+              flexWrap: 'wrap',
+              opacity: 0.6
+            }}>
+              {/* Grayscale partner logos with hover transitions */}
+              {['Circle', 'Arc Chain', 'Coinbase', 'OpenAI', 'Anthropic', 'Agora'].map((partner, index) => (
+                <span 
+                  key={index} 
+                  style={{ 
+                    fontFamily: 'var(--font-serif)', 
+                    fontWeight: 800, 
+                    fontSize: '20px', 
+                    color: 'var(--text-main)',
+                    letterSpacing: '-0.03em',
+                    cursor: 'default',
+                    transition: 'all 0.2s'
+                  }}
+                  className="hover-opacity-100"
+                >
+                  {partner}
+                </span>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* SECTION 3: LIVE PLATFORM STATS */}
+        <section style={{
           padding: '60px 24px',
+          borderBottom: '1px solid var(--border)'
+        }}>
+          <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(4, 1fr)',
+              gap: '20px'
+            }} className="flex flex-col sm:grid">
+              {[
+                { label: 'Volume Settled', value: `$${(volumeCount / 1000000).toFixed(2)}M+` },
+                { label: 'Agent Transactions', value: txCount.toLocaleString() },
+                { label: 'AI Wallets Created', value: walletCount.toLocaleString() },
+                { label: 'Settlement Success', value: '99.98%' }
+              ].map((stat, idx) => (
+                <div 
+                  key={idx} 
+                  style={{
+                    backgroundColor: 'var(--bg-card)',
+                    padding: '24px',
+                    borderRadius: 'var(--radius-sm)',
+                    border: '1px solid var(--border)',
+                    textAlign: 'center',
+                    boxShadow: 'var(--shadow-soft)'
+                  }}
+                >
+                  <div style={{ fontSize: 'clamp(20px, 4vw, 28px)', fontWeight: 900, color: 'var(--text-main)', fontFamily: 'monospace' }}>
+                    {stat.value}
+                  </div>
+                  <div style={{ fontSize: '12.5px', color: 'var(--text-muted)', marginTop: '6px', fontWeight: 600 }}>
+                    {stat.label}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* SECTION 4: REAL-WORLD USE CASES */}
+        <section id="usecases" style={{
+          padding: '80px 24px',
           backgroundColor: 'var(--bg-inner)',
-          borderTop: '1px solid var(--border)',
           borderBottom: '1px solid var(--border)'
         }}>
           <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
             <div style={{ textAlign: 'center', marginBottom: '50px' }}>
-              <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '36px', fontWeight: 700, margin: 0 }}>
-                Designed for the <i>Autonomous Web</i>
+              <span className="badge-brutalist pink" style={{ fontSize: '10px' }}>Real-World Autonomy</span>
+              <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '36px', fontWeight: 700, margin: '8px 0 0 0' }}>
+                How Agents Use <i>InferPay</i>
               </h2>
               <p style={{ color: 'var(--text-muted)', fontSize: '16px', marginTop: '10px', maxWidth: '600px', margin: '10px auto 0' }}>
-                Every tool needed to handle finance, trust, and operations without developer friction.
+                Bridging the gap between cognitive LLM reasoning and real-world economic actions.
               </p>
             </div>
 
-            {/* Bento Grid */}
             <div style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(3, 1fr)',
               gap: '20px'
             }} className="flex flex-col md:grid">
-              {/* Card 1: 2/3 width */}
-              <div className="brutalist-card" style={{ gridColumn: 'span 2', backgroundColor: 'var(--bg-card)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                <div>
+              {[
+                {
+                  title: 'AI Customer Support Agent',
+                  desc: 'Autonomously pays third-party APIs (OpenAI, Anthropic) as inference demands scale.',
+                  workflow: 'Request -> Limit Check -> Settlement -> API Call',
+                  icon: Cpu
+                },
+                {
+                  title: 'AI Trading Agent',
+                  desc: 'Monitors real-time yields and automatically routes stablecoins to optimize treasury growth.',
+                  workflow: 'Scan Yield -> Request Swap -> Settlement -> Complete',
+                  icon: TrendingUp
+                },
+                {
+                  title: 'AI Research Agent',
+                  desc: 'Buys compute power and inference bandwidth using micropayments based on dataset analysis.',
+                  workflow: 'Compute needed -> Check balance -> Pay vendor -> Train model',
+                  icon: Eye
+                },
+                {
+                  title: 'Multi-Agent Payroll',
+                  desc: 'Orchestrates payments from coordinator agents down to sub-worker contractors automatically.',
+                  workflow: 'Verify task -> Trigger salary payout -> Release funds',
+                  icon: Users
+                },
+                {
+                  title: 'Autonomous Treasury',
+                  desc: 'Allocates budgets dynamically inside smart contract rules defined by human operators.',
+                  workflow: 'Check daily limits -> Execute payment -> log transactions',
+                  icon: Lock
+                },
+                {
+                  title: 'Cross-Border Payments',
+                  desc: 'Enables sub-second worldwide transactions via Circle CCTP stablecoin rails.',
+                  workflow: 'Swap asset -> Route via CCTP -> Deliver EURC/USDC',
+                  icon: Globe
+                }
+              ].map((item, index) => {
+                const IconComp = item.icon
+                return (
+                  <div 
+                    key={index}
+                    style={{
+                      backgroundColor: 'var(--bg-card)',
+                      border: '1px solid var(--border)',
+                      borderRadius: 'var(--radius-sm)',
+                      padding: '24px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between',
+                      boxShadow: 'var(--shadow-soft)'
+                    }}
+                  >
+                    <div>
+                      <div style={{
+                        width: '36px',
+                        height: '36px',
+                        borderRadius: 'var(--radius-sm)',
+                        backgroundColor: 'var(--bg-inner)',
+                        border: '1px solid var(--border)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        marginBottom: '15px'
+                      }}>
+                        <IconComp size={18} style={{ color: 'var(--accent-coral)' }} />
+                      </div>
+                      <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '18px', fontWeight: 700, margin: '0 0 10px' }}>
+                        {item.title}
+                      </h3>
+                      <p style={{ color: 'var(--text-muted)', fontSize: '13.5px', lineHeight: '1.6', margin: '0 0 16px' }}>
+                        {item.desc}
+                      </p>
+                    </div>
+                    <div style={{
+                      backgroundColor: 'var(--bg-inner)',
+                      border: '1px dashed var(--border)',
+                      padding: '8px 12px',
+                      borderRadius: '4px',
+                      fontSize: '11px',
+                      fontFamily: 'monospace',
+                      color: 'var(--text-muted)'
+                    }}>
+                      <span style={{ color: 'var(--accent-pink)', fontWeight: 800 }}>FLOW: </span>
+                      {item.workflow}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        </section>
 
+        {/* SECTION 5: PRODUCT WALKTHROUGH VIDEO */}
+        <section id="demo-walkthrough" style={{
+          padding: '80px 24px',
+          borderBottom: '1px solid var(--border)'
+        }}>
+          <div style={{ maxWidth: '1000px', margin: '0 auto', textAlign: 'center' }}>
+            <span className="badge-brutalist pink" style={{ fontSize: '10px' }}>Walkthrough Video</span>
+            <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '36px', fontWeight: 700, margin: '8px 0 30px' }}>
+              See InferPay in Action
+            </h2>
+
+            {/* Video mockup frame */}
+            <div 
+              onClick={() => setVideoModalOpen(true)}
+              style={{
+                position: 'relative',
+                width: '100%',
+                maxWidth: '800px',
+                height: '400px',
+                margin: '0 auto',
+                backgroundColor: '#0c0a09',
+                borderRadius: 'var(--radius-md)',
+                border: '2px solid var(--border)',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: 'var(--shadow-hard)',
+                overflow: 'hidden'
+              }}
+            >
+              {/* Overlay with radial glow */}
+              <div style={{
+                position: 'absolute',
+                inset: 0,
+                background: 'radial-gradient(circle, rgba(234,88,12,0.1) 0%, rgba(0,0,0,0.8) 100%)',
+                zIndex: 1
+              }} />
               
+              {/* Play Button Widget */}
+              <div style={{
+                zIndex: 2,
+                width: '70px',
+                height: '70px',
+                borderRadius: '50%',
+                backgroundColor: 'var(--bg-main)',
+                border: '3px solid var(--border)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '3px 3px 0px var(--border)',
+                color: 'var(--text-main)',
+                transition: 'all 0.2s'
+              }} className="hover-scale">
+                <Play size={28} style={{ marginLeft: '4px', fill: 'currentColor' }} />
+              </div>
 
-                  <div style={{
-                    width: '36px',
-                    height: '36px',
-                    borderRadius: 'var(--radius-sm)',
-                    backgroundColor: 'var(--bg-inner)',
-                    border: '1px solid var(--border)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    marginBottom: '15px'
-                  }}>
-                    <Lock size={18} style={{ color: 'var(--accent-coral)' }} />
+              {/* Simulated UI components elements inside video frame */}
+              <div style={{
+                position: 'absolute',
+                bottom: '20px',
+                left: '20px',
+                right: '20px',
+                zIndex: 2,
+                display: 'flex',
+                justifyContent: 'space-between',
+                color: '#94a3b8',
+                fontFamily: 'monospace',
+                fontSize: '11px'
+              }}>
+                <span>▶ InferPay_SDK_Quickstart_v1.0.4.mp4</span>
+                <span>02:45 / 03:00</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* SECTION 6: ARCHITECTURE DIAGRAM */}
+        <section style={{
+          padding: '80px 24px',
+          backgroundColor: 'var(--bg-inner)',
+          borderBottom: '1px solid var(--border)'
+        }}>
+          <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+            <div style={{ textAlign: 'center', marginBottom: '50px' }}>
+              <span className="badge-brutalist green" style={{ fontSize: '10px' }}>Technical Architecture</span>
+              <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '36px', fontWeight: 700, margin: '8px 0 0' }}>
+                Secure Cryptographic Routing
+              </h2>
+              <p style={{ color: 'var(--text-muted)', fontSize: '15px', marginTop: '10px' }}>
+                How InferPay interacts with wallets, policy engines, and blockchain layers.
+              </p>
+            </div>
+
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: '40px',
+              alignItems: 'center'
+            }} className="flex flex-col md:grid">
+              {/* Flow diagram visual */}
+              <div style={{
+                backgroundColor: 'var(--bg-card)',
+                padding: '30px',
+                borderRadius: 'var(--radius-sm)',
+                border: '1px solid var(--border)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '15px',
+                fontFamily: 'monospace',
+                fontSize: '11.5px',
+                boxShadow: 'var(--shadow-soft)'
+              }}>
+                {[
+                  { step: '1. Human Master Operator', desc: 'Sets vault policy, funding rules & signs Permit2 parameters' },
+                  { step: '2. Autonomous AI Agent', desc: 'Analyzes triggers, constructs swap/payment intent arrays' },
+                  { step: '3. InferPay Smart Account', desc: 'Verifies operator signature & budget restrictions on-chain' },
+                  { step: '4. Arc Gasless Policy Engine', desc: 'Sponsors gas in USDC, signs execution payload' },
+                  { step: '5. Circle CCTP Liquidity Route', desc: 'Settles transactions locally or routes across chains instantly' }
+                ].map((row, idx) => (
+                  <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <div style={{ fontWeight: 800, color: 'var(--accent-pink)' }}>{row.step}</div>
+                    <div style={{ color: 'var(--text-muted)' }}>{row.desc}</div>
+                    {idx < 4 && <div style={{ color: 'var(--text-light)', paddingLeft: '20px' }}>↓</div>}
                   </div>
-                  <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '22px', fontWeight: 700, margin: '0 0 10px' }}>
-                    Non-Custodial Spending Rules
-                  </h3>
-                  <p style={{ color: 'var(--text-muted)', fontSize: '14px', lineHeight: '1.6', margin: 0 }}>
-                    Keep ultimate control of your capital. Enforce strict daily, weekly, or transactional spending rules via gasless cryptographically signed permits directly on the Arc ledger.
-                  </p>
-                </div>
+                ))}
               </div>
 
-              {/* Card 2: 1/3 width */}
-              <div className="brutalist-card" style={{ backgroundColor: 'var(--bg-card)' }}>
-                <div style={{
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: 'var(--radius-sm)',
-                  backgroundColor: 'var(--bg-inner)',
-                  border: '1px solid var(--border)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginBottom: '15px'
-                }}>
-                  <Zap size={18} style={{ color: 'var(--accent-pink)' }} />
-                </div>
-                <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '20px', fontWeight: 700, margin: '0 0 10px' }}>
-                  x402 Nanopayments
+              {/* Explainer details */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '24px', fontWeight: 700, margin: 0 }}>
+                  Decentralized spending limits with zero gas friction.
                 </h3>
-                <p style={{ color: 'var(--text-muted)', fontSize: '13.5px', lineHeight: '1.6', margin: 0 }}>
-                  Enable real-time micropayments for API inference. Agents pay cents dynamically per query.
+                <p style={{ color: 'var(--text-muted)', fontSize: '14px', lineHeight: '1.6', margin: 0 }}>
+                  Unlike custodian systems that hold complete control of your keys, InferPay uses on-chain smart policies.
+                  Our infrastructure automatically wraps ERC-20 stablecoins in Permit2 signatures. AI agents can execute payments but are cryptographically blocked from withdrawing beyond limits.
                 </p>
-              </div>
-
-              {/* Card 3: 1/3 width */}
-              <div className="brutalist-card" style={{ backgroundColor: 'var(--bg-card)' }}>
-                <div style={{
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: 'var(--radius-sm)',
-                  backgroundColor: 'var(--bg-inner)',
-                  border: '1px solid var(--border)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginBottom: '15px'
-                }}>
-                  <Shield size={18} style={{ color: 'var(--accent-green)' }} />
-                </div>
-                <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '20px', fontWeight: 700, margin: '0 0 10px' }}>
-                  ERC-8004 Identity
-                </h3>
-                <p style={{ color: 'var(--text-muted)', fontSize: '13.5px', lineHeight: '1.6', margin: 0 }}>
-                  Verifiable reputations on-chain for AI contractors. Choose agents based on audited compliance records.
-                </p>
-              </div>
-
-              {/* Card 4: 2/3 width */}
-              <div className="brutalist-card" style={{ gridColumn: 'span 2', backgroundColor: 'var(--bg-card)' }}>
-                <div>
-                  <div style={{
-                    width: '36px',
-                    height: '36px',
-                    borderRadius: 'var(--radius-sm)',
-                    backgroundColor: 'var(--bg-inner)',
-                    border: '1px solid var(--border)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    marginBottom: '15px'
-                  }}>
-                    <Coins size={18} style={{ color: 'var(--accent-coral)' }} />
+                <div style={{ display: 'flex', gap: '15px' }}>
+                  <div style={{ flex: 1 }}>
+                    <strong style={{ display: 'block', fontSize: '15px', color: 'var(--text-main)' }}>Sub-cent Gas Fees</strong>
+                    <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Gas sponsored directly by Arc node relayers.</span>
                   </div>
-                  <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '22px', fontWeight: 700, margin: '0 0 10px' }}>
-                    StableFX Yield & FX Arbitrage
-                  </h3>
-                  <p style={{ color: 'var(--text-muted)', fontSize: '14px', lineHeight: '1.6', margin: 0 }}>
-                    Maximize yields on dormant idle corporate cash. Automated algorithms swap balances between USDC and EURC based on real-time on-chain RFQ price quotes and yield opportunities.
-                  </p>
+                  <div style={{ flex: 1 }}>
+                    <strong style={{ display: 'block', fontSize: '15px', color: 'var(--text-main)' }}>ERC-8004 Verified</strong>
+                    <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Agents carry reputations directly in on-chain metadata.</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* SECTION 7: DEVELOPER EXPERIENCE (DX) */}
+        <section id="developers" style={{
+          padding: '80px 24px',
+          borderBottom: '1px solid var(--border)'
+        }}>
+          <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+            <div style={{ textAlign: 'center', marginBottom: '50px' }}>
+              <span className="badge-brutalist pink" style={{ fontSize: '10px' }}>Developer API</span>
+              <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '36px', fontWeight: 700, margin: '8px 0 0' }}>
+                Build Autonomous Payments in Minutes
+              </h2>
+              <p style={{ color: 'var(--text-muted)', fontSize: '15px', marginTop: '10px' }}>
+                A Stripe-like integration experience built for developer velocity.
+              </p>
+            </div>
+
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: '1.2fr 0.8fr',
+              gap: '40px',
+              alignItems: 'center'
+            }} className="flex flex-col md:grid">
+              
+              {/* Terminal code snippet view */}
+              <div style={{
+                backgroundColor: '#0c0a09',
+                borderRadius: '8px',
+                border: '2px solid var(--border)',
+                overflow: 'hidden',
+                boxShadow: 'var(--shadow-hard)'
+              }}>
+                <div style={{
+                  backgroundColor: '#1c1917',
+                  borderBottom: '1px solid #292524',
+                  padding: '10px 20px',
+                  display: 'flex',
+                  gap: '8px'
+                }}>
+                  {['sdk', 'api', 'cli'].map(tab => (
+                    <button
+                      key={tab}
+                      onClick={() => setActiveCodeTab(tab as any)}
+                      style={{
+                        background: activeCodeTab === tab ? '#292524' : 'none',
+                        border: 'none',
+                        color: activeCodeTab === tab ? 'white' : '#78716c',
+                        padding: '4px 12px',
+                        borderRadius: '4px',
+                        fontFamily: 'monospace',
+                        fontSize: '11px',
+                        fontWeight: 700,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {tab.toUpperCase()}
+                    </button>
+                  ))}
+                </div>
+                <div style={{ padding: '24px', fontFamily: 'monospace', fontSize: '12px', color: '#e2e8f0', overflowX: 'auto' }}>
+                  {activeCodeTab === 'sdk' && (
+                    <pre style={{ margin: 0 }}>
+                      <span style={{ color: '#60a5fa' }}>import</span> {'{ InferPay }'} <span style={{ color: '#60a5fa' }}>from</span> <span style={{ color: '#34d399' }}>'@inferpay/sdk'</span>{'\n\n'}
+                      <span style={{ color: '#8b5cf6' }}>const</span> agent = <span style={{ color: '#8b5cf6' }}>await</span> InferPay.initialize({'{'}{'\n'}
+                      {'  '}apiKey: <span style={{ color: '#34d399' }}>'ip_live_58c2a9'</span>,{'\n'}
+                      {'  '}agentId: <span style={{ color: '#34d399' }}>'agent_01h9y'</span>{'\n'}
+                      {'}'}){'\n\n'}
+                      <span style={{ color: '#8b5cf6' }}>const</span> payout = <span style={{ color: '#8b5cf6' }}>await</span> agent.executePayment({'{'}{'\n'}
+                      {'  '}toAddress: <span style={{ color: '#34d399' }}>'0x3f42...1209'</span>,{'\n'}
+                      {'  '}amount: <span style={{ color: '#fb923c' }}>150.00</span>,{'\n'}
+                      {'  '}currency: <span style={{ color: '#34d399' }}>'USDC'</span>{'\n'}
+                      {'}'}){'\n\n'}
+                      console.log(<span style={{ color: '#34d399' }}>`Settled tx hash: ${'{'}payout.hash{'}'}`</span>)
+                    </pre>
+                  )}
+                  {activeCodeTab === 'api' && (
+                    <pre style={{ margin: 0 }}>
+                      <span style={{ color: '#f472b6' }}>POST</span> /v1/intents/execute{'\n'}
+                      Authorization: Bearer ip_live_58c2a9{'\n'}
+                      Content-Type: application/json{'\n\n'}
+                      {'{'}{'\n'}
+                      {'  '}<span style={{ color: '#60a5fa' }}>"recipient"</span>: <span style={{ color: '#34d399' }}>"0x3f42...1209"</span>,{'\n'}
+                      {'  '}<span style={{ color: '#60a5fa' }}>"amount"</span>: <span style={{ color: '#fb923c' }}>150.00</span>,{'\n'}
+                      {'  '}<span style={{ color: '#60a5fa' }}>"policy_id"</span>: <span style={{ color: '#34d399' }}>"vault_500_limit"</span>{'\n'}
+                      {'}'}
+                    </pre>
+                  )}
+                  {activeCodeTab === 'cli' && (
+                    <pre style={{ margin: 0 }}>
+                      <span style={{ color: '#a855f7' }}>$</span> npm install -g @inferpay/cli{'\n'}
+                      <span style={{ color: '#a855f7' }}>$</span> inferpay login --key ip_live_58c2a9{'\n'}
+                      <span style={{ color: '#a855f7' }}>$</span> inferpay vaults:create --limit 500 --token USDC{'\n\n'}
+                      <span style={{ color: '#34d399' }}>✓ Vault successfully created. Address: 0x9f12...3e4f</span>
+                    </pre>
+                  )}
+                </div>
+              </div>
+
+              {/* Dev Copy */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '24px', fontWeight: 700, margin: 0 }}>
+                  Integrating payments has never been easier for AI builders.
+                </h3>
+                <p style={{ color: 'var(--text-muted)', fontSize: '14px', lineHeight: '1.6', margin: 0 }}>
+                  Utilize our comprehensive SDK and JSON-RPC API interfaces to spawn smart wallets for your LLM loops. Pre-packaged gas sponsorship parameters handle raw EVM complications in the background.
+                </p>
+                <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
+                  <Link href="/docs" className="btn-brutalist" style={{ textDecoration: 'none', padding: '10px 20px', fontSize: '13px', fontWeight: 700, backgroundColor: 'var(--bg-inner)' }}>
+                    API Reference
+                  </Link>
+                  <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="btn-brutalist" style={{ textDecoration: 'none', padding: '10px 20px', fontSize: '13px', fontWeight: 700, backgroundColor: 'var(--bg-inner)' }}>
+                    GitHub Repository
+                  </a>
                 </div>
               </div>
 
@@ -773,123 +1170,526 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* HOW IT WORKS SECTION */}
+        {/* SECTION 8: SECURITY & TRUST MATRIX */}
+        <section style={{
+          padding: '80px 24px',
+          backgroundColor: 'var(--bg-inner)',
+          borderBottom: '1px solid var(--border)'
+        }}>
+          <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+            <div style={{ textAlign: 'center', marginBottom: '50px' }}>
+              <span className="badge-brutalist green" style={{ fontSize: '10px' }}>Cryptographic Assurance</span>
+              <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '36px', fontWeight: 700, margin: '8px 0 0' }}>
+                Enterprise Grade Trust
+              </h2>
+              <p style={{ color: 'var(--text-muted)', fontSize: '15px', marginTop: '10px' }}>
+                Engineered with multi-layered cryptographic security from smart account to ledger.
+              </p>
+            </div>
+
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(4, 1fr)',
+              gap: '20px'
+            }} className="flex flex-col sm:grid">
+              {[
+                { title: 'Non-Custodial', desc: 'Operator retains key authority; contracts lock raw extraction access.' },
+                { title: 'Smart Guarded', desc: 'Every transaction validates limits via Permit2 code paths.' },
+                { title: 'On-Chain Rules', desc: 'Spending caps and agent metadata reside immutably on Arc.' },
+                { title: 'Multi-Sig Safe', desc: 'Compatible with multisig structures for corporate treasury approvals.' },
+                { title: 'ERC-8004 Identity', desc: 'Verifiable credentials link agent keys directly to reputation registries.' },
+                { title: 'Circle USDC Rails', desc: '1:1 dollar-backed stablecoin guarantees liquidity safety.' },
+                { title: 'Audit Ready', desc: 'Codebase optimized for public auditing and security validation.' },
+                { title: 'Zero Gas Waste', desc: 'No gas wallet management needed for your AI agents.' }
+              ].map((item, index) => (
+                <div 
+                  key={index}
+                  style={{
+                    backgroundColor: 'var(--bg-card)',
+                    border: '1px solid var(--border)',
+                    borderRadius: 'var(--radius-sm)',
+                    padding: '20px',
+                    boxShadow: 'var(--shadow-soft)'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+                    <CheckCircle2 size={16} style={{ color: 'var(--accent-green)', flexShrink: 0 }} />
+                    <strong style={{ fontSize: '14px', color: 'var(--text-main)' }}>{item.title}</strong>
+                  </div>
+                  <p style={{ color: 'var(--text-muted)', fontSize: '12.5px', lineHeight: '1.5', margin: 0 }}>
+                    {item.desc}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* SECTION 9: COMPARISON TABLE */}
+        <section style={{
+          padding: '80px 24px',
+          borderBottom: '1px solid var(--border)'
+        }}>
+          <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+            <div style={{ textAlign: 'center', marginBottom: '50px' }}>
+              <span className="badge-brutalist pink" style={{ fontSize: '10px' }}>Feature Matrix</span>
+              <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '36px', fontWeight: 700, margin: '8px 0 0' }}>
+                Outperforming Legacy Stacks
+              </h2>
+            </div>
+
+            <div style={{ overflowX: 'auto', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '13.5px' }}>
+                <thead>
+                  <tr style={{ backgroundColor: 'var(--bg-inner)', borderBottom: '1px solid var(--border)' }}>
+                    <th style={{ padding: '16px 20px', fontWeight: 700 }}>Capabilities</th>
+                    <th style={{ padding: '16px 20px', fontWeight: 700, color: 'var(--accent-coral)' }}>InferPay</th>
+                    <th style={{ padding: '16px 20px', fontWeight: 700 }}>Legacy Web3 Wallet</th>
+                    <th style={{ padding: '16px 20px', fontWeight: 700 }}>Traditional Bank</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    { capability: 'AI-Native (Passkey & API-driven)', ip: true, w3: false, bank: false },
+                    { capability: 'Programmable Spending Limits', ip: true, w3: false, bank: false },
+                    { capability: 'Gasless Transaction Settlement', ip: true, w3: false, bank: true },
+                    { capability: 'Sub-second stablecoin settlement', ip: true, w3: false, bank: false },
+                    { capability: 'Multi-Agent payroll logic', ip: true, w3: false, bank: false },
+                    { capability: 'On-chain Permit2 Security rules', ip: true, w3: false, bank: false },
+                    { capability: 'Micropayments (x402 protocol)', ip: true, w3: false, bank: false }
+                  ].map((row, idx) => (
+                    <tr key={idx} style={{ borderBottom: '1px solid var(--border)', backgroundColor: idx % 2 === 0 ? 'var(--bg-main)' : 'var(--bg-card)' }}>
+                      <td style={{ padding: '14px 20px', fontWeight: 600 }}>{row.capability}</td>
+                      <td style={{ padding: '14px 20px', color: 'var(--accent-coral)', fontWeight: 800 }}>{row.ip ? '✓ Yes' : '—'}</td>
+                      <td style={{ padding: '14px 20px' }}>{row.w3 ? '✓ Yes' : '—'}</td>
+                      <td style={{ padding: '14px 20px' }}>{row.bank ? '✓ Yes' : '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        {/* SECTION 10: TESTIMONIALS */}
+        <section style={{
+          padding: '80px 24px',
+          backgroundColor: 'var(--bg-inner)',
+          borderBottom: '1px solid var(--border)'
+        }}>
+          <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+            <div style={{ textAlign: 'center', marginBottom: '50px' }}>
+              <span className="badge-brutalist green" style={{ fontSize: '10px' }}>Testimonials</span>
+              <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '36px', fontWeight: 700, margin: '8px 0 0' }}>
+                Loved by AI Builders
+              </h2>
+            </div>
+
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: '20px'
+            }} className="flex flex-col md:grid">
+              {[
+                { quote: 'We spun up our coordinator treasury vault in under an hour. Micropayments to worker sub-agents work seamlessly.', author: 'CEO, AgentForce AI' },
+                { quote: 'Permit2 budget enforcement keeps our corporate treasurers calm. The agents spend stablecoins, but limits are cryptographically safe.', author: 'CTO, LedgerFlow' },
+                { quote: 'Arc blockchain gas sponsorship saved us hundreds in overhead. InferPay is the missing financial layer for the AI economy.', author: 'Core Developer, NexaNode' }
+              ].map((card, idx) => (
+                <div 
+                  key={idx}
+                  style={{
+                    backgroundColor: 'var(--bg-card)',
+                    border: '1px solid var(--border)',
+                    borderRadius: 'var(--radius-sm)',
+                    padding: '24px',
+                    boxShadow: 'var(--shadow-soft)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between'
+                  }}
+                >
+                  <p style={{ fontStyle: 'italic', fontSize: '14px', lineHeight: '1.6', margin: '0 0 20px', color: 'var(--text-main)' }}>
+                    "{card.quote}"
+                  </p>
+                  <div style={{ fontSize: '12.5px', fontWeight: 700, color: 'var(--text-muted)' }}>
+                    — {card.author}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* SECTION 11: HOW IT WORKS (6 STEPS) */}
+        <section style={{
+          padding: '80px 24px',
+          borderBottom: '1px solid var(--border)'
+        }}>
+          <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+            <div style={{ textAlign: 'center', marginBottom: '50px' }}>
+              <span className="badge-brutalist pink" style={{ fontSize: '10px' }}>Setup Guide</span>
+              <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '36px', fontWeight: 700, margin: '8px 0 0' }}>
+                Onboarding in <i>6 Simple Steps</i>
+              </h2>
+            </div>
+
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: '30px'
+            }} className="flex flex-col md:grid">
+              {[
+                { step: '1', title: 'Connect Wallet', desc: 'Securely link via passkeys, social logins, or MetaMask.' },
+                { step: '2', title: 'Fund Treasury', desc: 'Deposit Circle USDC or EURC into your non-custodial Smart Account.' },
+                { step: '3', title: 'Configure Rules', desc: 'Establish granular daily limits and signature policy envelopes.' },
+                { step: '4', title: 'Assign AI Agents', desc: 'Link LLM keys to specific vault rule limits.' },
+                { step: '5', title: 'Execute Payments', desc: 'Agents dispatch settlement intents autonomously over the SDK.' },
+                { step: '6', title: 'Monitor Activity', desc: 'Audit transactions, gas savings, and reputations live.' }
+              ].map((step, idx) => (
+                <div key={idx} style={{ display: 'flex', gap: '16px' }}>
+                  <div style={{
+                    width: '36px',
+                    height: '36px',
+                    borderRadius: '50%',
+                    backgroundColor: 'var(--text-main)',
+                    color: 'var(--bg-main)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontWeight: 800,
+                    fontSize: '14px',
+                    flexShrink: 0
+                  }}>{step.step}</div>
+                  <div>
+                    <h4 style={{ margin: '0 0 6px 0', fontSize: '15px', fontWeight: 700 }}>{step.title}</h4>
+                    <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-muted)', lineHeight: '1.5' }}>{step.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* SECTION 18: ROI COMPARISON */}
+        <section style={{
+          padding: '80px 24px',
+          backgroundColor: 'var(--bg-inner)',
+          borderBottom: '1px solid var(--border)'
+        }}>
+          <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+            <div style={{ textAlign: 'center', marginBottom: '50px' }}>
+              <span className="badge-brutalist green" style={{ fontSize: '10px' }}>ROI Matrix</span>
+              <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '36px', fontWeight: 700, margin: '8px 0 0' }}>
+                Financial & Operations Optimization
+              </h2>
+            </div>
+
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: '30px'
+            }} className="flex flex-col md:grid">
+              
+              {/* Without card */}
+              <div style={{
+                backgroundColor: 'var(--bg-card)',
+                border: '2px solid var(--border)',
+                borderTop: '6px solid var(--accent-coral)',
+                borderRadius: 'var(--radius-sm)',
+                padding: '30px',
+                boxShadow: 'var(--shadow-soft)'
+              }}>
+                <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '20px', fontWeight: 800, margin: '0 0 20px', color: 'var(--text-main)' }}>
+                  Manual Operations (Legacy)
+                </h3>
+                <ul style={{ display: 'flex', flexDirection: 'column', gap: '12px', paddingLeft: '20px', fontSize: '13.5px', color: 'var(--text-muted)' }}>
+                  <li>Treasurers manually login to approve daily SaaS/API invoices.</li>
+                  <li>Over $12.00 per cross-border payment wire fee.</li>
+                  <li>Substantial risk of API billing over-drafting key cards.</li>
+                  <li>Inability to automate micropayments dynamically.</li>
+                </ul>
+              </div>
+
+              {/* With card */}
+              <div style={{
+                backgroundColor: 'var(--bg-card)',
+                border: '2px solid var(--border)',
+                borderTop: '6px solid var(--accent-green)',
+                borderRadius: 'var(--radius-sm)',
+                padding: '30px',
+                boxShadow: 'var(--shadow-hard)'
+              }}>
+                <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '20px', fontWeight: 800, margin: '0 0 20px', color: 'var(--text-main)' }}>
+                  Autonomous with InferPay
+                </h3>
+                <ul style={{ display: 'flex', flexDirection: 'column', gap: '12px', paddingLeft: '20px', fontSize: '13.5px', color: 'var(--text-main)' }}>
+                  <li><strong style={{ color: 'var(--accent-green)' }}>95% Less Manual Overhead</strong> — limits protect capital.</li>
+                  <li><strong style={{ color: 'var(--accent-green)' }}>Sub-cent Settlement</strong> via CCTP stablecoin rails.</li>
+                  <li><strong style={{ color: 'var(--accent-green)' }}>On-Chain Permits</strong> restrict rogue behavior.</li>
+                  <li><strong style={{ color: 'var(--accent-green)' }}>Automatic Yield Optimization</strong> swaps idle deposits.</li>
+                </ul>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        {/* SECTION 19: WHY NOW */}
+        <section style={{
+          padding: '80px 24px',
+          borderBottom: '1px solid var(--border)'
+        }}>
+          <div style={{ maxWidth: '800px', margin: '0 auto', textAlign: 'center' }}>
+            <span className="badge-brutalist pink" style={{ fontSize: '10px' }}>Ecosystem Outlook</span>
+            <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '36px', fontWeight: 700, margin: '8px 0 20px' }}>
+              Why Autonomous Payments Matter Now
+            </h2>
+            <p style={{ color: 'var(--text-muted)', fontSize: '16px', lineHeight: '1.8', textAlign: 'justify' }}>
+              AI agents are transitioning from cognitive systems to active economic actors. Today, they write code, compile research, and construct applications. Yet, they remain financially locked—reliant on human bank cards or risky custodial balances. 
+              InferPay provides the native financial stack for autonomous workflows. By combining non-custodial smart contracts on Arc with Circle CCTP stablecoin rails, we give AI agents the safe, predictable financial rails needed to operate autonomously.
+            </p>
+          </div>
+        </section>
+
+        {/* SECTION 17: ROADMAP */}
+        <section style={{
+          padding: '80px 24px',
+          backgroundColor: 'var(--bg-inner)',
+          borderBottom: '1px solid var(--border)'
+        }}>
+          <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+            <div style={{ textAlign: 'center', marginBottom: '50px' }}>
+              <span className="badge-brutalist green" style={{ fontSize: '10px' }}>Ecosystem Vision</span>
+              <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '36px', fontWeight: 700, margin: '8px 0 0' }}>
+                Public Roadmap
+              </h2>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', position: 'relative' }}>
+              {[
+                { quarter: 'Q2 2026', title: 'AI Wallets & Passkey accounts', status: 'Completed', desc: 'Secure wallet provisioning with sub-second finality on Arc.' },
+                { quarter: 'Q3 2026', title: 'Agent Payroll & Task escrow', status: 'In Progress', desc: 'Enabling coordinator-worker task payout flows automatically.' },
+                { quarter: 'Q4 2026', title: 'Autonomous Multi-Agent Treasuries', status: 'Planned', desc: 'Advanced on-chain signature policies and multi-currency controls.' },
+                { quarter: 'Q1 2027', title: 'Cross-Chain CCTP Settlement Engine', status: 'Planned', desc: 'Deploying native liquidity bridge routing with Circle.' }
+              ].map((row, idx) => (
+                <div 
+                  key={idx}
+                  style={{
+                    backgroundColor: 'var(--bg-card)',
+                    border: '1px solid var(--border)',
+                    borderRadius: 'var(--radius-sm)',
+                    padding: '20px',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    boxShadow: 'var(--shadow-soft)'
+                  }}
+                >
+                  <div>
+                    <span style={{ fontSize: '11px', fontWeight: 800, color: 'var(--accent-pink)', textTransform: 'uppercase' }}>{row.quarter}</span>
+                    <h4 style={{ margin: '4px 0', fontSize: '16px', fontWeight: 700 }}>{row.title}</h4>
+                    <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-muted)' }}>{row.desc}</p>
+                  </div>
+                  <span className={`badge-brutalist ${row.status === 'Completed' ? 'green' : row.status === 'In Progress' ? 'yellow' : ''}`} style={{ fontSize: '9.5px' }}>
+                    {row.status}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* SECTION 12: EXHAUSTIVE FAQ ACCORDION */}
+        <section id="faq" style={{
+          padding: '80px 24px',
+          borderBottom: '1px solid var(--border)'
+        }}>
+          <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+            <div style={{ textAlign: 'center', marginBottom: '50px' }}>
+              <span className="badge-brutalist pink" style={{ fontSize: '10px' }}>Support Center</span>
+              <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '36px', fontWeight: 700, margin: '8px 0 0' }}>
+                Frequently Asked Questions
+              </h2>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {[
+                { q: 'Is InferPay custodial?', a: 'No, InferPay is completely non-custodial. All AI wallets are smart contract accounts controlled via cryptographic passkey signatures, securing your treasury against external control.' },
+                { q: 'Which wallets are supported?', a: 'We natively support MetaMask, Passkeys, Coinbase Wallet, WalletConnect, and social passkey setups.' },
+                { q: 'How does spending control work?', a: 'Spending controls are enforced on-chain via smart contracts (such as Permit2 validation policies), restricting the maximum amount an agent can transfer per transaction or daily.' },
+                { q: 'What stablecoins are supported?', a: 'We support Circle USDC and EURC on the Arc blockchain.' },
+                { q: 'How are AI agents authenticated?', a: 'AI agents are authenticated via unique cryptographic credentials tied to their specific ERC-8004 reputational identity records.' },
+                { q: 'How does gas sponsorship work?', a: 'All gas fees are sponsored directly by our Arc node relayers, ensuring AI agents require no separate native gas token balances.' },
+                { q: 'Can enterprise clients use this?', a: 'Yes. InferPay provides specialized corporate vaults, compliant treasury controls, and automated payroll reporting workflows.' },
+                { q: 'What is the x402 nanopayment protocol?', a: 'It is our custom micro-billing routing engine, allowing AI agents to stream sub-cent payments for API query completions.' },
+                { q: 'Is there smart contract insurance?', a: 'We partner with DeFi coverage protocols to provide optionally structured vault assurance mechanisms.' },
+                { q: 'Are transactions compliant with regulations?', a: 'Yes, our smart routing checks and verifies wallets against Circle AML blacklist registries.' },
+                { q: 'How fast are settlements completed?', a: 'All settlements on the Arc chain conclude within 0.8 seconds.' },
+                { q: 'Can human operators override agents?', a: 'Yes, human owners retain ultimate master key permissions to cancel or modify vault limits at any time.' },
+                { q: 'Do you offer a bug bounty program?', a: 'Yes, our Bug Bounty program pays up to 25,000 USDC for verified vulnerabilities.' },
+                { q: 'How does cross-chain routing work?', a: 'We utilize Circle CCTP to burn and mint stablecoins across different chains cleanly.' },
+                { q: 'Where is the SDK documentation?', a: 'You can access full API references and code guides at /docs.' }
+              ].map((faq, index) => {
+                const isOpen = activeFaqIndex === index
+                return (
+                  <div 
+                    key={index}
+                    style={{
+                      border: '1px solid var(--border)',
+                      borderRadius: 'var(--radius-sm)',
+                      backgroundColor: 'var(--bg-card)',
+                      overflow: 'hidden'
+                    }}
+                  >
+                    <button
+                      onClick={() => setActiveFaqIndex(isOpen ? null : index)}
+                      style={{
+                        width: '100%',
+                        padding: '18px 20px',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        backgroundColor: 'none',
+                        border: 'none',
+                        textAlign: 'left',
+                        cursor: 'pointer',
+                        fontSize: '15px',
+                        fontWeight: 700,
+                        color: 'var(--text-main)',
+                        fontFamily: 'inherit'
+                      }}
+                    >
+                      <span>{faq.q}</span>
+                      {isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                    </button>
+                    {isOpen && (
+                      <div style={{
+                        padding: '0 20px 20px 20px',
+                        fontSize: '13.5px',
+                        color: 'var(--text-muted)',
+                        lineHeight: '1.6'
+                      }}>
+                        {faq.a}
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        </section>
+
+        {/* SECTION 13: COMMUNITY */}
+        <section style={{
+          padding: '80px 24px',
+          backgroundColor: 'var(--bg-inner)',
+          borderBottom: '1px solid var(--border)'
+        }}>
+          <div style={{ maxWidth: '800px', margin: '0 auto', textAlign: 'center' }}>
+            <span className="badge-brutalist green" style={{ fontSize: '10px' }}>Ecosystem Ecosystem</span>
+            <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '36px', fontWeight: 700, margin: '8px 0 20px' }}>
+              Join the Community
+            </h2>
+            <p style={{ color: 'var(--text-muted)', fontSize: '15.5px', marginBottom: '30px' }}>
+              Connect with fellow developers, get engineering support, and track releases.
+            </p>
+            <div style={{ display: 'flex', gap: '15px', justifyContent: 'center', flexWrap: 'wrap' }}>
+              <a href="https://discord.com" target="_blank" rel="noopener noreferrer" className="btn-brutalist btn-brutalist-pink" style={{ textDecoration: 'none', padding: '12px 28px', fontWeight: 700 }}>
+                Join Discord
+              </a>
+              <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="btn-brutalist" style={{ textDecoration: 'none', padding: '12px 28px', fontWeight: 700, backgroundColor: 'var(--bg-card)' }}>
+                GitHub Stars
+              </a>
+              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="btn-brutalist" style={{ textDecoration: 'none', padding: '12px 28px', fontWeight: 700, backgroundColor: 'var(--bg-card)' }}>
+                Follow X updates
+              </a>
+            </div>
+          </div>
+        </section>
+
+        {/* SECTION 14: CHANGELOG */}
+        <section style={{
+          padding: '80px 24px',
+          borderBottom: '1px solid var(--border)'
+        }}>
+          <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+            <div style={{ textAlign: 'center', marginBottom: '50px' }}>
+              <span className="badge-brutalist pink" style={{ fontSize: '10px' }}>Release Log</span>
+              <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '36px', fontWeight: 700, margin: '8px 0 0' }}>
+                What's New
+              </h2>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              {[
+                { version: 'v0.6', title: 'Cross-Chain CCTP Settlement Engine', desc: 'Allows direct stablecoin settlement across Base and Arbitrum pipelines.' },
+                { version: 'v0.5', title: 'ERC-8004 Identity reputation contracts', desc: 'Enforces verifiable on-chain metadata for third-party AI agents.' },
+                { version: 'v0.4', title: 'Multi-Agent Payroll Orchestration', desc: 'Supports automated coordination worker task structures.' }
+              ].map((changelog, idx) => (
+                <div key={idx} style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
+                  <span className="badge-brutalist pink" style={{ fontSize: '10px', flexShrink: 0, padding: '4px 10px' }}>{changelog.version}</span>
+                  <div>
+                    <h4 style={{ margin: '0 0 4px 0', fontSize: '16px', fontWeight: 700 }}>{changelog.title}</h4>
+                    <p style={{ margin: 0, fontSize: '13.5px', color: 'var(--text-muted)' }}>{changelog.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* SECTION 15: STATUS PAGE & SYSTEM TRANPARENCY */}
+        <section style={{
+          padding: '30px 24px',
+          backgroundColor: 'var(--bg-inner)',
+          borderBottom: '1px solid var(--border)'
+        }}>
+          <div style={{ maxWidth: '1000px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--accent-green)', display: 'inline-block' }}></span>
+              <span style={{ fontSize: '12.5px', fontWeight: 700, color: 'var(--text-main)' }}>All Systems Operational</span>
+            </div>
+            <div style={{ display: 'flex', gap: '20px', fontSize: '12px', color: 'var(--text-muted)' }}>
+              <span>API Status: 100%</span>
+              <span>Settlement Engine: Healthy</span>
+              <span>RPC Connectivity: 12ms</span>
+            </div>
+            <a href="https://status.inferpay.xyz" target="_blank" rel="noopener noreferrer" style={{ fontSize: '12px', color: 'var(--accent-pink)', textDecoration: 'underline' }}>
+              status.inferpay.xyz
+            </a>
+          </div>
+        </section>
+
+        {/* SECTION 20: FINALwaitlist CTA */}
         <section style={{
           padding: '80px 24px',
           maxWidth: '1000px',
           margin: '0 auto'
         }}>
-          <div style={{ textAlign: 'center', marginBottom: '60px' }}>
-            <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '36px', fontWeight: 700, margin: 0 }}>
-              How it works in <i>3 Simple Steps</i>
-            </h2>
-            <p style={{ color: 'var(--text-muted)', fontSize: '16px', marginTop: '10px' }}>
-              Launch your autonomous treasury stack in minutes.
-            </p>
-          </div>
-
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: '30px',
-            position: 'relative'
-          }} className="flex flex-col md:grid">
-            
-            {/* Step 1 */}
-            <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' }}>
-              <div style={{
-                width: '50px',
-                height: '50px',
-                borderRadius: '50%',
-                backgroundColor: 'var(--text-main)',
-                color: 'var(--bg-main)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '18px',
-                fontWeight: 800,
-                boxShadow: 'var(--shadow-soft)'
-              }}>1</div>
-              <h3 style={{ fontSize: '18px', fontWeight: 700, margin: 0 }}>Connect & Fund</h3>
-              <p style={{ color: 'var(--text-muted)', fontSize: '13.5px', lineHeight: '1.6', margin: 0, maxWidth: '280px' }}>
-                Securely log in via Passkeys or MetaMask and fund your account with USDC or EURC.
-              </p>
-            </div>
-
-            {/* Step 2 */}
-            <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' }}>
-              <div style={{
-                width: '50px',
-                height: '50px',
-                borderRadius: '50%',
-                backgroundColor: 'var(--text-main)',
-                color: 'var(--bg-main)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '18px',
-                fontWeight: 800,
-                boxShadow: 'var(--shadow-soft)'
-              }}>2</div>
-              <h3 style={{ fontSize: '18px', fontWeight: 700, margin: 0 }}>Provision AI Rules</h3>
-              <p style={{ color: 'var(--text-muted)', fontSize: '13.5px', lineHeight: '1.6', margin: 0, maxWidth: '280px' }}>
-                Define spending limits, gas sponsorships, or assign task contracts to designated AI Agents.
-              </p>
-            </div>
-
-            {/* Step 3 */}
-            <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' }}>
-              <div style={{
-                width: '50px',
-                height: '50px',
-                borderRadius: '50%',
-                backgroundColor: 'var(--text-main)',
-                color: 'var(--bg-main)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '18px',
-                fontWeight: 800,
-                boxShadow: 'var(--shadow-soft)'
-              }}>3</div>
-              <h3 style={{ fontSize: '18px', fontWeight: 700, margin: 0 }}>Automate Payments</h3>
-              <p style={{ color: 'var(--text-muted)', fontSize: '13.5px', lineHeight: '1.6', margin: 0, maxWidth: '280px' }}>
-                Your AI works and processes bills instantly. Transactions verify on Arc with USDC gas.
-              </p>
-            </div>
-
-          </div>
-        </section>
-
-        {/* FINAL CONVERSION CALL TO ACTION */}
-        <section style={{
-          padding: '40px 24px 80px',
-          maxWidth: '1000px',
-          margin: '0 auto'
-        }}>
           <div className="bg-inner" style={{
-            padding: '50px 30px',
+            padding: '60px 40px',
             borderRadius: 'var(--radius-lg)',
-            border: '1px solid var(--border)',
+            border: '2px solid var(--border)',
             backgroundColor: 'var(--bg-inner)',
             textAlign: 'center',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: '20px'
+            gap: '24px',
+            boxShadow: 'var(--shadow-hard)'
           }}>
-            <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '32px', fontWeight: 700, margin: 0 }}>
-              Join the <i>Autonomous Stablecoins</i> Waitlist
+            <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '36px', fontWeight: 800, margin: 0 }}>
+              Ready to Give Your AI Agent a Wallet?
             </h2>
-            <p style={{ color: 'var(--text-muted)', fontSize: '15px', maxWidth: '500px', margin: 0 }}>
-              Get early beta access to developer SDKs, token models, and exclusive gas sponsorships on the Arc testnet.
+            <p style={{ color: 'var(--text-muted)', fontSize: '15.5px', maxWidth: '500px', margin: 0, lineHeight: '1.6' }}>
+              Secure early access to developer SDK keys, testnet sponsorships, and join the future of autonomous stablecoin commerce.
             </p>
 
             <form onSubmit={handleJoinWaitlist} style={{
               display: 'flex',
               gap: '10px',
               width: '100%',
-              maxWidth: '420px',
+              maxWidth: '440px',
               marginTop: '10px'
             }} className="flex flex-col sm:flex-row">
               <input 
@@ -905,31 +1705,39 @@ export default function LandingPage() {
               <button 
                 type="submit" 
                 className="btn-brutalist btn-brutalist-pink"
-                style={{ padding: '0 24px', height: '42px', fontWeight: 700, whiteSpace: 'nowrap' }}
+                style={{ padding: '0 28px', height: '42px', fontWeight: 700, whiteSpace: 'nowrap' }}
                 disabled={waitlistStatus !== 'idle'}
               >
-                {waitlistStatus === 'idle' && 'Join Waitlist'}
+                {waitlistStatus === 'idle' && 'Get Early Access'}
                 {waitlistStatus === 'loading' && 'Joining...'}
-                {waitlistStatus === 'success' && '✓ You\'re on the list'}
+                {waitlistStatus === 'success' && '✓ Enrolled'}
               </button>
             </form>
 
             {waitlistStatus === 'success' && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--accent-green)', fontSize: '13px', fontWeight: 700, animation: 'fadeIn 0.2s' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--accent-green)', fontSize: '13px', fontWeight: 700 }}>
                 <CheckCircle2 size={16} />
-                <span>Thank you! We\'ve saved your email. Invitation will follow.</span>
+                <span>Success! You have been added to the waitlist queue.</span>
               </div>
             )}
+
+            <div style={{ display: 'flex', gap: '20px', fontSize: '12px', color: 'var(--text-muted)', flexWrap: 'wrap', justifyContent: 'center' }}>
+              <Link href="/docs" style={{ color: 'inherit' }}>Read Docs</Link>
+              <span>•</span>
+              <a href="https://discord.com" style={{ color: 'inherit' }}>Discord Hub</a>
+              <span>•</span>
+              <Link href="/contact" style={{ color: 'inherit' }}>Book enterprise demo</Link>
+            </div>
           </div>
         </section>
 
       </main>
 
-      {/* FOOTER */}
+      {/* FOOTER & TRUST CENTER RESOURCE GRID */}
       <footer style={{
         backgroundColor: 'var(--bg-card)',
         borderTop: '1px solid var(--border)',
-        padding: '50px 24px 40px',
+        padding: '60px 24px 40px',
         color: 'var(--text-muted)',
         fontSize: '13px'
       }}>
@@ -971,10 +1779,10 @@ export default function LandingPage() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <span style={{ fontWeight: 700, color: 'var(--text-main)', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Resources</span>
             <Link href="/docs" style={{ textDecoration: 'none', color: 'inherit' }}>Documentation</Link>
-            <Link href="/faq" style={{ textDecoration: 'none', color: 'inherit' }}>FAQ Support</Link>
             <a href="https://github.com" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center', gap: '4px' }}>
               GitHub Repo <ExternalLink size={12} />
             </a>
+            <Link href="/security" style={{ textDecoration: 'none', color: 'inherit' }}>Incident History</Link>
           </div>
 
           {/* Links 2 */}
@@ -987,9 +1795,9 @@ export default function LandingPage() {
             </a>
           </div>
 
-          {/* Links 3 */}
+          {/* Links 3: Trust Center Resources */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <span style={{ fontWeight: 700, color: 'var(--text-main)', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Legal</span>
+            <span style={{ fontWeight: 700, color: 'var(--text-main)', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Trust Center</span>
             <Link href="/security" style={{ textDecoration: 'none', color: 'inherit', fontWeight: 600 }}>🛡️ Security Hub</Link>
             <Link href="/privacy" style={{ textDecoration: 'none', color: 'inherit' }}>Privacy Policy</Link>
             <Link href="/terms" style={{ textDecoration: 'none', color: 'inherit' }}>Terms of Service</Link>
@@ -997,6 +1805,197 @@ export default function LandingPage() {
 
         </div>
       </footer>
+
+      {/* FLOAT SUPPORT CHAT WIDGET */}
+      <div style={{
+        position: 'fixed',
+        bottom: '24px',
+        right: '24px',
+        zIndex: 999
+      }}>
+        <button
+          onClick={() => alert('Support Widget: Contacting operational developer support channel...')}
+          style={{
+            width: '50px',
+            height: '50px',
+            borderRadius: '50%',
+            backgroundColor: 'var(--text-main)',
+            color: 'var(--bg-main)',
+            border: '2px solid var(--border)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            boxShadow: '3px 3px 0px var(--border)'
+          }}
+          title="Contact Support"
+        >
+          <MessageSquare size={20} />
+        </button>
+      </div>
+
+      {/* COOKIE CONSENT BANNER */}
+      {showCookieBanner && (
+        <div style={{
+          position: 'fixed',
+          bottom: '24px',
+          left: '24px',
+          maxWidth: '340px',
+          backgroundColor: 'var(--bg-card)',
+          border: '2px solid var(--border)',
+          borderRadius: 'var(--radius-sm)',
+          padding: '20px',
+          boxShadow: 'var(--shadow-hard)',
+          zIndex: 1000,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '12px',
+          animation: 'slideUp 0.3s ease-out'
+        }}>
+          <div style={{ fontSize: '13px', color: 'var(--text-main)', lineHeight: '1.5' }}>
+            🍪 We use cookies to analyze performance and optimize conversion rate. By continuing, you agree to our policies.
+          </div>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button 
+              onClick={() => setShowCookieBanner(false)}
+              className="btn-brutalist btn-brutalist-pink"
+              style={{ flex: 1, height: '32px', fontSize: '11px', fontWeight: 800, padding: 0 }}
+            >
+              Accept Cookies
+            </button>
+            <button 
+              onClick={() => setShowCookieBanner(false)}
+              className="btn-brutalist"
+              style={{ flex: 1, height: '32px', fontSize: '11px', fontWeight: 800, padding: 0, backgroundColor: 'var(--bg-inner)' }}
+            >
+              Decline
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* WALKTHROUGH VIDEO MODAL OVERLAY */}
+      {videoModalOpen && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          backgroundColor: 'rgba(0,0,0,0.85)',
+          backdropFilter: 'blur(8px)',
+          zIndex: 10000,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '24px',
+          animation: 'fadeIn 0.2s ease-out'
+        }}>
+          <div style={{
+            position: 'relative',
+            width: '100%',
+            maxWidth: '800px',
+            backgroundColor: '#000',
+            aspectRatio: '16/9',
+            borderRadius: 'var(--radius-md)',
+            border: '2px solid var(--border)',
+            boxShadow: 'var(--shadow-hard)',
+            overflow: 'hidden'
+          }}>
+            <button
+              onClick={() => setVideoModalOpen(false)}
+              style={{
+                position: 'absolute',
+                top: '15px',
+                right: '15px',
+                zIndex: 10,
+                background: '#fff',
+                border: '2px solid var(--border)',
+                borderRadius: '50%',
+                width: '32px',
+                height: '32px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                color: '#000',
+                fontWeight: 'bold'
+              }}
+            >
+              ✕
+            </button>
+            {/* Embedded mockup player */}
+            <div style={{
+              width: '100%',
+              height: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center',
+              color: '#34d399',
+              fontFamily: 'monospace',
+              fontSize: '13px',
+              padding: '40px',
+              textAlign: 'center'
+            }}>
+              <Cpu size={48} className="blink" style={{ color: 'var(--accent-pink)', marginBottom: '20px' }} />
+              <div>▶ STREAMING DEMO VIDEO FEED FROM THE CANTEEN APP NETWORKS...</div>
+              <div style={{ color: 'var(--text-light)', marginTop: '8px', fontSize: '11px' }}>
+                Connecting to simulated walkthrough stream: walkthrough_v1.mp4
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* SEO JSON-LD Structured Data Markups */}
+      <script 
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@graph": [
+              {
+                "@type": "Organization",
+                "@id": "https://inferpay.xyz/#organization",
+                "name": "InferPay",
+                "url": "https://inferpay.xyz",
+                "logo": "https://inferpay.xyz/images/logo.png"
+              },
+              {
+                "@type": "SoftwareApplication",
+                "@id": "https://inferpay.xyz/#application",
+                "name": "InferPay Agent Wallet SDK",
+                "operatingSystem": "All",
+                "applicationCategory": "DeveloperApplication",
+                "offers": {
+                  "@type": "Offer",
+                  "price": "0",
+                  "priceCurrency": "USD"
+                }
+              },
+              {
+                "@type": "FAQPage",
+                "mainEntity": [
+                  {
+                    "@type": "Question",
+                    "name": "Is InferPay custodial?",
+                    "acceptedAnswer": {
+                      "@type": "Answer",
+                      "text": "No, InferPay is completely non-custodial. All AI wallets are smart contract accounts controlled via cryptographic keys and signatures."
+                    }
+                  },
+                  {
+                    "@type": "Question",
+                    "name": "How does spending control work?",
+                    "acceptedAnswer": {
+                      "@type": "Answer",
+                      "text": "Spending controls are enforced on-chain via smart contracts (such as Permit2 validation policies)."
+                    }
+                  }
+                ]
+              }
+            ]
+          })
+        }}
+      />
     </div>
   )
 }
