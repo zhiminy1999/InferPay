@@ -1157,10 +1157,10 @@ export default function LandingPage() {
                   Utilize our comprehensive SDK and JSON-RPC API interfaces to spawn smart wallets for your LLM loops. Pre-packaged gas sponsorship parameters handle raw EVM complications in the background.
                 </p>
                 <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
-                  <Link href="/docs" className="btn-brutalist" style={{ textDecoration: 'none', padding: '10px 20px', fontSize: '13px', fontWeight: 700, backgroundColor: 'var(--bg-inner)' }}>
+                  <Link href="/docs" className="btn-brutalist" style={{ textDecoration: 'none', padding: '10px 20px', fontSize: '13px', fontWeight: 700, backgroundColor: 'var(--bg-inner)', color: 'var(--text-main)', border: '1px solid var(--border)' }}>
                     API Reference
                   </Link>
-                  <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="btn-brutalist" style={{ textDecoration: 'none', padding: '10px 20px', fontSize: '13px', fontWeight: 700, backgroundColor: 'var(--bg-inner)' }}>
+                  <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="btn-brutalist" style={{ textDecoration: 'none', padding: '10px 20px', fontSize: '13px', fontWeight: 700, backgroundColor: 'var(--bg-inner)', color: 'var(--text-main)', border: '1px solid var(--border)' }}>
                     GitHub Repository
                   </a>
                 </div>
