@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { Sparkles, RefreshCw, ArrowRightLeft, TrendingUp, AlertTriangle, ArrowRight, ShieldCheck } from 'lucide-react'
+import { Sparkles, RefreshCw, ArrowRightLeft, TrendingUp, AlertTriangle, ArrowRight, ShieldCheck, Info } from 'lucide-react'
 import { useStableFX } from '@/hooks/useStableFX'
 import { SwapHistory } from './SwapHistory'
 import { ButtonLoading } from './LoadingSystem'
@@ -273,12 +273,22 @@ export function SavingsOptimizer({
 
           <div style={{ display: 'flex', gap: '15px', margin: '15px 0' }}>
             <div style={{ flex: 1, padding: '12px', border: '1px solid var(--border)', backgroundColor: 'var(--bg-inner)', borderRadius: 'var(--radius-md)' }}>
-              <div style={{ fontSize: '10px', color: 'var(--text-light)', fontWeight: 800, textTransform: 'uppercase' }}>USD Savings (USDC)</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'space-between', marginBottom: '4px' }}>
+                <div style={{ fontSize: '10px', color: 'var(--text-light)', fontWeight: 800, textTransform: 'uppercase' }}>USD Savings (USDC)</div>
+                <span title="Decentralized yield generated via liquidity provisioning and lending on USDC pools." style={{ cursor: 'help', color: 'var(--text-light)', display: 'inline-flex' }}>
+                  <Info size={11} />
+                </span>
+              </div>
               <div style={{ fontSize: '24px', fontWeight: 900, fontFamily: 'monospace', color: 'var(--text-main)' }}>{yieldUsdc}% APY</div>
             </div>
             
             <div style={{ flex: 1, padding: '12px', border: '1px solid var(--border)', backgroundColor: 'var(--bg-inner)', borderRadius: 'var(--radius-md)' }}>
-              <div style={{ fontSize: '10px', color: 'var(--text-light)', fontWeight: 800, textTransform: 'uppercase' }}>EUR Savings (EURC)</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'space-between', marginBottom: '4px' }}>
+                <div style={{ fontSize: '10px', color: 'var(--text-light)', fontWeight: 800, textTransform: 'uppercase' }}>EUR Savings (EURC)</div>
+                <span title="Decentralized yield generated via liquidity provisioning and lending on EURC pools." style={{ cursor: 'help', color: 'var(--text-light)', display: 'inline-flex' }}>
+                  <Info size={11} />
+                </span>
+              </div>
               <div style={{ fontSize: '24px', fontWeight: 900, fontFamily: 'monospace', color: 'var(--accent-coral)' }}>{yieldEurc}% APY</div>
             </div>
           </div>

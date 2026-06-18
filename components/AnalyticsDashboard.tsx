@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { Download, Calendar, ShieldAlert, Cpu, Landmark, RefreshCw, BarChart2 } from 'lucide-react'
+import { Download, Calendar, ShieldAlert, Cpu, Landmark, RefreshCw, BarChart2, Info } from 'lucide-react'
 import { useAnalytics } from '@/hooks/useAnalytics'
 import { TreasuryChart } from './charts/TreasuryChart'
 import { SpendingBreakdown } from './charts/SpendingBreakdown'
@@ -176,7 +176,12 @@ export const AnalyticsDashboard: React.FC = () => {
               justifyContent: 'space-between'
             }}>
               <div>
-                <span className="brutalist-label" style={{ marginBottom: '4px' }}>Total Portfolio Valuation</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                  <span className="brutalist-label" style={{ marginBottom: 0 }}>Total Portfolio Valuation</span>
+                  <span title="Consolidated value of MetaMask (Master Vault) and active Gateway reserves, converted to USD based on live FX rates." style={{ cursor: 'help', color: 'var(--text-light)', display: 'inline-flex', alignItems: 'center' }}>
+                    <Info size={12} />
+                  </span>
+                </div>
                 <span style={{ display: 'block', fontSize: '20px', fontWeight: 800, fontFamily: 'var(--font-serif)', fontStyle: 'italic', color: 'var(--text-main)', marginTop: '4px' }}>
                   ${data.treasury.total.toLocaleString()} <span style={{ fontSize: '10px', color: 'var(--text-light)', fontStyle: 'normal' }}>USD</span>
                 </span>
@@ -199,7 +204,12 @@ export const AnalyticsDashboard: React.FC = () => {
               justifyContent: 'space-between'
             }}>
               <div>
-                <span className="brutalist-label" style={{ marginBottom: '4px' }}>Operational Spending</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                  <span className="brutalist-label" style={{ marginBottom: 0 }}>Operational Spending</span>
+                  <span title="Aggregate funds spent by company AI assistants on automated invoices, payroll disbursements, and marketplace handshakes." style={{ cursor: 'help', color: 'var(--text-light)', display: 'inline-flex', alignItems: 'center' }}>
+                    <Info size={12} />
+                  </span>
+                </div>
                 <span style={{ display: 'block', fontSize: '20px', fontWeight: 800, fontFamily: 'var(--font-serif)', fontStyle: 'italic', color: 'var(--accent-coral)', marginTop: '4px' }}>
                   ${data.spending.total.toLocaleString()} <span style={{ fontSize: '10px', color: 'var(--text-light)', fontStyle: 'normal' }}>USDC</span>
                 </span>
@@ -222,7 +232,12 @@ export const AnalyticsDashboard: React.FC = () => {
               justifyContent: 'space-between'
             }}>
               <div>
-                <span className="brutalist-label" style={{ marginBottom: '4px' }}>Predictable Gas Overheads</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                  <span className="brutalist-label" style={{ marginBottom: 0 }}>Predictable Gas Overheads</span>
+                  <span title="Total transaction costs sponsored on the Arc Network. Paid directly in native USDC gas, eliminating volatile fee tokens." style={{ cursor: 'help', color: 'var(--text-light)', display: 'inline-flex', alignItems: 'center' }}>
+                    <Info size={12} />
+                  </span>
+                </div>
                 <span style={{ display: 'block', fontSize: '20px', fontWeight: 800, fontFamily: 'var(--font-serif)', fontStyle: 'italic', color: 'var(--accent-green)', marginTop: '4px' }}>
                   ${data.gas.totalSpent.toFixed(4)} <span style={{ fontSize: '10px', color: 'var(--text-light)', fontStyle: 'normal' }}>USDC</span>
                 </span>
@@ -245,7 +260,12 @@ export const AnalyticsDashboard: React.FC = () => {
               justifyContent: 'space-between'
             }}>
               <div>
-                <span className="brutalist-label" style={{ marginBottom: '4px' }}>CCTP Bridge Volume</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                  <span className="brutalist-label" style={{ marginBottom: 0 }}>CCTP Bridge Volume</span>
+                  <span title="Total volume burned/minted cross-chain using Circle's secure official cross-chain transfer protocol." style={{ cursor: 'help', color: 'var(--text-light)', display: 'inline-flex', alignItems: 'center' }}>
+                    <Info size={12} />
+                  </span>
+                </div>
                 <span style={{ display: 'block', fontSize: '20px', fontWeight: 800, fontFamily: 'var(--font-serif)', fontStyle: 'italic', color: '#3b82f6', marginTop: '4px' }}>
                   ${data.bridge.totalVolume.toLocaleString()} <span style={{ fontSize: '10px', color: 'var(--text-light)', fontStyle: 'normal' }}>USDC</span>
                 </span>

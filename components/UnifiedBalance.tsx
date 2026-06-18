@@ -1,10 +1,11 @@
 import React from 'react'
 import { useBridge } from '../hooks/useBridge'
-import { Layers } from 'lucide-react'
+import { Layers, Info } from 'lucide-react'
 import { EthereumIcon, BaseIcon, ArcIcon, USDCIcon } from './Icons'
 
 export const UnifiedBalance: React.FC = () => {
   const { balances } = useBridge()
+  const [showTooltip, setShowTooltip] = React.useState(false)
   
   // Compute cumulative Unified USDC balance
   const unifiedTotal = (
@@ -14,10 +15,42 @@ export const UnifiedBalance: React.FC = () => {
   ).toFixed(2)
 
   return (
-    <div className="brutalist-card accent-purple">
-      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', marginBottom: 'var(--space-4)' }}>
-        <Layers style={{ color: 'var(--accent-coral)' }} size={18} />
-        <span className="brutalist-label" style={{ marginBottom: 0 }}>Your Unified Stablecoin Treasury Balance</span>
+    <div className="brutalist-card accent-purple" style={{ position: 'relative' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--space-4)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+          <Layers style={{ color: 'var(--accent-coral)' }} size={18} />
+          <span className="brutalist-label" style={{ marginBottom: 0 }}>Your Unified Stablecoin Treasury Balance</span>
+        </div>
+        <div style={{ position: 'relative' }}>
+          <button 
+            type="button"
+            onMouseEnter={() => setShowTooltip(true)}
+            onMouseLeave={() => setShowTooltip(false)}
+            onClick={() => setShowTooltip(!showTooltip)}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '2px', color: 'var(--text-light)' }}
+          >
+            <Info size={14} />
+          </button>
+          {showTooltip && (
+            <div style={{
+              position: 'absolute',
+              right: 0,
+              top: '22px',
+              backgroundColor: 'var(--bg-inner)',
+              border: '1px solid var(--border)',
+              borderRadius: 'var(--radius-sm)',
+              padding: '10px',
+              width: '260px',
+              zIndex: 99,
+              fontSize: '11px',
+              color: 'var(--text-main)',
+              lineHeight: '1.4',
+              boxShadow: 'var(--shadow-soft)'
+            }}>
+              💡 <strong>Unified Reserves:</strong> Cumulative company funds aggregate across Ethereum Sepolia, Base Sepolia, and Arc Testnet. Maintain positive balances to fund multi-agent execution budgets.
+            </div>
+          )}
+        </div>
       </div>
 
       <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'flex-start', gap: 'var(--space-6)' }}>

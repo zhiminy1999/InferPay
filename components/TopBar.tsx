@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { Cpu, RefreshCw, Droplet, Key, Fingerprint, ShieldCheck, ArrowLeftRight, Menu } from 'lucide-react'
+import { Cpu, RefreshCw, Droplet, Key, Fingerprint, ShieldCheck, ArrowLeftRight, Menu, HelpCircle } from 'lucide-react'
 import Link from 'next/link'
 import { StableFXClient } from '@/lib/stablefx'
 import { USDCIcon, EURCIcon, ArcIcon } from './Icons'
@@ -18,6 +18,7 @@ interface TopBarProps {
   onOpenBridge: () => void
   disconnect: () => void
   onToggleSidebar?: () => void
+  onOpenHelpGuide?: () => void
 }
 
 export function TopBar({
@@ -31,7 +32,8 @@ export function TopBar({
   onOpenAuthModal,
   onOpenBridge,
   disconnect,
-  onToggleSidebar
+  onToggleSidebar,
+  onOpenHelpGuide
 }: TopBarProps) {
   const [rate, setRate] = useState<number>(1.08)
 
@@ -89,6 +91,17 @@ export function TopBar({
           >
             <ArrowLeftRight size={11} />
             <span>Bridge USDC via CCTP</span>
+          </button>
+        )}
+
+        {onOpenHelpGuide && (
+          <button 
+            className="btn-brutalist btn-brutalist-muted" 
+            onClick={onOpenHelpGuide} 
+            style={{ padding: '6px 12px', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '5px' }}
+          >
+            <HelpCircle size={11} />
+            <span>Interactive Guide</span>
           </button>
         )}
 

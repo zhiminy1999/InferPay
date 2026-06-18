@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Lock, ArrowRightLeft, Coins, FileText, Shield, Briefcase, Users, History, Zap, Cpu } from 'lucide-react'
+import { Lock, ArrowRightLeft, Coins, FileText, Shield, Briefcase, Users, History, Zap, Cpu, X, HelpCircle } from 'lucide-react'
 import { useWeb3 } from '@/lib/web3-provider'
 import { useActivityFeed } from '@/hooks/useActivityFeed'
 import { useBalances } from '@/hooks/useBalances'
@@ -49,6 +49,7 @@ export default function InferPayDashboard() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false)
   const [showBridgeModal, setShowBridgeModal] = useState<boolean>(false)
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState<boolean>(false)
+  const [showHelpModal, setShowHelpModal] = useState<boolean>(false)
 
   // Shared hooks
   const { activities, addActivity } = useActivityFeed()
@@ -160,6 +161,7 @@ export default function InferPayDashboard() {
         onOpenBridge={() => setShowBridgeModal(true)}
         disconnect={handleDisconnectAll}
         onToggleSidebar={() => setMobileSidebarOpen(!mobileSidebarOpen)}
+        onOpenHelpGuide={() => setShowHelpModal(true)}
       />
 
       {/* Mobile Sidebar backdrop overlay */}
@@ -335,6 +337,64 @@ export default function InferPayDashboard() {
         isOpen={showBridgeModal}
         onClose={() => setShowBridgeModal(false)}
       />
+
+      {showHelpModal && (
+        <div className="modal-overlay" style={{ zIndex: 10000 }}>
+          <div className="modal-container" style={{ maxWidth: '640px', width: '90%' }}>
+            <div className="modal-header">
+              <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Cpu size={18} style={{ color: 'var(--accent-coral)' }} />
+                <span>Interactive Onboarding & <i>System Guide</i></span>
+              </h3>
+              <button className="modal-close-btn" onClick={() => setShowHelpModal(false)}>
+                <X size={18} />
+              </button>
+            </div>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxHeight: '480px', overflowY: 'auto', paddingRight: '4px', fontSize: '13px', lineHeight: '1.5' }}>
+              <div style={{ backgroundColor: 'var(--bg-inner)', padding: '12px', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }}>
+                <strong>Welcome to InferPay Space!</strong>
+                <p style={{ margin: '6px 0 0 0', color: 'var(--text-muted)' }}>
+                  This dashboard is a fully realized stablecoin treasury operations center on Arc Testnet, featuring real-time AI swarms, programmable spending limits, and automated yield sweeps.
+                </p>
+              </div>
+
+              <div>
+                <strong style={{ display: 'block', marginBottom: '8px', color: 'var(--text-main)', borderBottom: '1px solid var(--border)', paddingBottom: '4px' }}>
+                  🎯 Core Testing Workflows
+                </strong>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  <div>
+                    <strong>1. Refill Test Assets:</strong> Click the droplet icon 💧 (<strong>Get Free Test Funds</strong>) on the top bar. In Live mode, this deposits native gas USDC (18 decimals) and ERC-20 stablecoins directly into your connected MetaMask. In Demo mode, it adds $1,000 to your simulated balance instantly.
+                  </div>
+                  <div>
+                    <strong>2. Execute AI Tasks:</strong> Go to the <strong>AI Agent Workspace</strong>. Click any suggested command (e.g. <i>"Swap 25 USDC"</i>) and press <strong>Run</strong>. The LangGraph agent swarm coordinates token swaps or balance checks, logging each step in real time.
+                  </div>
+                  <div>
+                    <strong>3. Define Spending Budgets:</strong> Select <strong>AI Spending Budget</strong> to lock stablecoins in an ephemeral escrow wallet with preset spending limits, whitelisted addresses, and expiration times.
+                  </div>
+                  <div>
+                    <strong>4. Approve High-Value Invoices:</strong> Go to the <strong>Approval Committee</strong>. Propose a payment (e.g., $25,000) and watch the three-party AI audit swarm deliberate. Toggle compliance flags to test rejection scenarios and manual human overrides.
+                  </div>
+                  <div>
+                    <strong>5. Perform Micro-billing:</strong> Go to <strong>Gateway Nanopayments</strong>. Authorize off-chain EIP-712 signatures to pay fractions-of-a-cent for compute queries on the Fly.
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ backgroundColor: '#fef3c7', color: '#78350f', padding: '12px', borderRadius: 'var(--radius-sm)', border: '1px solid #fde68a' }}>
+                💡 <strong>Under the Hood:</strong> We sponsor all transactions on Arc Testnet using a server-side relayer. The USDC stablecoin acts directly as the native gas asset, meaning you never need separate gas tokens to test!
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '12px', borderTop: '1px solid var(--border)', marginTop: '12px' }}>
+              <button className="btn-brutalist btn-brutalist-pink" onClick={() => setShowHelpModal(false)}>
+                Got It, Let's Go!
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
