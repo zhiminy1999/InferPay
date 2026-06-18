@@ -18,7 +18,10 @@ import {
   Menu,
   X,
   Play,
-  Cpu
+  Cpu,
+  Eye,
+  ShieldCheck,
+  Sparkles
 } from 'lucide-react'
 
 export default function LandingPage() {
@@ -30,68 +33,45 @@ export default function LandingPage() {
   // Interactive Simulator States
   const [simState, setSimState] = useState<'idle' | 'executing'>('idle')
   const [simAction, setSimAction] = useState<'swap' | 'invoice' | null>(null)
-  const [simLogs, setSimLogs] = useState<string[]>([
-    'SYSTEM: InferPay Agent Node v1.0.4 initialized.',
-    'NETWORK: Connected to Arc Testnet. Gas settings locked.',
-    'POLICY: Operational AI Vault active. Standing by for instructions...'
-  ])
+  const [simStep, setSimStep] = useState<number>(0) // 0: standby, 1-4: stages
   const [simBalance, setSimBalance] = useState(12450.80)
 
   const runSimSwap = () => {
     if (simState === 'executing') return
     setSimState('executing')
     setSimAction('swap')
-    setSimLogs(['[0.0s] 🛰️ Initiating atomic treasury auto-swap...'])
+    setSimStep(1) // Intent Triage
     
-    const steps = [
-      { time: 400, log: '[0.4s] 🔑 Checking Permit2 spending allowance: 500 USDC limit...' },
-      { time: 800, log: '[0.8s] 📝 Constructing signature verification request...' },
-      { time: 1200, log: '[1.2s] ⛓️ Submitting swap execution to Arc Testnet...' },
-      { time: 1600, log: '[1.6s] 🔄 Swapping 150.00 USDC to 139.50 EURC (Rate: 0.9300)' },
-      { time: 2000, log: '[2.0s] 🏁 Atomic settlement complete! Block #849104' },
-      { time: 2400, log: 'POLICY: Operational AI Vault standing by.' }
-    ]
-
-    steps.forEach((step, idx) => {
-      setTimeout(() => {
-        setSimLogs(prev => [...prev, step.log])
-        if (idx === 4) {
-          setSimBalance(prev => prev - 150.00)
-        }
-        if (idx === steps.length - 1) {
-          setSimState('idle')
-          setSimAction(null)
-        }
-      }, step.time)
-    })
+    setTimeout(() => setSimStep(2), 650)   // Policy validation
+    setTimeout(() => setSimStep(3), 1300)  // Atomic exchange execution
+    setTimeout(() => {
+      setSimStep(4)                        // Completed transaction
+      setSimBalance(prev => prev - 150.00)
+    }, 1950)
+    setTimeout(() => {
+      setSimState('idle')
+      setSimAction(null)
+      setSimStep(0)
+    }, 3600)
   }
 
   const runSimInvoice = () => {
     if (simState === 'executing') return
     setSimState('executing')
     setSimAction('invoice')
-    setSimLogs(['[0.0s] 📥 Triaging agent billing invoice #841...'])
-
-    const steps = [
-      { time: 400, log: '[0.4s] 🛡️ Checking AgentRegistry ERC-8004 capabilities & reputation score: 98/100...' },
-      { time: 800, log: '[0.8s] 💸 Verifying daily spending limits... Approved (120 USDC < 500 USDC limit).' },
-      { time: 1200, log: '[1.2s] ⚡ Dispensing atomic payout on Arc chain...' },
-      { time: 1600, log: '[1.6s] 🔒 Payment dispatched to agent 0x9f12...3e4f. Transaction hash logged.' },
-      { time: 2000, log: 'POLICY: Operational AI Vault standing by.' }
-    ]
-
-    steps.forEach((step, idx) => {
-      setTimeout(() => {
-        setSimLogs(prev => [...prev, step.log])
-        if (idx === 3) {
-          setSimBalance(prev => prev - 120.00)
-        }
-        if (idx === steps.length - 1) {
-          setSimState('idle')
-          setSimAction(null)
-        }
-      }, step.time)
-    })
+    setSimStep(1) // Intent Triage
+    
+    setTimeout(() => setSimStep(2), 650)   // Reputation check
+    setTimeout(() => setSimStep(3), 1300)  // Atomic payout execution
+    setTimeout(() => {
+      setSimStep(4)                        // Completed transaction
+      setSimBalance(prev => prev - 120.00)
+    }, 1950)
+    setTimeout(() => {
+      setSimState('idle')
+      setSimAction(null)
+      setSimStep(0)
+    }, 3600)
   }
 
   const handleJoinWaitlist = (e: React.FormEvent) => {
@@ -515,60 +495,151 @@ export default function LandingPage() {
                 </div>
               </div>
 
-              {/* Right Panel: Live Blockchain Node Console logs */}
+              {/* Right Panel: Live AI Intent Execution Visualizer */}
               <div style={{
                 padding: '30px',
-                backgroundColor: '#0c0a09',
-                color: '#34d399',
-                fontFamily: 'monospace',
-                fontSize: '12px',
+                backgroundColor: 'var(--bg-card)',
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'space-between',
-                gap: '20px'
+                gap: '24px'
               }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', overflowY: 'auto', maxHeight: '320px' }}>
-                  <div style={{ borderBottom: '1px dashed #1e293b', paddingBottom: '8px', color: '#94a3b8', display: 'flex', justifyContent: 'space-between' }}>
-                    <span>AGENT INSTANCE LOG FEED</span>
-                    <span>v1.0.4</span>
+                <div>
+                  <div style={{ borderBottom: '1px dashed var(--border)', paddingBottom: '12px', marginBottom: '20px' }}>
+                    <div style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', color: 'var(--text-light)', letterSpacing: '0.05em' }}>
+                      ⚡ AI Workflow Tracker
+                    </div>
+                    <h4 style={{ margin: '4px 0 0 0', fontFamily: 'var(--font-serif)', fontSize: '16px', fontWeight: 700 }}>
+                      Live Intent Validation
+                    </h4>
                   </div>
                   
-                  {simLogs.map((log, index) => {
-                    let logColor = '#34d399' // default console green
-                    if (log.startsWith('SYSTEM')) logColor = '#a855f7' // purple
-                    if (log.startsWith('NETWORK')) logColor = '#38bdf8' // blue
-                    if (log.startsWith('POLICY')) logColor = '#eab308' // yellow
-                    if (log.includes('complete') || log.includes('dispatched')) logColor = '#f472b6' // pink
-                    
-                    return (
-                      <div 
-                        key={index} 
-                        style={{ 
-                          lineHeight: '1.5', 
-                          color: logColor,
-                          animation: 'slideUp 0.15s ease-out'
-                        }}
-                      >
-                        {log}
-                      </div>
-                    )
-                  })}
+                  {/* Vertical Timeline Steps */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', position: 'relative' }}>
+                    {/* Connecting line */}
+                    <div style={{
+                      position: 'absolute',
+                      left: '17px',
+                      top: '10px',
+                      bottom: '24px',
+                      width: '2px',
+                      backgroundColor: 'var(--border)',
+                      zIndex: 0
+                    }} />
+
+                    {/* Step 1: Triage */}
+                    {[
+                      {
+                        stepId: 1,
+                        label: 'Intent Detection & Parse',
+                        desc: simAction === 'swap' ? 'Swap rate threshold alert detected' : 'Scanning incoming agent invoice #841',
+                        icon: Eye,
+                        getStatus: () => {
+                          if (simStep === 0) return { label: 'Standby', className: 'badge-brutalist' }
+                          if (simStep === 1) return { label: 'Scanning...', className: 'badge-brutalist yellow blink' }
+                          return { label: 'Parsed', className: 'badge-brutalist pink' }
+                        }
+                      },
+                      {
+                        stepId: 2,
+                        label: 'Smart Policy Verification',
+                        desc: simAction === 'swap' ? 'Checking daily Permit2 limits' : 'Verifying reputation & daily spend caps',
+                        icon: ShieldCheck,
+                        getStatus: () => {
+                          if (simStep < 2) return { label: 'Pending', className: 'badge-brutalist' }
+                          if (simStep === 2) return { label: 'Checking...', className: 'badge-brutalist yellow blink' }
+                          return { label: 'Authorized', className: 'badge-brutalist pink' }
+                        }
+                      },
+                      {
+                        stepId: 3,
+                        label: 'Atomic Settlement (Arc)',
+                        desc: simAction === 'swap' ? 'Converting 150 USDC to EURC' : 'Dispensing stablecoin agent salary payout',
+                        icon: Zap,
+                        getStatus: () => {
+                          if (simStep < 3) return { label: 'Pending', className: 'badge-brutalist' }
+                          if (simStep === 3) return { label: 'Settling...', className: 'badge-brutalist yellow blink' }
+                          return { label: 'Settled', className: 'badge-brutalist green' }
+                        }
+                      },
+                      {
+                        stepId: 4,
+                        label: 'Gas Optimization Log',
+                        desc: 'Refining transaction overhead to sub-cent gas',
+                        icon: Sparkles,
+                        getStatus: () => {
+                          if (simStep < 4) return { label: 'Pending', className: 'badge-brutalist' }
+                          return { label: 'Optimized', className: 'badge-brutalist green' }
+                        }
+                      }
+                    ].map((step, idx) => {
+                      const StepIcon = step.icon
+                      const status = step.getStatus()
+                      const isActive = simStep === step.stepId
+                      const isCompleted = simStep > step.stepId || (simStep === 4 && step.stepId === 4)
+                      
+                      return (
+                        <div key={idx} style={{ display: 'flex', gap: '16px', zIndex: 1, position: 'relative' }}>
+                          {/* Circular Icon badge */}
+                          <div style={{
+                            width: '36px',
+                            height: '36px',
+                            borderRadius: '50%',
+                            backgroundColor: isCompleted ? 'var(--bg-main)' : isActive ? 'var(--accent-coral)' : 'var(--bg-inner)',
+                            border: '2px solid var(--border)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: isActive ? 'white' : 'var(--text-main)',
+                            transition: 'all 0.2s',
+                            transform: isActive ? 'scale(1.1)' : 'none',
+                            boxShadow: isActive ? '2px 2px 0px var(--border)' : 'none'
+                          }}>
+                            <StepIcon size={16} />
+                          </div>
+
+                          {/* Info Column */}
+                          <div style={{ flex: 1 }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '5px' }}>
+                              <strong style={{ fontSize: '13px', color: isActive ? 'var(--accent-coral)' : 'var(--text-main)' }}>
+                                {step.label}
+                              </strong>
+                              <span className={status.className} style={{ fontSize: '8.5px', padding: '1px 5px', fontWeight: 800 }}>
+                                {status.label}
+                              </span>
+                            </div>
+                            <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
+                              {simStep === 0 ? 'Awaiting operations trigger...' : step.desc}
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
                 </div>
 
+                {/* Status Bar */}
                 <div style={{ 
-                  borderTop: '1px solid #1e293b', 
-                  paddingTop: '12px', 
-                  color: '#64748b', 
+                  borderTop: '1px solid var(--border)', 
+                  paddingTop: '14px', 
+                  color: 'var(--text-muted)', 
                   display: 'flex', 
                   justifyContent: 'space-between',
                   alignItems: 'center',
-                  fontSize: '11px'
+                  fontSize: '11.5px',
+                  fontFamily: 'monospace'
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#34d399', display: 'inline-block' }} className="blink"></span>
-                    <span>Node latency: ~12ms</span>
+                    <span style={{ 
+                      width: '6px', 
+                      height: '6px', 
+                      borderRadius: '50%', 
+                      backgroundColor: simStep > 0 ? 'var(--accent-coral)' : 'var(--accent-green)', 
+                      display: 'inline-block' 
+                    }} className={simStep > 0 ? 'blink' : ''}></span>
+                    <span>{simStep > 0 ? 'Executing state machine' : 'Monitoring network latency ~12ms'}</span>
                   </div>
-                  <span>Gas: 0.0004 USDC (98% saving)</span>
+                  <span style={{ fontWeight: 700 }}>Gas saving: 98%</span>
                 </div>
               </div>
 
