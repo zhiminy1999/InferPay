@@ -25,7 +25,7 @@ export const X402Protocol = {
     return {
       status: 402,
       headers: {
-        'X-402-Payment-Required': 'https://api.inferpay.xyz/gateway/nanopayments',
+        'X-402-Payment-Required': 'https://api.inferpay.space/gateway/nanopayments',
         'X-402-Payment-Token': 'USDC',
         'X-402-Price': priceUsd.toFixed(4),
         'X-402-Service-Id': serviceId,

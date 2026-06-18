@@ -78,7 +78,7 @@ export default function PrivacyPage() {
 
           <h3 style={{ fontFamily: 'var(--font-serif)', color: 'var(--text-main)', fontSize: '18px', fontWeight: 700, margin: '10px 0 0' }}>3. Contact Information</h3>
           <p>
-            If you have questions regarding this privacy policy, please contact our team via support@inferpay.xyz.
+            If you have questions regarding this privacy policy, please contact our team via support@inferpay.space.
           </p>
         </div>
       </main>

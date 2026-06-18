@@ -287,7 +287,7 @@ export default function ContactPage() {
             </div>
             <div>
               <h4 style={{ margin: 0, fontSize: '14px', fontWeight: 700 }}>Email Support</h4>
-              <a href="mailto:support@inferpay.xyz" style={{ fontSize: '12.5px', color: 'var(--text-light)', textDecoration: 'none' }}>support@inferpay.xyz</a>
+              <a href="mailto:support@inferpay.space" style={{ fontSize: '12.5px', color: 'var(--text-light)', textDecoration: 'none' }}>support@inferpay.space</a>
             </div>
           </div>
         </div>

@@ -44,7 +44,7 @@ const session = await client.createSession({
 console.log('Session established:', session.sessionId)`
 
   const x402Snippet = `// 3. Initiate client-side x402 micropayment query challenge
-const response = await fetch('https://api.inferpay.xyz/gateway/inference', {
+const response = await fetch('https://api.inferpay.space/gateway/inference', {
   headers: {
     'X-402-Service-Id': 'gpt-4o-custom-agent',
     'X-402-Payment-Proof': session.paymentProof

@@ -1655,8 +1655,8 @@ export default function LandingPage() {
               <span>Settlement Engine: Healthy</span>
               <span>RPC Connectivity: 12ms</span>
             </div>
-            <a href="https://status.inferpay.xyz" target="_blank" rel="noopener noreferrer" style={{ fontSize: '12px', color: 'var(--accent-pink)', textDecoration: 'underline' }}>
-              status.inferpay.xyz
+            <a href="https://status.inferpay.space" target="_blank" rel="noopener noreferrer" style={{ fontSize: '12px', color: 'var(--accent-pink)', textDecoration: 'underline' }}>
+              status.inferpay.space
             </a>
           </div>
         </section>
@@ -1970,14 +1970,14 @@ export default function LandingPage() {
             "@graph": [
               {
                 "@type": "Organization",
-                "@id": "https://inferpay.xyz/#organization",
+                "@id": "https://inferpay.space/#organization",
                 "name": "InferPay",
-                "url": "https://inferpay.xyz",
-                "logo": "https://inferpay.xyz/images/logo.png"
+                "url": "https://inferpay.space",
+                "logo": "https://inferpay.space/images/logo.png"
               },
               {
                 "@type": "SoftwareApplication",
-                "@id": "https://inferpay.xyz/#application",
+                "@id": "https://inferpay.space/#application",
                 "name": "InferPay Agent Wallet SDK",
                 "operatingSystem": "All",
                 "applicationCategory": "DeveloperApplication",

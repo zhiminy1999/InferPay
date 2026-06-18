@@ -548,7 +548,7 @@ K6Qh8X0W9zK4R8hJ5/vCjU1o1h/lC9Z7B8P9T+3sJ+Q3N4eD+9AK6Qh8X0W9zK4
                       <span>{copiedKey ? 'PGP Public Key Copied!' : 'Copy Security PGP Public Key'}</span>
                     </button>
                     <a
-                      href="mailto:security@inferpay.xyz"
+                      href="mailto:security@inferpay.space"
                       className="btn-brutalist"
                       style={{ fontSize: '12px', padding: '10px 16px', display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: 'var(--bg-inner)', color: 'var(--text-main)' }}
                     >
