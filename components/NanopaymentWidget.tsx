@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useNanopayments } from '../hooks/useNanopayments'
 import { useActivityFeed } from '../hooks/useActivityFeed'
 import { parseUnits, formatUnits } from 'viem'
+import { BrandIcon } from './BrandIcon'
 
 export const NanopaymentWidget: React.FC = () => {
   const {
@@ -81,7 +82,8 @@ export const NanopaymentWidget: React.FC = () => {
             alignItems: 'center',
             gap: '8px'
           }}>
-            ⚠️ Low Nanopayments Balance! Please Deposit USDC to Prevent Inference Interruption.
+            <BrandIcon name="warning" size={14} variant="coral" />
+            <span>Low Nanopayments Balance! Please Deposit USDC to Prevent Inference Interruption.</span>
           </div>
         )}
 
@@ -220,7 +222,17 @@ export const NanopaymentWidget: React.FC = () => {
                     <td style={{ color: 'var(--text-muted)' }}>{item.description || (item.type === 'deposit' ? 'Vault Funding Transfer' : 'Withdrawal Cashout')}</td>
                     <td>
                       <span style={{ color: 'var(--text-light)', fontSize: '12px' }}>
-                        {item.type === 'spend' ? '⚡ Gasless Offchain' : '⛓️ On-Chain (1s Finality)'}
+                        {item.type === 'spend' ? (
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                            <BrandIcon name="lightning" size={11} variant="coral" />
+                            <span>Gasless Offchain</span>
+                          </span>
+                        ) : (
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                            <BrandIcon name="chain" size={11} variant="muted" />
+                            <span>On-Chain (1s Finality)</span>
+                          </span>
+                        )}
                       </span>
                     </td>
                     <td style={{ textAlign: 'right' }}>

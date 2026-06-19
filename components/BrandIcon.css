@@ -1,0 +1,298 @@
+/* Custom Brand Icons Styling & Animations */
+
+.brand-icon {
+  display: inline-block;
+  vertical-align: middle;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), 
+              stroke 0.25s ease, 
+              filter 0.25s ease, 
+              opacity 0.25s ease;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Hover scales up and applies subtle rotation */
+.brand-icon:hover {
+  transform: scale(1.15) rotate(2deg);
+}
+
+/* Color Variants based on design system */
+.variant-default {
+  stroke: var(--text-main);
+}
+
+.variant-coral {
+  stroke: var(--accent-coral);
+  filter: drop-shadow(0 2px 6px rgba(255, 93, 75, 0.15));
+}
+.variant-coral:hover {
+  filter: drop-shadow(0 4px 12px rgba(255, 93, 75, 0.35));
+}
+
+.variant-green {
+  stroke: var(--accent-green);
+  filter: drop-shadow(0 2px 6px rgba(52, 211, 153, 0.15));
+}
+.variant-green:hover {
+  filter: drop-shadow(0 4px 12px rgba(52, 211, 153, 0.35));
+}
+
+.variant-yellow {
+  stroke: var(--accent-yellow);
+  filter: drop-shadow(0 2px 6px rgba(251, 191, 36, 0.15));
+}
+.variant-yellow:hover {
+  filter: drop-shadow(0 4px 12px rgba(251, 191, 36, 0.35));
+}
+
+.variant-peach {
+  stroke: #ff9e80;
+  filter: drop-shadow(0 2px 6px rgba(255, 158, 128, 0.15));
+}
+
+.variant-muted {
+  stroke: var(--text-light);
+  opacity: 0.8;
+}
+.variant-muted:hover {
+  opacity: 1;
+  stroke: var(--text-main);
+}
+
+/* Micro-Interaction Animation Classes */
+
+/* Floating effect */
+.ani-float {
+  animation: icon-float 3s ease-in-out infinite;
+}
+
+@keyframes icon-float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+/* Pulse scaling and opacity */
+.ani-pulse {
+  animation: icon-pulse 2s ease-in-out infinite;
+}
+
+@keyframes icon-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(0.92);
+    opacity: 0.8;
+  }
+}
+
+/* Glowing Neon Cycle */
+.ani-glow {
+  animation: icon-glow 2.5s ease-in-out infinite alternate;
+}
+
+@keyframes icon-glow {
+  0% {
+    filter: drop-shadow(0 2px 4px var(--accent-peach));
+  }
+  100% {
+    filter: drop-shadow(0 4px 14px var(--accent-coral));
+  }
+}
+
+/* Slow rotation */
+.ani-spin-slow {
+  animation: icon-spin-slow 8s linear infinite;
+}
+
+@keyframes icon-spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Global Premium Visual Enhancements */
+
+/* Animated Underlines */
+.animated-underline-hover {
+  position: relative;
+  text-decoration: none;
+}
+
+.animated-underline-hover::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  transform: scaleX(0);
+  height: 2px;
+  bottom: -4px;
+  left: 0;
+  background-color: var(--accent-coral);
+  transform-origin: bottom right;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.animated-underline-hover:hover::after {
+  transform: scaleX(1);
+  transform-origin: bottom left;
+}
+
+/* Stagger Animations */
+.stagger-container > * {
+  opacity: 0;
+  transform: translateY(12px);
+  animation: stagger-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.stagger-container > *:nth-child(1) { animation-delay: 0.05s; }
+.stagger-container > *:nth-child(2) { animation-delay: 0.1s; }
+.stagger-container > *:nth-child(3) { animation-delay: 0.15s; }
+.stagger-container > *:nth-child(4) { animation-delay: 0.2s; }
+.stagger-container > *:nth-child(5) { animation-delay: 0.25s; }
+
+@keyframes stagger-in {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Magnetic Button Visual Hint (Pulse Shadow) */
+.magnetic-btn-pulse {
+  position: relative;
+  overflow: hidden;
+}
+
+.magnetic-btn-pulse::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 120px;
+  height: 120px;
+  background: rgba(255, 93, 75, 0.15);
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  opacity: 0;
+  transition: transform 0.5s ease, opacity 0.5s ease;
+}
+
+.magnetic-btn-pulse:hover::before {
+  transform: translate(-50%, -50%) scale(2);
+  opacity: 1;
+}
+
+/* Animated Border Container */
+.animated-glow-border {
+  border: 1px solid var(--border);
+  position: relative;
+  z-index: 1;
+  background: var(--bg-card);
+}
+
+.animated-glow-border::after {
+  content: '';
+  position: absolute;
+  top: -1px; left: -1px; right: -1px; bottom: -1px;
+  z-index: -1;
+  background: linear-gradient(90deg, var(--accent-coral), #f472b6, var(--accent-green), var(--accent-coral));
+  background-size: 300% 300%;
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  animation: border-gradient-move 4s ease infinite;
+}
+
+.animated-glow-border:hover::after {
+  opacity: 0.25;
+}
+
+@keyframes border-gradient-move {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Beautiful Animated Background Blobs */
+.bg-blobs-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.blob-pink, .blob-cyan {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.05;
+  mix-blend-mode: multiply;
+  animation: blob-float 15s ease-in-out infinite alternate;
+}
+
+.blob-pink {
+  width: 300px;
+  height: 300px;
+  background-color: var(--accent-coral);
+  top: 10%;
+  left: 5%;
+}
+
+.blob-cyan {
+  width: 400px;
+  height: 400px;
+  background-color: #06b6d4;
+  bottom: 10%;
+  right: 5%;
+  animation-delay: 2s;
+}
+
+@keyframes blob-float {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    transform: translate(40px, 30px) scale(1.15);
+  }
+}
+
+/* Elegant Skeleton Loading Shimmer Override */
+.skeleton-shimmer-premium {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--bg-inner);
+  border-radius: var(--radius-sm);
+}
+
+.skeleton-shimmer-premium::after {
+  content: '';
+  position: absolute;
+  top: 0; right: 0; bottom: 0; left: 0;
+  transform: translateX(-100%);
+  background-image: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.4) 20%,
+    rgba(255, 255, 255, 0.6) 60%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  animation: shimmer-swipe 1.6s infinite;
+}
+
+@keyframes shimmer-swipe {
+  100% {
+    transform: translateX(100%);
+  }
+}

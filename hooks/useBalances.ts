@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { formatUnits } from 'viem'
 import { USDC_ADDRESS_ARC, EURC_ADDRESS_ARC, erc20Abi } from '@/lib/contracts'
 
@@ -14,28 +14,21 @@ interface UseBalancesProps {
 export function useBalances({ isConnected, address, publicClient, addActivity }: UseBalancesProps) {
   const [usdcBalance, setUsdcBalance] = useState<string>('0.00')
   const [eurcBalance, setEurcBalance] = useState<string>('0.00')
+  const firstLoadDone = useRef<boolean>(false)
 
-  // Fetch real on-chain balances when wallet connects
-  // No localStorage simulation — only real Arc Testnet data
-
-  // Load simulated balances for Demo Mode
+  // Set balances to zero when disconnected
   useEffect(() => {
     if (!isConnected) {
-      const storedUsdc = localStorage.getItem('inferpay_sim_usdc') || '1000.00'
-      const storedEurc = localStorage.getItem('inferpay_sim_eurc') || '1000.00'
-      setUsdcBalance(storedUsdc)
-      setEurcBalance(storedEurc)
-      if (!localStorage.getItem('inferpay_sim_usdc')) {
-        localStorage.setItem('inferpay_sim_usdc', '1000.00')
-      }
-      if (!localStorage.getItem('inferpay_sim_eurc')) {
-        localStorage.setItem('inferpay_sim_eurc', '1000.00')
-      }
+      firstLoadDone.current = false
+      setUsdcBalance('0.00')
+      setEurcBalance('0.00')
     }
   }, [isConnected])
 
-  // Get On-chain Real Balances when connected
+  // Get On-chain Real Balances when connected and poll every 2 seconds
   useEffect(() => {
+    let active = true
+
     const getOnChainBalances = async () => {
       if (isConnected && address && publicClient) {
         try {
@@ -56,21 +49,34 @@ export function useBalances({ isConnected, address, publicClient, addActivity }:
           const usdcStr = Number(formatUnits(usdcBal, 6)).toFixed(2)
           const eurcStr = Number(formatUnits(eurcBal, 6)).toFixed(2)
 
-          setUsdcBalance(usdcStr)
-          setEurcBalance(eurcStr)
-          
-          addActivity(
-            'Balances loaded',
-            `Your account: $${usdcStr} USD · €${eurcStr} EUR`,
-            '💳',
-            'success'
-          )
+          if (active) {
+            setUsdcBalance(usdcStr)
+            setEurcBalance(eurcStr)
+            
+            if (!firstLoadDone.current) {
+              firstLoadDone.current = true
+              addActivity(
+                'Balances loaded',
+                `Your account: $${usdcStr} USD · €${eurcStr} EUR`,
+                'money',
+                'success'
+              )
+            }
+          }
         } catch (err) {
           console.error("Failed to read balances:", err)
         }
       }
     }
+    
     getOnChainBalances()
+    
+    const interval = setInterval(getOnChainBalances, 2000)
+    
+    return () => {
+      active = false
+      clearInterval(interval)
+    }
   }, [isConnected, address, publicClient])
 
   return {

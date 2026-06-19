@@ -57,7 +57,7 @@ export function FaucetModal({ isOpen, onClose, address, onOpenBridge, addActivit
               }}
               style={{ padding: '8px 14px', fontSize: '12px', marginTop: '6px' }}
             >
-              🌉 Open Cross-Chain Bridge
+              Open Cross-Chain Bridge
             </button>
           </div>
 
@@ -97,13 +97,13 @@ export function FaucetModal({ isOpen, onClose, address, onOpenBridge, addActivit
                   if (address) {
                     navigator.clipboard.writeText(address)
                     setCopied(true)
-                    addActivity('Address copied', 'Your address is ready to paste into the faucet page.', '📋', 'info')
+                    addActivity('Address copied', 'Your address is ready to paste into the faucet page.', 'clipboard', 'info')
                     setTimeout(() => setCopied(false), 2000)
                   }
                 }}
                 style={{ padding: '6px 12px', fontSize: '11px', whiteSpace: 'nowrap' }}
               >
-                {copied ? 'Copied! ✓' : 'Copy Address'}
+                {copied ? 'Copied!' : 'Copy Address'}
               </button>
             </div>
 

@@ -135,7 +135,7 @@ K6Qh8X0W9zK4R8hJ5/vCjU1o1h/lC9Z7B8P9T+3sJ+Q3N4eD+9AK6Qh8X0W9zK4
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <span className="badge-brutalist green" style={{ fontSize: '11px', textTransform: 'uppercase', fontWeight: 800 }}>
-            🛡️ SOC-2 Compliance Roadmap
+            SOC-2 Compliance Roadmap
           </span>
         </div>
       </header>

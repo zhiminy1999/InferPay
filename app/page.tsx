@@ -150,7 +150,7 @@ export default function LandingPage() {
         letterSpacing: '0.03em',
         borderBottom: '1px solid var(--border)'
       }}>
-        <span>🚀 InferPay Devnet is now live on the Arc Chain! Build gasless AI agent vaults with native USDC. </span>
+        <span>InferPay Devnet is now live on the Arc Chain! Build gasless AI agent vaults with native USDC. </span>
         <Link href="/docs" style={{ color: 'var(--accent-pink)', marginLeft: '6px', textDecoration: 'underline' }}>Read SDK Docs →</Link>
       </div>
 
@@ -560,7 +560,7 @@ export default function LandingPage() {
                 <div>
                   <div style={{ borderBottom: '1px dashed var(--border)', paddingBottom: '12px', marginBottom: '20px' }}>
                     <div style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', color: 'var(--text-light)', letterSpacing: '0.05em' }}>
-                      ⚡ AI Workflow Tracker
+                      AI Workflow Tracker
                     </div>
                     <h4 style={{ margin: '4px 0 0 0', fontFamily: 'var(--font-serif)', fontSize: '16px', fontWeight: 700 }}>
                       Live Intent Validation
@@ -1145,7 +1145,7 @@ export default function LandingPage() {
                       <span style={{ color: '#a855f7' }}>$</span> npm install -g @inferpay/cli{'\n'}
                       <span style={{ color: '#a855f7' }}>$</span> inferpay login --key ip_live_58c2a9{'\n'}
                       <span style={{ color: '#a855f7' }}>$</span> inferpay vaults:create --limit 500 --token USDC{'\n\n'}
-                      <span style={{ color: '#34d399' }}>✓ Vault successfully created. Address: 0x9f12...3e4f</span>
+                      <span style={{ color: '#34d399' }}><Check size={12}/> Vault successfully created. Address: 0x9f12...3e4f</span>
                     </pre>
                   )}
                 </div>
@@ -1263,9 +1263,9 @@ export default function LandingPage() {
                   ].map((row, idx) => (
                     <tr key={idx} style={{ borderBottom: '1px solid var(--border)', backgroundColor: idx % 2 === 0 ? 'var(--bg-main)' : 'var(--bg-card)' }}>
                       <td style={{ padding: '14px 20px', fontWeight: 600 }}>{row.capability}</td>
-                      <td style={{ padding: '14px 20px', color: 'var(--accent-coral)', fontWeight: 800 }}>{row.ip ? '✓ Yes' : '—'}</td>
-                      <td style={{ padding: '14px 20px' }}>{row.w3 ? '✓ Yes' : '—'}</td>
-                      <td style={{ padding: '14px 20px' }}>{row.bank ? '✓ Yes' : '—'}</td>
+                      <td style={{ padding: '14px 20px', color: 'var(--accent-coral)', fontWeight: 800 }}>{row.ip ? <Check size={18} style={{ color: 'var(--accent-green)' }} /> : '—'}</td>
+                      <td style={{ padding: '14px 20px' }}>{row.w3 ? <Check size={18} style={{ color: 'var(--accent-green)' }} /> : '—'}</td>
+                      <td style={{ padding: '14px 20px' }}>{row.bank ? <Check size={18} style={{ color: 'var(--accent-green)' }} /> : '—'}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -1713,14 +1713,14 @@ export default function LandingPage() {
               >
                 {waitlistStatus === 'idle' && 'Get Early Access'}
                 {waitlistStatus === 'loading' && 'Joining...'}
-                {waitlistStatus === 'success' && '✓ Enrolled'}
+                {waitlistStatus === 'success' && 'Enrolled'}
               </button>
             </form>
 
             {waitlistStatus === 'success' && (
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--accent-green)', fontSize: '13px', fontWeight: 700 }}>
                 <CheckCircle2 size={16} />
-                <span>Success! You have been added to the waitlist queue.</span>
+                <span>Enrolled</span>
               </div>
             )}
 
@@ -1801,7 +1801,7 @@ export default function LandingPage() {
           {/* Links 3: Trust Center Resources */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <span style={{ fontWeight: 700, color: 'var(--text-main)', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Trust Center</span>
-            <Link href="/security" style={{ textDecoration: 'none', color: 'inherit', fontWeight: 600 }}>🛡️ Security Hub</Link>
+            <Link href="/security" style={{ textDecoration: 'none', color: 'inherit', fontWeight: 600 }}>Security Hub</Link>
             <Link href="/privacy" style={{ textDecoration: 'none', color: 'inherit' }}>Privacy Policy</Link>
             <Link href="/terms" style={{ textDecoration: 'none', color: 'inherit' }}>Terms of Service</Link>
           </div>
@@ -1871,7 +1871,7 @@ export default function LandingPage() {
           animation: 'slideUp 0.3s ease-out'
         }}>
           <div style={{ fontSize: '13px', color: 'var(--text-main)', lineHeight: '1.5' }}>
-            🍪 We use cookies to analyze performance and optimize conversion rate. By continuing, you agree to our policies.
+            We use cookies to analyze performance and optimize conversion rate. By continuing, you agree to our policies.
           </div>
           <div style={{ display: 'flex', gap: '10px' }}>
             <button 
@@ -1921,11 +1921,10 @@ export default function LandingPage() {
               onClick={() => setVideoModalOpen(false)}
               style={{
                 position: 'absolute',
-                top: '15px',
-                right: '15px',
-                zIndex: 10,
+                top: '-40px',
+                right: '0',
                 background: '#fff',
-                border: '2px solid var(--border)',
+                border: 'none',
                 borderRadius: '50%',
                 width: '32px',
                 height: '32px',
@@ -1937,7 +1936,7 @@ export default function LandingPage() {
                 fontWeight: 'bold'
               }}
             >
-              ✕
+              <X size={16} />
             </button>
             {/* Embedded mockup player */}
             <div style={{

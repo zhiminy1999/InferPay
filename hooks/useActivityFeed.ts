@@ -20,8 +20,8 @@ export function useActivityFeed() {
 
     // Default static fallback if database is empty/loading
     setActivities([
-      { time: '14:32:04', emoji: '⚡', title: 'System Ready', desc: 'InferPay is connected and ready to manage your company finances.', type: 'success' },
-      { time: '14:32:05', emoji: '🛡️', title: 'Safety Checks Active', desc: 'All spending limits and approval rules are in place.', type: 'info' }
+      { time: '14:32:04', emoji: 'lightning', title: 'System Ready', desc: 'InferPay is connected and ready to manage your company finances.', type: 'success' },
+      { time: '14:32:05', emoji: 'shield', title: 'Safety Checks Active', desc: 'All spending limits and approval rules are in place.', type: 'info' }
     ])
   }, [])
 
@@ -37,18 +37,18 @@ export function useActivityFeed() {
   ) => {
     let finalTitle = ''
     let finalDesc = ''
-    let finalEmoji = '⚡'
+    let finalEmoji = 'lightning'
     let finalType = 'default'
 
     if (typeof titleOrObj === 'object' && titleOrObj !== null) {
       finalTitle = titleOrObj.title || ''
       finalDesc = titleOrObj.desc || titleOrObj.description || ''
-      finalEmoji = titleOrObj.emoji || '⚡'
+      finalEmoji = titleOrObj.emoji || 'lightning'
       finalType = titleOrObj.type || 'default'
     } else {
       finalTitle = titleOrObj
       finalDesc = desc || ''
-      finalEmoji = emoji || '⚡'
+      finalEmoji = emoji || 'lightning'
       finalType = type || 'default'
     }
 

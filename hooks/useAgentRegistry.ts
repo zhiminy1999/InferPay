@@ -81,7 +81,7 @@ export function useAgentRegistry({
         throw new Error("Wallet not connected")
       }
 
-      addActivity('Registering Agent', `Submitting Agent registration for ${name}...`, '🤖', 'info')
+      addActivity('Registering Agent', `Submitting Agent registration for ${name}...`, 'robot', 'info')
 
       const hash = await walletClient.writeContract({
         address: AGENT_REGISTRY_ADDRESS,
@@ -95,14 +95,14 @@ export function useAgentRegistry({
       setTxHash(hash)
       await publicClient.waitForTransactionReceipt({ hash })
       setTxStatus('success')
-      addActivity('Agent Registered', `AI Agent registered on-chain.`, '✅', 'success')
+      addActivity('Agent Registered', `AI Agent registered on-chain.`, 'party', 'success')
       return hash
     } catch (err: any) {
       console.error(err)
       setTxStatus('error')
       const msg = err.shortMessage || err.message || 'Transaction failed'
       setErrorMsg(msg)
-      addActivity('Registration failed', msg, '❌', 'danger')
+      addActivity('Registration failed', msg, 'cross', 'danger')
       return null
     } finally {
       setIsRegistryLoading(false)

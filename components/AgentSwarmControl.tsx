@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Brain, Cpu, ArrowRight, ShieldCheck, DollarSign, ExternalLink } from 'lucide-react'
+import { Brain, Cpu, ArrowRight, ShieldCheck, DollarSign, ExternalLink, Star } from 'lucide-react'
 import { parseUnits } from 'viem'
 import { useNanopayments } from '@/hooks/useNanopayments'
 
@@ -33,7 +33,7 @@ export const AgentSwarmControl: React.FC = () => {
   const runSwarm = async () => {
     setIsRunning(true)
     setLogs([])
-    addLog('🚀 Initializing ERC-8004 Swarm Orchestration...')
+    addLog('[System] Initializing ERC-8004 Swarm Orchestration...')
     
     // Reset agent statuses
     setAgents(prev => prev.map(a => ({ ...a, status: 'IDLE' })))
@@ -45,7 +45,7 @@ export const AgentSwarmControl: React.FC = () => {
       next[0].status = 'BUSY'
       return next
     })
-    addLog('💬 [Coordinator Agent] Parsing user prompt. Estimated compute budget: 0.009 USDC.')
+    addLog('[Coordinator Agent] Parsing user prompt. Estimated compute budget: 0.009 USDC.')
     await new Promise(r => setTimeout(r, 1200))
     setAgents(prev => {
       const next = [...prev]
@@ -59,11 +59,11 @@ export const AgentSwarmControl: React.FC = () => {
       next[1].status = 'BUSY'
       return next
     })
-    addLog('🔍 [Research Agent] Commencing file search. Querying Lepton research files...')
-    addLog('⛓️ [Research Agent] x402 challenge detected on /api/search. Signing authorization invoice...')
+    addLog('[Research Agent] Commencing file search. Querying Lepton research files...')
+    addLog('[Chain] [Research Agent] x402 challenge detected on /api/search. Signing authorization invoice...')
     await new Promise(r => setTimeout(r, 1500))
-    addLog('💳 [Research Agent] EIP-712 micro-signature verified. Deducted 0.002 USDC from local balance.')
-    addLog('📈 [Royalty Split] 20% of fee (0.0004 USDC) routed to publisher wallet.')
+    addLog('[Payments] [Research Agent] EIP-712 micro-signature verified. Deducted 0.002 USDC from local balance.')
+    addLog('[Royalty Split] 20% of fee (0.0004 USDC) routed to publisher wallet.')
     setAgents(prev => {
       const next = [...prev]
       next[1].status = 'COMPLETED'
@@ -76,7 +76,7 @@ export const AgentSwarmControl: React.FC = () => {
       next[2].status = 'BUSY'
       return next
     })
-    addLog('📝 [Translation Agent] Formatting search results. Billed 0.001 USDC for OCR compilation.')
+    addLog('[Translation Agent] Formatting search results. Billed 0.001 USDC for OCR compilation.')
     await new Promise(r => setTimeout(r, 1200))
     setAgents(prev => {
       const next = [...prev]
@@ -90,7 +90,7 @@ export const AgentSwarmControl: React.FC = () => {
       next[3].status = 'BUSY'
       return next
     })
-    addLog('🛡️ [Verifier Agent] Running compliance check. Match index verified successfully.')
+    addLog('[Verifier Agent] Running compliance check. Match index verified successfully.')
     await new Promise(r => setTimeout(r, 1000))
     setAgents(prev => {
       const next = [...prev]
@@ -104,7 +104,7 @@ export const AgentSwarmControl: React.FC = () => {
       next[4].status = 'BUSY'
       return next
     })
-    addLog('🎉 [Payment Agent] Settlement confirmed on Arc Testnet. Gas fee: 0.0004 USDC.')
+    addLog('[Payouts] [Payment Agent] Settlement confirmed on Arc Testnet. Gas fee: 0.0004 USDC.')
     await new Promise(r => setTimeout(r, 1000))
     setAgents(prev => {
       const next = [...prev]
@@ -112,7 +112,7 @@ export const AgentSwarmControl: React.FC = () => {
       return next
     })
 
-    addLog('✅ ERC-8004 Swarm operation executed successfully.')
+    addLog('[Success] ERC-8004 Swarm operation executed successfully.')
     setIsRunning(false)
     refreshBalances()
   }
@@ -158,7 +158,9 @@ export const AgentSwarmControl: React.FC = () => {
               <span className={`badge-brutalist ${agent.status === 'BUSY' ? 'yellow' : agent.status === 'COMPLETED' ? 'green' : 'default'}`} style={{ fontSize: '9px', padding: '2px 6px' }}>
                 {agent.status}
               </span>
-              <span style={{ fontSize: '11px', color: 'var(--text-light)', fontWeight: 700 }}>⭐ {agent.reputation}</span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: '11px', color: 'var(--text-light)', fontWeight: 700 }}>
+                <Star size={11} fill="var(--accent-coral)" style={{ color: 'var(--accent-coral)' }} /> {agent.reputation}
+              </span>
             </div>
 
             <div style={{ fontWeight: 800, fontSize: '13px', color: 'var(--text-main)', marginBottom: '2px' }}>{agent.name}</div>
@@ -192,7 +194,7 @@ export const AgentSwarmControl: React.FC = () => {
           </div>
         ) : (
           logs.map((log, i) => (
-            <div key={i} style={{ color: log.includes('✅') || log.includes('Split') ? 'var(--accent-green)' : log.includes('🚀') ? 'var(--accent-coral)' : 'var(--text-main)' }}>
+            <div key={i} style={{ color: log.includes('[Success]') || log.includes('Split') ? 'var(--accent-green)' : log.includes('[System]') ? 'var(--accent-coral)' : 'var(--text-main)' }}>
               {log}
             </div>
           ))

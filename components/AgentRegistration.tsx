@@ -44,12 +44,12 @@ export function AgentRegistration({
     e.preventDefault()
 
     if (!name || !description || !capabilities || !serviceEndpoint) {
-      addActivity('Validation Error', 'All metadata fields are required for Agent registration.', '⚠️', 'warning')
+      addActivity('Validation Error', 'All metadata fields are required for Agent registration.', 'warning', 'warning')
       return
     }
 
     if (!serviceEndpoint.startsWith('http://') && !serviceEndpoint.startsWith('https://')) {
-      addActivity('Validation Error', 'Service endpoint must start with http:// or https://', '⚠️', 'warning')
+      addActivity('Validation Error', 'Service endpoint must start with http:// or https://', 'warning', 'warning')
       return
     }
 

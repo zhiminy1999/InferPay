@@ -11,8 +11,8 @@ import AuthModal from '@/components/AuthModal'
 // Decomposed Components
 import TopBar from '@/components/TopBar'
 import Sidebar from '@/components/Sidebar'
-import ActivityFeed from '@/components/ActivityFeed'
 import FaucetModal from '@/components/FaucetModal'
+import { UserProfileModal } from '@/components/UserProfileModal'
 import SpendingBudget from '@/components/SpendingBudget'
 import SmartBillPay from '@/components/SmartBillPay'
 import SavingsOptimizer from '@/components/SavingsOptimizer'
@@ -50,6 +50,7 @@ export default function InferPayDashboard() {
   const [showBridgeModal, setShowBridgeModal] = useState<boolean>(false)
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState<boolean>(false)
   const [showHelpModal, setShowHelpModal] = useState<boolean>(false)
+  const [showProfileModal, setShowProfileModal] = useState<boolean>(false)
 
   // Shared hooks
   const { activities, addActivity } = useActivityFeed()
@@ -100,7 +101,7 @@ export default function InferPayDashboard() {
   const handleFaucet = async () => {
     setIsFaucetLoading(true)
     if (isConnected && address) {
-      addActivity('Requesting faucet funds', 'Transferring 10 USDC & 10 EURC on Arc Testnet...', '💧', 'info')
+      addActivity('Requesting faucet funds', 'Transferring 10 USDC & 10 EURC on Arc Testnet...', 'faucet', 'info')
       try {
         const res = await fetch('/api/faucet', {
           method: 'POST',
@@ -109,7 +110,7 @@ export default function InferPayDashboard() {
         })
         const data = await res.json()
         if (res.ok && data.success) {
-          addActivity('Faucet funded', 'Received 10 USDC & 10 EURC on Arc Testnet!', '🎉', 'success')
+          addActivity('Faucet funded', 'Received 10 USDC & 10 EURC on Arc Testnet!', 'party', 'success')
           
           // Fetch new balances
           if (setUsdcBalance && setEurcBalance) {
@@ -120,29 +121,14 @@ export default function InferPayDashboard() {
           throw new Error(data.error || 'Faucet request failed')
         }
       } catch (err: any) {
-        addActivity('Faucet failed', err.message || 'Could not fund wallet.', '❌', 'danger')
+        addActivity('Faucet failed', err.message || 'Could not fund wallet.', 'cross', 'danger')
       } finally {
         setIsFaucetLoading(false)
       }
     } else {
-      // Demo Mode: Mint simulated assets and persist in localStorage
-      addActivity('Adding demo funds', 'Depositing $1,000 USD & €1,000 EUR into your demo account.', '💧', 'info')
-      try {
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        const newUsdc = (Number(usdcBalance) + 1000).toFixed(2)
-        const newEurc = (Number(eurcBalance) + 1000).toFixed(2)
-        
-        setUsdcBalance(newUsdc)
-        setEurcBalance(newEurc)
-        localStorage.setItem('inferpay_sim_usdc', newUsdc)
-        localStorage.setItem('inferpay_sim_eurc', newEurc)
-        
-        addActivity('Demo funds added', 'Your demo account now has +$1,000 USD & +€1,000 EUR.', '🎉', 'success')
-      } catch (err) {
-        addActivity('Could not add funds', 'Something went wrong. Please try again.', '❌', 'danger')
-      } finally {
-        setIsFaucetLoading(false)
-      }
+      addActivity('Faucet request blocked', 'Please connect your wallet first to request testnet faucet funds.', 'lock', 'warning')
+      setIsFaucetLoading(false)
+      setIsAuthModalOpen(true)
     }
   }
 
@@ -160,6 +146,7 @@ export default function InferPayDashboard() {
         onOpenAuthModal={() => setIsAuthModalOpen(true)}
         onOpenBridge={() => setShowBridgeModal(true)}
         disconnect={handleDisconnectAll}
+        onOpenProfileModal={() => setShowProfileModal(true)}
         onToggleSidebar={() => setMobileSidebarOpen(!mobileSidebarOpen)}
         onOpenHelpGuide={() => setShowHelpModal(true)}
       />
@@ -311,9 +298,6 @@ export default function InferPayDashboard() {
             )}
           </div>
         </main>
-
-        {/* Right Info Box */}
-        <ActivityFeed activities={activities} />
       </div>
 
       <FaucetModal
@@ -336,6 +320,16 @@ export default function InferPayDashboard() {
       <BridgeModal
         isOpen={showBridgeModal}
         onClose={() => setShowBridgeModal(false)}
+      />
+
+      <UserProfileModal
+        isOpen={showProfileModal}
+        onClose={() => setShowProfileModal(false)}
+        address={address}
+        usdcBalance={usdcBalance}
+        eurcBalance={eurcBalance}
+        walletType={walletType}
+        disconnect={handleDisconnectAll}
       />
 
       {showHelpModal && (
@@ -361,11 +355,11 @@ export default function InferPayDashboard() {
 
               <div>
                 <strong style={{ display: 'block', marginBottom: '8px', color: 'var(--text-main)', borderBottom: '1px solid var(--border)', paddingBottom: '4px' }}>
-                  🎯 Core Testing Workflows
+                  Core Testing Workflows
                 </strong>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   <div>
-                    <strong>1. Refill Test Assets:</strong> Click the droplet icon 💧 (<strong>Get Free Test Funds</strong>) on the top bar. In Live mode, this deposits native gas USDC (18 decimals) and ERC-20 stablecoins directly into your connected MetaMask. In Demo mode, it adds $1,000 to your simulated balance instantly.
+                    <strong>1. Refill Test Assets:</strong> Click the droplet icon (<strong>Get Free Test Funds</strong>) on the top bar. In Live mode, this deposits native gas USDC (18 decimals) and ERC-20 stablecoins directly into your connected MetaMask. In Demo mode, it adds $1,000 to your simulated balance instantly.
                   </div>
                   <div>
                     <strong>2. Execute AI Tasks:</strong> Go to the <strong>AI Agent Workspace</strong>. Click any suggested command (e.g. <i>"Swap 25 USDC"</i>) and press <strong>Run</strong>. The LangGraph agent swarm coordinates token swaps or balance checks, logging each step in real time.
@@ -383,7 +377,7 @@ export default function InferPayDashboard() {
               </div>
 
               <div style={{ backgroundColor: '#fef3c7', color: '#78350f', padding: '12px', borderRadius: 'var(--radius-sm)', border: '1px solid #fde68a' }}>
-                💡 <strong>Under the Hood:</strong> We sponsor all transactions on Arc Testnet using a server-side relayer. The USDC stablecoin acts directly as the native gas asset, meaning you never need separate gas tokens to test!
+                <strong>Under the Hood:</strong> We sponsor all transactions on Arc Testnet using a server-side relayer. The USDC stablecoin acts directly as the native gas asset, meaning you never need separate gas tokens to test!
               </div>
             </div>
 

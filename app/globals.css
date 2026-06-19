@@ -1019,6 +1019,15 @@ body {
 }
 
 /* Small Screens (Mobile Portait & Landscape) */
+@media (max-width: 992px) {
+  .hide-mobile {
+    display: none !important;
+  }
+  .network-badge {
+    display: none !important;
+  }
+}
+
 @media (max-width: 768px) {
   .app-topbar {
     height: auto !important;

@@ -8,6 +8,7 @@ import { privateKeyToAccount } from 'viem/accounts'
 import { arcTestnet } from 'viem/chains'
 import { AGENT_REGISTRY_ADDRESS, agentRegistryAbi } from '@/lib/agent-registry'
 import { AGENT_CONSENSUS_ADDRESS, agentConsensusAbi } from '@/lib/contracts'
+import { BrandIcon } from './BrandIcon'
 
 interface ApprovalCommitteeProps {
   isConnected: boolean
@@ -106,14 +107,14 @@ export function ApprovalCommittee({
   const autoRegisterAgents = async () => {
     if (!publicClient || !walletClient || !address) return
     setIsRegisteringAgents(true)
-    addActivity('Seeding ERC-8004 Identity', 'Registering agent profiles on-chain...', '🤖', 'info')
+    addActivity('Seeding ERC-8004 Identity', 'Registering agent profiles on-chain...', 'robot', 'info')
 
     try {
       const AGENT_1_KEY = '0x0000000000000000000000000000000000000000000000000000000000000001'
       const AGENT_2_KEY = '0x0000000000000000000000000000000000000000000000000000000000000002'
 
       // 1. Register Proposer (Master Wallet / Agent 0)
-      addActivity('Registering Proposer', 'Registering Admin Operations Controller...', '🤖', 'info')
+      addActivity('Registering Proposer', 'Registering Admin Operations Controller...', 'robot', 'info')
       const hash0 = await walletClient.writeContract({
         address: AGENT_REGISTRY_ADDRESS,
         abi: agentRegistryAbi,
@@ -137,7 +138,7 @@ export function ApprovalCommittee({
         chain: arcTestnet,
         transport: http()
       })
-      addActivity('Registering Safety Agent', 'Registering Safety Guardrail Reviewer...', '🛡️', 'info')
+      addActivity('Registering Safety Agent', 'Registering Safety Guardrail Reviewer...', 'shield', 'info')
       const hash1 = await client1.writeContract({
         address: AGENT_REGISTRY_ADDRESS,
         abi: agentRegistryAbi,
@@ -160,7 +161,7 @@ export function ApprovalCommittee({
         chain: arcTestnet,
         transport: http()
       })
-      addActivity('Registering Auditor Agent', 'Registering Budget Auditor Agent...', '📊', 'info')
+      addActivity('Registering Auditor Agent', 'Registering Budget Auditor Agent...', 'chart', 'info')
       const hash2 = await client2.writeContract({
         address: AGENT_REGISTRY_ADDRESS,
         abi: agentRegistryAbi,
@@ -176,11 +177,11 @@ export function ApprovalCommittee({
       })
       await publicClient.waitForTransactionReceipt({ hash: hash2 })
 
-      addActivity('Identities created', 'All 3 committee agents verified under ERC-8004.', '✅', 'success')
+      addActivity('Identities created', 'All 3 committee agents verified under ERC-8004.', 'party', 'success')
       await checkAgentRegistrations()
     } catch (err: any) {
       console.error(err)
-      addActivity('Auto-registration failed', err.shortMessage || err.message || 'Verification failed', '❌', 'danger')
+      addActivity('Auto-registration failed', err.shortMessage || err.message || 'Verification failed', 'cross', 'danger')
     } finally {
       setIsRegisteringAgents(false)
     }
@@ -250,12 +251,12 @@ export function ApprovalCommittee({
         // Our hook sets `txHash` state and returns proposal index/status
         // Let's read creationTx hash from the transaction log
         
-        addActivity('On-chain review', `Proposal #${nextId} created on-chain. Waiting for agent committee review.`, '🛡️', 'info')
+        addActivity('On-chain review', `Proposal #${nextId} created on-chain. Waiting for agent committee review.`, 'shield', 'info')
 
         // Let's run debate steps with real transactions
         // Proposer Vote (Agent 0 - Master wallet)
         const msg0 = { 
-          sender: '🤖 Operations Team (Requester)', 
+          sender: 'Operations Team (Requester)', 
           role: 'proposer' as const, 
           text: 'We need $25,000 to rent cloud computing servers for the next quarter. Requesting approval.' 
         }
@@ -269,10 +270,10 @@ export function ApprovalCommittee({
 
         // Safety Reviewer Vote (Agent 1 - Safety agent)
         const checkMsg = complianceFlag 
-          ? '🔴 WARNING: The recipient address looks suspicious! Rejecting for security compliance.'
-          : '🟢 Safety check passed. Verified vendor. Recommending approval.'
+          ? 'WARNING: The recipient address looks suspicious! Rejecting for security compliance.'
+          : 'Safety check passed. Verified vendor. Recommending approval.'
         const msg1 = { 
-          sender: '🛡️ Safety Reviewer', 
+          sender: 'Safety Reviewer', 
           role: 'compliance' as const, 
           text: checkMsg 
         }
@@ -289,7 +290,7 @@ export function ApprovalCommittee({
           ? 'Safety checker triggered warning. Rejecting consensus proposal.'
           : 'Budget verified. Cloud computing is within quarterly budget boundaries. Approving.'
         const msg2 = { 
-          sender: '📊 Budget Reviewer', 
+          sender: 'Budget Reviewer', 
           role: 'auditor' as const, 
           text: budgetMsg 
         }
@@ -304,30 +305,30 @@ export function ApprovalCommittee({
         // Determine final outcome
         if (complianceFlag) {
           setStatus('REJECTED')
-          addActivity('Governance Blocked', 'The Safety & Budget reviewers rejected the proposal.', '🔒', 'danger')
+          addActivity('Governance Blocked', 'The Safety & Budget reviewers rejected the proposal.', 'lock', 'danger')
         } else {
           setStatus('APPROVED')
-          addActivity('Governance Approved', 'Consensus met. Payment executed successfully.', '🎉', 'success')
+          addActivity('Governance Approved', 'Consensus met. Payment executed successfully.', 'party', 'success')
         }
 
       } catch (err: any) {
         console.error("On-chain governance flow failed:", err)
-        addActivity('Governance flow halted', err.message || 'Workflow error', '❌', 'danger')
+        addActivity('Governance flow halted', err.message || 'Workflow error', 'cross', 'danger')
       } finally {
         setIsDebating(false)
       }
 
     } else {
       // --- DEMO MODE ---
-      addActivity('Review started (Demo)', 'Simulating three independent reviewer votes.', '🛡️', 'info')
+      addActivity('Review started (Demo)', 'Simulating three independent reviewer votes.', 'shield', 'info')
       setProposalId(104)
 
       const messages = [
-        { sender: '🤖 Operations Team (Requester)', role: 'proposer' as const, text: 'We need $25,000 to rent cloud computing servers for the next quarter. All usage reports are verified.' },
-        { sender: '🛡️ Safety Reviewer', role: 'compliance' as const, text: complianceFlag 
-          ? '🔴 WARNING: The payment recipient has been flagged as potentially unsafe. I recommend rejecting this payment.'
-          : '🟢 Safety check passed. The recipient is verified and trustworthy. I recommend approving this payment.' },
-        { sender: '📊 Budget Reviewer', role: 'auditor' as const, text: complianceFlag
+        { sender: 'Operations Team (Requester)', role: 'proposer' as const, text: 'We need $25,000 to rent cloud computing servers for the next quarter. All usage reports are verified.' },
+        { sender: 'Safety Reviewer', role: 'compliance' as const, text: complianceFlag 
+          ? 'WARNING: The payment recipient has been flagged as potentially unsafe. I recommend rejecting this payment.'
+          : 'Safety check passed. The recipient is verified and trustworthy. I recommend approving this payment.' },
+        { sender: 'Budget Reviewer', role: 'auditor' as const, text: complianceFlag
           ? 'The safety reviewer found a problem. I agree we should reject this payment until further investigation.'
           : 'Budget check passed. We have $43,000 remaining in this quarter\'s budget. This $25,000 request is within our limits. Approved.' }
       ]
@@ -338,7 +339,7 @@ export function ApprovalCommittee({
       const messageTimer = setInterval(() => {
         if (i < messages.length) {
           setDebateMessages(prev => [...prev, messages[i]])
-          addActivity(`AI Governance (Demo): ${messages[i].sender}`, messages[i].text, '💬', messages[i].role === 'proposer' ? 'info' : messages[i].role === 'compliance' ? 'warning' : 'default')
+          addActivity(`AI Governance (Demo): ${messages[i].sender}`, messages[i].text, 'chat', messages[i].role === 'proposer' ? 'info' : messages[i].role === 'compliance' ? 'warning' : 'default')
 
           if (i === 1) {
             setVotes(prev => ({ ...prev, compliance: complianceFlag ? 'REJECTED' : 'APPROVED' }))
@@ -352,9 +353,9 @@ export function ApprovalCommittee({
           clearInterval(messageTimer)
           setIsDebating(false)
           if (complianceFlag) {
-            addActivity('Payment blocked (Demo)', 'The safety reviewer flagged this payment as suspicious. The $25,000 transfer has been stopped.', '🔒', 'danger')
+            addActivity('Payment blocked (Demo)', 'The safety reviewer flagged this payment as suspicious. The $25,000 transfer has been stopped.', 'lock', 'danger')
           } else {
-            addActivity('Payment approved (Demo)', 'All 3 reviewers approved. The $25,000 has been sent.', '🎉', 'success')
+            addActivity('Payment approved (Demo)', 'All 3 reviewers approved. The $25,000 has been sent.', 'party', 'success')
           }
         }
       }, delay)
@@ -375,10 +376,10 @@ export function ApprovalCommittee({
       }
     } else {
       // Demo mode bypass
-      addActivity('Owner override (Demo)', 'Manually approving this payment as the account owner.', '🔑', 'warning')
+      addActivity('Owner override (Demo)', 'Manually approving this payment as the account owner.', 'key', 'warning')
       setTimeout(() => {
         setStatus('BYPASSED')
-        addActivity('Payment sent (Demo)', 'The $25,000 has been released with manual authorization.', '✅', 'success')
+        addActivity('Payment sent (Demo)', 'The $25,000 has been released with manual authorization.', 'party', 'success')
       }, 1200)
     }
   }
@@ -420,8 +421,18 @@ export function ApprovalCommittee({
                     </a>
                   )}
                 </div>
-                <span className={`badge-brutalist ${votes.proposer === 'APPROVED' ? 'green' : 'yellow'}`}>
-                  {votes.proposer === 'APPROVED' ? 'APPROVED ✅' : 'PENDING ⏳'}
+                <span className={`badge-brutalist ${votes.proposer === 'APPROVED' ? 'green' : 'yellow'}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                  {votes.proposer === 'APPROVED' ? (
+                    <>
+                      <BrandIcon name="shield" size={11} variant="green" />
+                      <span>APPROVED</span>
+                    </>
+                  ) : (
+                    <>
+                      <BrandIcon name="refresh" size={11} variant="yellow" />
+                      <span>PENDING</span>
+                    </>
+                  )}
                 </span>
               </div>
               
@@ -434,8 +445,23 @@ export function ApprovalCommittee({
                     </a>
                   )}
                 </div>
-                <span className={`badge-brutalist ${votes.compliance === 'APPROVED' ? 'green' : votes.compliance === 'REJECTED' ? 'pink' : 'yellow'}`}>
-                  {votes.compliance === 'APPROVED' ? 'APPROVED ✅' : votes.compliance === 'REJECTED' ? 'REJECTED ❌' : 'SCANNING ⏳'}
+                <span className={`badge-brutalist ${votes.compliance === 'APPROVED' ? 'green' : votes.compliance === 'REJECTED' ? 'pink' : 'yellow'}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                  {votes.compliance === 'APPROVED' ? (
+                    <>
+                      <BrandIcon name="shield" size={11} variant="green" />
+                      <span>APPROVED</span>
+                    </>
+                  ) : votes.compliance === 'REJECTED' ? (
+                    <>
+                      <BrandIcon name="cross" size={11} variant="coral" />
+                      <span>REJECTED</span>
+                    </>
+                  ) : (
+                    <>
+                      <BrandIcon name="refresh" size={11} variant="yellow" />
+                      <span>SCANNING</span>
+                    </>
+                  )}
                 </span>
               </div>
               
@@ -448,8 +474,23 @@ export function ApprovalCommittee({
                     </a>
                   )}
                 </div>
-                <span className={`badge-brutalist ${votes.auditor === 'APPROVED' ? 'green' : votes.auditor === 'REJECTED' ? 'pink' : 'yellow'}`}>
-                  {votes.auditor === 'APPROVED' ? 'APPROVED ✅' : votes.auditor === 'REJECTED' ? 'REJECTED ❌' : 'PENDING ⏳'}
+                <span className={`badge-brutalist ${votes.auditor === 'APPROVED' ? 'green' : votes.auditor === 'REJECTED' ? 'pink' : 'yellow'}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                  {votes.auditor === 'APPROVED' ? (
+                    <>
+                      <BrandIcon name="shield" size={11} variant="green" />
+                      <span>APPROVED</span>
+                    </>
+                  ) : votes.auditor === 'REJECTED' ? (
+                    <>
+                      <BrandIcon name="cross" size={11} variant="coral" />
+                      <span>REJECTED</span>
+                    </>
+                  ) : (
+                    <>
+                      <BrandIcon name="refresh" size={11} variant="yellow" />
+                      <span>PENDING</span>
+                    </>
+                  )}
                 </span>
               </div>
             </div>
@@ -459,13 +500,34 @@ export function ApprovalCommittee({
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '12px 15px', backgroundColor: 'var(--bg-inner)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', marginBottom: '15px' }}>
             <div style={{ fontSize: '11px', color: 'var(--text-light)', fontWeight: 700, textTransform: 'uppercase' }}>ERC-8004 Committee Status</div>
             <div style={{ display: 'flex', gap: '15px', fontSize: '12px', flexWrap: 'wrap' }}>
-              <span>Proposer: <strong style={{ color: agentsRegistered.proposer ? '#166534' : '#991b1b' }}>{agentsRegistered.proposer ? 'REGISTERED ✅' : 'UNREGISTERED ❌'}</strong></span>
-              <span>Safety Agent: <strong style={{ color: agentsRegistered.compliance ? '#166534' : '#991b1b' }}>{agentsRegistered.compliance ? 'REGISTERED ✅' : 'UNREGISTERED ❌'}</strong></span>
-              <span>Budget Agent: <strong style={{ color: agentsRegistered.auditor ? '#166534' : '#991b1b' }}>{agentsRegistered.auditor ? 'REGISTERED ✅' : 'UNREGISTERED ❌'}</strong></span>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                Proposer: 
+                <strong style={{ color: agentsRegistered.proposer ? '#166534' : '#991b1b', display: 'inline-flex', alignItems: 'center', gap: '2px' }}>
+                  <BrandIcon name={agentsRegistered.proposer ? 'shield' : 'cross'} size={11} variant={agentsRegistered.proposer ? 'green' : 'coral'} />
+                  <span>{agentsRegistered.proposer ? 'REGISTERED' : 'UNREGISTERED'}</span>
+                </strong>
+              </span>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                Safety Agent: 
+                <strong style={{ color: agentsRegistered.compliance ? '#166534' : '#991b1b', display: 'inline-flex', alignItems: 'center', gap: '2px' }}>
+                  <BrandIcon name={agentsRegistered.compliance ? 'shield' : 'cross'} size={11} variant={agentsRegistered.compliance ? 'green' : 'coral'} />
+                  <span>{agentsRegistered.compliance ? 'REGISTERED' : 'UNREGISTERED'}</span>
+                </strong>
+              </span>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                Budget Agent: 
+                <strong style={{ color: agentsRegistered.auditor ? '#166534' : '#991b1b', display: 'inline-flex', alignItems: 'center', gap: '2px' }}>
+                  <BrandIcon name={agentsRegistered.auditor ? 'shield' : 'cross'} size={11} variant={agentsRegistered.auditor ? 'green' : 'coral'} />
+                  <span>{agentsRegistered.auditor ? 'REGISTERED' : 'UNREGISTERED'}</span>
+                </strong>
+              </span>
             </div>
             {(!agentsRegistered.proposer || !agentsRegistered.compliance || !agentsRegistered.auditor) && (
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '5px', flexWrap: 'wrap' }}>
-                <span style={{ fontSize: '11px', color: '#9a3412', fontWeight: 650 }}>⚠️ Committee identities must be registered to start consensus.</span>
+                <div style={{ fontSize: '11px', color: '#9a3412', fontWeight: 650, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <BrandIcon name="warning" size={12} variant="coral" />
+                  <span>Committee identities must be registered to start consensus.</span>
+                </div>
                 <button 
                   className="btn-brutalist btn-brutalist-muted" 
                   onClick={autoRegisterAgents}
@@ -515,7 +577,7 @@ export function ApprovalCommittee({
             className="btn-brutalist btn-brutalist-muted" 
             onClick={() => {
               setComplianceFlag(prev => !prev)
-              addActivity('Compliance test toggle', `${!complianceFlag ? 'Triggered' : 'Cleared'} suspicious payment simulation.`, '⚙️', 'warning')
+              addActivity('Compliance test toggle', `${!complianceFlag ? 'Triggered' : 'Cleared'} suspicious payment simulation.`, 'tools', 'warning')
             }}
             disabled={isDebating || status !== 'PENDING'}
           >
@@ -531,15 +593,17 @@ export function ApprovalCommittee({
           )}
 
           {status === 'APPROVED' && (
-            <div className="badge-brutalist green" style={{ padding: '10px 15px', fontSize: '13px' }}>
-              🎉 All reviewers approved! Payment has been sent successfully.
+            <div className="badge-brutalist green" style={{ padding: '10px 15px', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <BrandIcon name="party" size={14} variant="green" />
+              <span>All reviewers approved! Payment has been sent successfully.</span>
             </div>
           )}
 
           {status === 'BYPASSED' && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <div className="badge-brutalist yellow" style={{ padding: '10px 15px', fontSize: '13px' }}>
-                ⚠️ Payment was manually approved by the account owner.
+              <div className="badge-brutalist yellow" style={{ padding: '10px 15px', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <BrandIcon name="warning" size={14} variant="yellow" />
+                <span>Payment was manually approved by the account owner.</span>
               </div>
               {bypassTxHash && (
                 <a href={`https://testnet.arcscan.app/tx/${bypassTxHash}`} target="_blank" rel="noreferrer" style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--accent-coral)', textDecoration: 'underline' }}>

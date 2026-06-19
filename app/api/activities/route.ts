@@ -6,7 +6,7 @@ export async function GET() {
     const rows = db.prepare('SELECT * FROM activity_log ORDER BY timestamp DESC LIMIT 50').all()
     const parsed = rows.map((r: any) => ({
       time: new Date(r.timestamp * 1000).toLocaleTimeString('en-US', { hour12: false }),
-      emoji: r.tx_hash || '⚡', // Re-use standard schema fields: tx_hash represents emoji
+      emoji: r.tx_hash || 'lightning', // Re-use standard schema fields: tx_hash represents emoji
       title: r.status || 'System Log', // status represents title
       desc: r.metadata ? JSON.parse(r.metadata).desc : '', // metadata contains desc
       type: r.metadata ? JSON.parse(r.metadata).type : 'default'
@@ -29,7 +29,7 @@ export async function POST(request: Request) {
 
     stmt.run(
       Date.now().toString() + Math.floor(Math.random() * 1000).toString(),
-      emoji || '⚡',
+      emoji || 'lightning',
       0,
       Math.floor(Date.now() / 1000),
       'system',

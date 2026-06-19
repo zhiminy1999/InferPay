@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useNanopayments } from '../hooks/useNanopayments'
 import { useActivityFeed } from '../hooks/useActivityFeed'
+import { BrandIcon } from './BrandIcon'
 
 export const NanopaymentDeposit: React.FC = () => {
   const {
@@ -73,7 +74,8 @@ export const NanopaymentDeposit: React.FC = () => {
           alignItems: 'center',
           gap: '8px'
         }}>
-          ⚠️ Error: {errorMessage}
+          <BrandIcon name="warning" size={14} variant="coral" />
+          <span>Error: {errorMessage}</span>
         </div>
       )}
 

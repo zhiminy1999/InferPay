@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Search, Plus, ListFilter, Cpu, PlusCircle, History, Sparkles, X, Brain } from 'lucide-react'
+import { Search, Plus, ListFilter, Cpu, PlusCircle, History, Sparkles, X, Brain, Check } from 'lucide-react'
 import { useMarketplace, AIService } from '@/hooks/useMarketplace'
 import { ServiceCard } from './ServiceCard'
 import { AutonomousAgent } from './AutonomousAgent'
@@ -189,8 +189,8 @@ export const Marketplace: React.FC = () => {
                 onChange={e => setMinReputation(parseFloat(e.target.value))}
               >
                 <option value="0">All Ratings</option>
-                <option value="9.0">⭐ 9.0+ Rating</option>
-                <option value="9.5">⭐ 9.5+ Rating</option>
+                <option value="9.0">9.0+ Star Rating</option>
+                <option value="9.5">9.5+ Star Rating</option>
               </select>
             </div>
           </div>
@@ -426,7 +426,8 @@ export const Marketplace: React.FC = () => {
               {executionResult && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   <div style={{ color: 'var(--accent-green)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <span>✓ Succeeded</span>
+                    <Check size={14} />
+                    <span>Succeeded</span>
                   </div>
                   <div style={{
                     backgroundColor: 'var(--bg-inner)',

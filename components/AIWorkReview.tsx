@@ -8,6 +8,7 @@ import { CurrencySelector } from './CurrencySelector'
 import { parseUnits } from 'viem'
 import { erc20Abi, USDC_ADDRESS_ARC, EURC_ADDRESS_ARC } from '@/lib/contracts'
 import { ButtonLoading } from './LoadingSystem'
+import { BrandIcon } from './BrandIcon'
 
 interface AIWorkReviewProps {
   isConnected: boolean
@@ -171,14 +172,14 @@ export function AIWorkReview({
     if (!selectedInv || selectedInv.status !== 'PENDING') return
 
     setIsPayrollLoading(true)
-    addActivity('Reviewing AI work', `Checking the work report from ${selectedInv.agentName}.`, '⏳', 'info')
+    addActivity('Reviewing AI work', `Checking the work report from ${selectedInv.agentName}.`, 'refresh', 'info')
 
     try {
       if (isConnected && walletClient && address && publicClient) {
         const tokenAddress = currency === 'EURC' ? EURC_ADDRESS_ARC : USDC_ADDRESS_ARC
         const requiredAmount = parseUnits(selectedInv.amount.toString(), 6)
 
-        addActivity('Initiating Payment', `Sending ${selectedInv.amount} ${currency} to agent at ${selectedInv.agentWallet.slice(0, 8)}...`, '💸', 'info')
+        addActivity('Initiating Payment', `Sending ${selectedInv.amount} ${currency} to agent at ${selectedInv.agentWallet.slice(0, 8)}...`, 'money', 'info')
 
         const hash = await walletClient.writeContract({
           address: tokenAddress,
@@ -189,23 +190,23 @@ export function AIWorkReview({
           chain: null
         })
 
-        addActivity('Transaction Submitted', `Transaction hash: ${hash.slice(0, 10)}... Waiting for confirmation.`, '⛓️', 'info')
+        addActivity('Transaction Submitted', `Transaction hash: ${hash.slice(0, 10)}... Waiting for confirmation.`, 'chain', 'info')
         await publicClient.waitForTransactionReceipt({ hash })
 
         setInvoices(prev => prev.map(inv => inv.id === selectedInvoiceId ? { ...inv, status: 'PAID' } : inv))
-        addActivity('Report verified', 'This work report has been confirmed as authentic and untampered.', '🛡️', 'success')
-        addActivity('Payment settled', `${selectedInv.amount} ${currency} successfully paid to ${selectedInv.agentName} (Tx: ${hash.slice(0, 8)}...).`, '✅', 'success')
+        addActivity('Report verified', 'This work report has been confirmed as authentic and untampered.', 'shield', 'success')
+        addActivity('Payment settled', `${selectedInv.amount} ${currency} successfully paid to ${selectedInv.agentName} (Tx: ${hash.slice(0, 8)}...).`, 'party', 'success')
       } else {
         // Fallback for demo/unconnected state
         await new Promise((resolve) => setTimeout(resolve, 2000))
         setInvoices(prev => prev.map(inv => inv.id === selectedInvoiceId ? { ...inv, status: 'PAID' } : inv))
-        addActivity('Report verified', 'This work report has been confirmed as authentic and untampered.', '🛡️', 'success')
-        addActivity('Payment sent', `${selectedInv.amount} ${selectedInv.currency} has been sent to ${selectedInv.agentName}.`, '💸', 'success')
+        addActivity('Report verified', 'This work report has been confirmed as authentic and untampered.', 'shield', 'success')
+        addActivity('Payment sent', `${selectedInv.amount} ${selectedInv.currency} has been sent to ${selectedInv.agentName}.`, 'money', 'success')
       }
     } catch (err: any) {
       console.error(err)
       const msg = err.shortMessage || err.message || 'Transaction failed'
-      addActivity('Payment failed', msg, '❌', 'danger')
+      addActivity('Payment failed', msg, 'cross', 'danger')
     } finally {
       setIsPayrollLoading(false)
     }
@@ -269,7 +270,7 @@ export function AIWorkReview({
                   <td><strong style={{ color: 'var(--accent-coral)' }}>{inv.amount} {inv.currency}</strong></td>
                   <td>
                     <span className={`badge-brutalist ${inv.status === 'PAID' ? 'green' : 'yellow'}`}>
-                      {inv.status === 'PAID' ? 'Paid ✓' : 'Needs Review'}
+                      {inv.status === 'PAID' ? 'Paid' : 'Needs Review'}
                     </span>
                   </td>
                 </tr>
@@ -371,8 +372,9 @@ export function AIWorkReview({
                     </div>
                   </>
                 ) : (
-                  <div className="badge-brutalist green" style={{ padding: '10px 15px', fontSize: '13px' }}>
-                    ⚡ Payment sent! Funds have been transferred directly to this assistant’s account.
+                  <div className="badge-brutalist green" style={{ padding: '10px 15px', fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    <BrandIcon name="lightning" size={14} variant="green" />
+                    <span>Payment sent! Funds have been transferred directly to this assistant’s account.</span>
                   </div>
                 )}
               </div>

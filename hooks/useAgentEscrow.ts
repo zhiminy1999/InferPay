@@ -100,7 +100,7 @@ export function useAgentEscrow({
     setErrorMsg(null)
     setTxHash(null)
 
-    addActivity('Generating keypair', 'Creating ephemeral keys for the AI agent session.', '🔑', 'info')
+    addActivity('Generating keypair', 'Creating ephemeral keys for the AI agent session.', 'key', 'info')
     const keypair = generateEphemeralKeypair()
 
     try {
@@ -111,7 +111,7 @@ export function useAgentEscrow({
       const tokenAddress = currency === 'EURC' ? EURC_ADDRESS_ARC : USDC_ADDRESS_ARC
 
       // 1. Approve USDC/EURC transfer
-      addActivity(`${currency} Approve`, `Requesting allowance for AgentEscrow V2 in ${currency}...`, '⛓️', 'info')
+      addActivity(`${currency} Approve`, `Requesting allowance for AgentEscrow V2 in ${currency}...`, 'chain', 'info')
       const approveAmount = parseUnits(pocketMoney.toString(), 6)
       const approveTx = await walletClient.writeContract({
         address: tokenAddress,
@@ -123,10 +123,10 @@ export function useAgentEscrow({
       })
       setTxHash(approveTx)
       await publicClient.waitForTransactionReceipt({ hash: approveTx })
-      addActivity('Allowance Approved', `${currency} spend allowance verified.`, '✅', 'success')
+      addActivity('Allowance Approved', `${currency} spend allowance verified.`, 'party', 'success')
 
       // 2. Fund Ephemeral Wallet with gas
-      addActivity('Funding Gas', 'Transferring native USDC gas to ephemeral wallet...', '⛽', 'info')
+      addActivity('Funding Gas', 'Transferring native USDC gas to ephemeral wallet...', 'lightning', 'info')
       const gasAmount = parseUnits('0.015', 18) // ample native USDC for multiple txs
       const fundTx = await walletClient.sendTransaction({
         account: address,
@@ -136,7 +136,7 @@ export function useAgentEscrow({
       })
       setTxHash(fundTx)
       await publicClient.waitForTransactionReceipt({ hash: fundTx })
-      addActivity('Gas Funded', 'Gas tokens received by ephemeral wallet.', '⛽', 'success')
+      addActivity('Gas Funded', 'Gas tokens received by ephemeral wallet.', 'lightning', 'success')
 
       // 3. Collect Whitelist addresses
       const whitelist: `0x${string}`[] = []
@@ -146,7 +146,7 @@ export function useAgentEscrow({
       if (whitelistServices.anthropic) whitelist.push(WHITELIST_ADDRESSES.anthropic)
 
       // 4. Create Session on-chain
-      addActivity('On-chain Session', `Initializing session policy on AgentEscrow V2 using ${currency}...`, '⛓️', 'info')
+      addActivity('On-chain Session', `Initializing session policy on AgentEscrow V2 using ${currency}...`, 'chain', 'info')
       const duration = mapPeriodToSeconds(safePeriod)
       const createTx = await walletClient.writeContract({
         address: AGENT_ESCROW_ADDRESS,
@@ -160,7 +160,7 @@ export function useAgentEscrow({
       await publicClient.waitForTransactionReceipt({ hash: createTx })
 
       setTxStatus('success')
-      addActivity('Session Active', `AI budget policy (${currency}) enforced on Arc Testnet.`, '🛡️', 'success')
+      addActivity('Session Active', `AI budget policy (${currency}) enforced on Arc Testnet.`, 'shield', 'success')
       await updateEphemeralBalances(keypair.address)
 
       // Save session choice to database
@@ -186,7 +186,7 @@ export function useAgentEscrow({
       setTxStatus('error')
       const msg = err.shortMessage || err.message || 'Transaction failed'
       setErrorMsg(msg)
-      addActivity('Setup failed', msg, '❌', 'danger')
+      addActivity('Setup failed', msg, 'cross', 'danger')
       return null
     } finally {
       setIsEscrowLoading(false)
@@ -218,7 +218,7 @@ export function useAgentEscrow({
       // Update ephemeral wallet balance to check gas
       await updateEphemeralBalances(epAccount.address)
       
-      addActivity('AI purchasing', `Submitting spend transaction from AI session: $${amountUsd} to ${serviceKey}`, '💸', 'info')
+      addActivity('AI purchasing', `Submitting spend transaction from AI session: $${amountUsd} to ${serviceKey}`, 'money', 'info')
 
       // Create transient client for the ephemeral wallet
       const epClient = createWalletClient({
@@ -238,7 +238,7 @@ export function useAgentEscrow({
       await publicClient.waitForTransactionReceipt({ hash: tx })
 
       setTxStatus('success')
-      addActivity('Spend successful', `Purchased service from ${serviceKey} for $${amountUsd} USDC.`, '✅', 'success')
+      addActivity('Spend successful', `Purchased service from ${serviceKey} for $${amountUsd} USDC.`, 'party', 'success')
       await updateEphemeralBalances(epAccount.address)
       return tx
     } catch (err: any) {
@@ -246,7 +246,7 @@ export function useAgentEscrow({
       setTxStatus('error')
       const msg = err.shortMessage || err.message || 'Transaction failed'
       setErrorMsg(msg)
-      addActivity('Purchase failed', msg, '❌', 'danger')
+      addActivity('Purchase failed', msg, 'cross', 'danger')
       return null
     } finally {
       setIsEscrowLoading(false)
@@ -260,7 +260,7 @@ export function useAgentEscrow({
     setErrorMsg(null)
     setTxHash(null)
 
-    addActivity('Sweeping Session', 'Returning unspent funds to master wallet...', '🔄', 'info')
+    addActivity('Sweeping Session', 'Returning unspent funds to master wallet...', 'refresh', 'info')
 
     try {
       if (!isConnected || !walletClient || !address || !publicClient) {
@@ -279,7 +279,7 @@ export function useAgentEscrow({
       await publicClient.waitForTransactionReceipt({ hash: tx })
 
       setTxStatus('success')
-      addActivity('Sweep successful', 'All unspent funds returned to your account.', '🛡️', 'success')
+      addActivity('Sweep successful', 'All unspent funds returned to your account.', 'shield', 'success')
       await updateEphemeralBalances(ephemeralAddress)
       return tx
     } catch (err: any) {
@@ -287,7 +287,7 @@ export function useAgentEscrow({
       setTxStatus('error')
       const msg = err.shortMessage || err.message || 'Transaction failed'
       setErrorMsg(msg)
-      addActivity('Sweep failed', msg, '❌', 'danger')
+      addActivity('Sweep failed', msg, 'cross', 'danger')
       return null
     } finally {
       setIsEscrowLoading(false)

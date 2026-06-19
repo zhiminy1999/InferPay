@@ -208,7 +208,7 @@ export function Sidebar({ activeTab, setActiveTab, mobileOpen = false, onCloseMo
               color: 'var(--text-muted)',
               lineHeight: '1.3'
             }}>
-              💡 With just <strong>$1</strong> in fees, your AI assistant can handle <strong>2,500 tasks</strong> automatically.
+              With just <strong>$1</strong> in fees, your AI assistant can handle <strong>2,500 tasks</strong> automatically.
             </div>
           </div>
         </div>

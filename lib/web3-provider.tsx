@@ -11,10 +11,46 @@ interface Web3ContextType {
   publicClient: PublicClient | null
   walletClient: WalletClient | null
   walletType: 'metamask' | 'passkey' | null
+  provider: any | null
   connect: () => Promise<void> // connects MetaMask by default
   connectMetaMask: () => Promise<void>
   connectPasskey: (scaAddress: string, clientInstance: any) => void
   disconnect: () => void
+}
+
+function getMetaMaskProvider() {
+  if (typeof window === 'undefined') return null
+  const anyWindow = window as any
+  const ethereum = anyWindow.ethereum
+  if (!ethereum) return null
+
+  // Handle case where multiple providers are injected (e.g. MetaMask + Phantom/Coinbase)
+  if (ethereum.providers && Array.isArray(ethereum.providers)) {
+    const metaMaskProvider = ethereum.providers.find((p: any) => p.isMetaMask)
+    if (metaMaskProvider) return metaMaskProvider
+  }
+
+  // Fallback to window.ethereum if it is MetaMask
+  if (ethereum.isMetaMask) return ethereum
+
+  return ethereum
+}
+
+function getPhantomProvider() {
+  if (typeof window === 'undefined') return null
+  const anyWindow = window as any
+  
+  // Direct Phantom EVM provider to bypass extension selection screen (evmAsk.js Router)
+  if (anyWindow.phantom?.ethereum) {
+    return anyWindow.phantom.ethereum
+  }
+  
+  const ethereum = anyWindow.ethereum
+  if (ethereum && (ethereum.isPhantom || anyWindow.phantom)) {
+    return ethereum
+  }
+  
+  return null
 }
 
 const Web3Context = createContext<Web3ContextType>({
@@ -23,6 +59,7 @@ const Web3Context = createContext<Web3ContextType>({
   publicClient: null,
   walletClient: null,
   walletType: null,
+  provider: null,
   connect: async () => {},
   connectMetaMask: async () => {},
   connectPasskey: () => {},
@@ -35,6 +72,7 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
   const [publicClient, setPublicClient] = useState<PublicClient | null>(null)
   const [walletClient, setWalletClient] = useState<WalletClient | null>(null)
   const [walletType, setWalletType] = useState<'metamask' | 'passkey' | null>(null)
+  const [provider, setProvider] = useState<any | null>(null)
 
   useEffect(() => {
     const client = createPublicClient({
@@ -51,15 +89,24 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
       setWalletType(storedType)
       setIsConnected(true)
       
-      // If MetaMask was connected, we re-instantiate its client
+      // If MetaMask/Web3 was connected, we re-instantiate its client
       if (storedType === 'metamask') {
-        const ethereum = typeof window !== 'undefined' ? (window as any).ethereum : null
-        if (ethereum) {
+        let activeProvider = getMetaMaskProvider()
+        const phantomProvider = getPhantomProvider()
+        if (phantomProvider) {
+          const hasMetaMask = activeProvider && (activeProvider.isMetaMask && !activeProvider.isPhantom)
+          if (!hasMetaMask) {
+            activeProvider = phantomProvider
+          }
+        }
+
+        if (activeProvider) {
           const wClient = createWalletClient({
             chain: arcTestnet,
-            transport: custom(ethereum)
+            transport: custom(activeProvider)
           })
           setWalletClient(wClient)
+          setProvider(activeProvider)
         }
       } else if (storedType === 'passkey') {
         const savedCred = localStorage.getItem('inferpay_mw_cred')
@@ -83,24 +130,32 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const connectMetaMask = async () => {
-    const ethereum = typeof window !== 'undefined' ? (window as any).ethereum : null
-    if (ethereum) {
+    let activeProvider = getMetaMaskProvider()
+    const phantomProvider = getPhantomProvider()
+    if (phantomProvider) {
+      const hasMetaMask = activeProvider && (activeProvider.isMetaMask && !activeProvider.isPhantom)
+      if (!hasMetaMask) {
+        activeProvider = phantomProvider
+      }
+    }
+
+    if (activeProvider) {
       try {
-        const accounts = await ethereum.request({ method: 'eth_requestAccounts' }) as string[]
+        const accounts = await activeProvider.request({ method: 'eth_requestAccounts' }) as string[]
         if (accounts.length > 0) {
           const client = createWalletClient({
             chain: arcTestnet,
-            transport: custom(ethereum)
+            transport: custom(activeProvider)
           })
           
           try {
-            await ethereum.request({
+            await activeProvider.request({
               method: 'wallet_switchEthereumChain',
               params: [{ chainId: `0x${arcTestnet.id.toString(16)}` }],
             })
           } catch (switchError: any) {
             if (switchError.code === 4902) {
-              await ethereum.request({
+              await activeProvider.request({
                 method: 'wallet_addEthereumChain',
                 params: [{
                   chainId: `0x${arcTestnet.id.toString(16)}`,
@@ -114,17 +169,19 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
           }
 
           setWalletClient(client)
+          setProvider(activeProvider)
           setAddress(accounts[0])
           setWalletType('metamask')
           setIsConnected(true)
           localStorage.setItem('inferpay_connected', accounts[0])
           localStorage.setItem('inferpay_wallet_type', 'metamask')
         }
-      } catch (err) {
-        console.error("Failed to connect MetaMask:", err)
+      } catch (err: any) {
+        console.error("Failed to connect MetaMask/Web3 wallet:", err)
+        alert(`Failed to connect wallet: ${err.message || 'Unknown error'}. Please verify your extension is unlocked and try again.`)
       }
     } else {
-      alert("Please install MetaMask or a Web3 wallet.")
+      alert("Please install MetaMask, Phantom, or a Web3 wallet.")
     }
   }
 
@@ -142,6 +199,7 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
     setAddress(null)
     setWalletClient(null)
     setWalletType(null)
+    setProvider(null)
     localStorage.removeItem('inferpay_connected')
     localStorage.removeItem('inferpay_wallet_type')
   }
@@ -153,6 +211,7 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
       publicClient,
       walletClient,
       walletType,
+      provider,
       connect: connectMetaMask,
       connectMetaMask,
       connectPasskey,

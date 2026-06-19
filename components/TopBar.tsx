@@ -1,10 +1,8 @@
-'use client'
-
 import React, { useState, useEffect } from 'react'
-import { Cpu, RefreshCw, Droplet, Key, Fingerprint, ShieldCheck, ArrowLeftRight, Menu, HelpCircle } from 'lucide-react'
+import { Cpu, RefreshCw, Droplet, Key, Fingerprint, ArrowLeftRight, Menu, HelpCircle, User } from 'lucide-react'
 import Link from 'next/link'
 import { StableFXClient } from '@/lib/stablefx'
-import { USDCIcon, EURCIcon, ArcIcon } from './Icons'
+import { ArcIcon } from './Icons'
 
 interface TopBarProps {
   isConnected: boolean
@@ -17,6 +15,7 @@ interface TopBarProps {
   onOpenAuthModal: () => void
   onOpenBridge: () => void
   disconnect: () => void
+  onOpenProfileModal: () => void
   onToggleSidebar?: () => void
   onOpenHelpGuide?: () => void
 }
@@ -24,35 +23,15 @@ interface TopBarProps {
 export function TopBar({
   isConnected,
   address,
-  usdcBalance,
-  eurcBalance,
   isFaucetLoading,
   handleFaucet,
   walletType,
   onOpenAuthModal,
   onOpenBridge,
-  disconnect,
+  onOpenProfileModal,
   onToggleSidebar,
   onOpenHelpGuide
 }: TopBarProps) {
-  const [rate, setRate] = useState<number>(1.08)
-
-  useEffect(() => {
-    const fetchRate = async () => {
-      try {
-        const val = await StableFXClient.fetchExchangeRate('EURC', 'USDC')
-        setRate(val)
-      } catch (err) {
-        console.error('Failed to update TopBar exchange rate:', err)
-      }
-    }
-    fetchRate()
-    const interval = setInterval(fetchRate, 15000)
-    return () => clearInterval(interval)
-  }, [])
-
-  const combinedValuation = (parseFloat(usdcBalance || '0') + parseFloat(eurcBalance || '0') * rate).toFixed(2)
-
   return (
     <header className="app-topbar">
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -82,7 +61,7 @@ export function TopBar({
         </div>
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
         {isConnected && (
           <button 
             className="btn-brutalist btn-brutalist-pink" 
@@ -90,7 +69,7 @@ export function TopBar({
             style={{ padding: '6px 12px', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '5px' }}
           >
             <ArrowLeftRight size={11} />
-            <span>Bridge USDC via CCTP</span>
+            <span className="hide-mobile">Bridge USDC via CCTP</span>
           </button>
         )}
 
@@ -101,7 +80,7 @@ export function TopBar({
             style={{ padding: '6px 12px', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '5px' }}
           >
             <HelpCircle size={11} />
-            <span>Interactive Guide</span>
+            <span className="hide-mobile">Interactive Guide</span>
           </button>
         )}
 
@@ -113,47 +92,45 @@ export function TopBar({
           style={{ padding: '6px 12px', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '5px' }}
         >
           {isFaucetLoading ? <RefreshCw size={11} className="spin" /> : <Droplet size={11} />}
-          <span>Get Free Test Funds</span>
+          <span className="hide-mobile">Get Free Test Funds</span>
         </button>
 
         {isConnected ? (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-            <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: '11px', color: 'var(--text-light)', display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'flex-end' }}>
-                {walletType === 'passkey' ? (
-                  <>
-                    <Fingerprint size={12} className="accent-color" />
-                    <span>Passkey Smart Account:</span>
-                  </>
-                ) : (
-                  <span>Connected Account:</span>
-                )}
-              </div>
-              <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'flex-end' }}>
-                <span>{address?.slice(0, 6)}...{address?.slice(-4)}</span>
-                {walletType === 'passkey' && (
-                  <ShieldCheck size={14} style={{ color: 'var(--accent-green)' }} />
-                )}
-              </div>
-              <div style={{ fontSize: '12px', fontWeight: 650, color: 'var(--accent-coral)', display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'flex-end' }}>
-                <span>Balance:</span>
-                <USDCIcon size={13} style={{ display: 'inline' }} />
-                <span>{usdcBalance} USD</span>
-                <span>·</span>
-                <EURCIcon size={13} style={{ display: 'inline' }} />
-                <span>{eurcBalance} EUR</span>
-                <span style={{ color: 'var(--text-light)', fontSize: '10px', fontWeight: 500 }}>(Combined: ${combinedValuation} USD @ 1 EUR = {rate.toFixed(3)} USD)</span>
-              </div>
+          <button 
+            className="btn-brutalist btn-brutalist-muted" 
+            onClick={onOpenProfileModal}
+            style={{ 
+              padding: '6px 12px', 
+              fontSize: '11px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              borderRadius: 'var(--radius-sm)'
+            }}
+          >
+            <div style={{
+              width: '16px',
+              height: '16px',
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, var(--accent-coral) 0%, var(--accent-pink) 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0
+            }}>
+              {walletType === 'passkey' ? (
+                <Fingerprint size={10} style={{ color: 'white' }} />
+              ) : (
+                <User size={10} style={{ color: 'white' }} />
+              )}
             </div>
-            <button className="btn-brutalist btn-brutalist-muted" onClick={disconnect} style={{ padding: '6px 12px', fontSize: '11px' }}>
-              Disconnect
-            </button>
-          </div>
+            <span style={{ fontWeight: 700 }}>{address?.slice(0, 6)}...{address?.slice(-4)}</span>
+          </button>
         ) : (
           <div className="bracket-button-wrap">
             <button className="btn-brutalist btn-brutalist-pink" onClick={onOpenAuthModal} style={{ padding: '6px 14px' }}>
               <Key size={14} style={{ strokeWidth: 2.5 }} />
-              <span>Sign In with Wallet</span>
+              <span>Sign In <span className="hide-mobile">with Wallet</span></span>
             </button>
           </div>
         )}

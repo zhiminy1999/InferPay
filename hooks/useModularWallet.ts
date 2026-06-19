@@ -59,7 +59,7 @@ export function useModularWallet({ addActivity }: UseModularWalletProps) {
 
   const registerWallet = useCallback(async (user: string) => {
     setLoading(true)
-    addActivity('Creating Passkey', `Initiating WebAuthn registration for ${user}...`, '🔑', 'info')
+    addActivity('Creating Passkey', `Initiating WebAuthn registration for ${user}...`, 'key', 'info')
     
     try {
       const cred = await CircleModularWalletHelper.registerPasskey(user)
@@ -89,11 +89,11 @@ export function useModularWallet({ addActivity }: UseModularWalletProps) {
       localStorage.setItem('inferpay_mw_sca', derivedAddress)
       localStorage.setItem('inferpay_mw_cred', JSON.stringify(cred))
 
-      addActivity('Passkey Created', 'Device secure enclave registration successful.', '✓', 'success')
+      addActivity('Passkey Created', 'Device secure enclave registration successful.', 'party', 'success')
 
       // Gas Station Sponsorship Trigger
       setIsGaslessSponsoring(true)
-      addActivity('Gas Station', 'Requesting gas fee sponsorship for your new smart account...', '⛽', 'info')
+      addActivity('Gas Station', 'Requesting gas fee sponsorship for your new smart account...', 'lightning', 'info')
 
       const res = await fetch('/api/sponsor', {
         method: 'POST',
@@ -103,7 +103,7 @@ export function useModularWallet({ addActivity }: UseModularWalletProps) {
 
       const data = await res.json()
       if (res.ok && data.success) {
-        addActivity('Gas Sponsored', 'Circle Gas Station funded your wallet with 0.05 USDC for gas.', '⚡', 'success')
+        addActivity('Gas Sponsored', 'Circle Gas Station funded your wallet with 0.05 USDC for gas.', 'lightning', 'success')
       } else {
         console.warn('Gas sponsorship fallback:', data.error)
       }
@@ -113,7 +113,7 @@ export function useModularWallet({ addActivity }: UseModularWalletProps) {
       return { success: true, address: derivedAddress, walletClient: client }
     } catch (err: any) {
       console.error(err)
-      addActivity('Passkey Failed', err.message || 'Passkey creation failed', '❌', 'danger')
+      addActivity('Passkey Failed', err.message || 'Passkey creation failed', 'cross', 'danger')
       setIsGaslessSponsoring(false)
       setLoading(false)
       return { success: false, error: err.message }
@@ -122,7 +122,7 @@ export function useModularWallet({ addActivity }: UseModularWalletProps) {
 
   const loginWallet = useCallback(async (user: string) => {
     setLoading(true)
-    addActivity('Passkey Login', `Requesting WebAuthn signature for ${user}...`, '🔑', 'info')
+    addActivity('Passkey Login', `Requesting WebAuthn signature for ${user}...`, 'key', 'info')
 
     try {
       const savedCredStr = localStorage.getItem('inferpay_mw_cred')
@@ -160,12 +160,12 @@ export function useModularWallet({ addActivity }: UseModularWalletProps) {
       localStorage.setItem('inferpay_mw_sca', derivedAddress)
       localStorage.setItem('inferpay_mw_cred', JSON.stringify(cred))
 
-      addActivity('Passkey Authenticated', `Welcome back, ${user}!`, '✓', 'success')
+      addActivity('Passkey Authenticated', `Welcome back, ${user}!`, 'party', 'success')
       setLoading(false)
       return { success: true, address: derivedAddress, walletClient: client }
     } catch (err: any) {
       console.error(err)
-      addActivity('Login Failed', err.message || 'Passkey authentication failed', '❌', 'danger')
+      addActivity('Login Failed', err.message || 'Passkey authentication failed', 'cross', 'danger')
       setLoading(false)
       return { success: false, error: err.message }
     }
@@ -182,7 +182,7 @@ export function useModularWallet({ addActivity }: UseModularWalletProps) {
     localStorage.removeItem('inferpay_mw_sca')
     localStorage.removeItem('inferpay_mw_cred')
 
-    addActivity('Passkey Disconnected', 'Logged out of Smart Contract Account.', 'ℹ️', 'info')
+    addActivity('Passkey Disconnected', 'Logged out of Smart Contract Account.', 'info', 'info')
   }, [addActivity])
 
   return {

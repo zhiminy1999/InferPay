@@ -50,6 +50,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Inbound swap transaction failed on-chain' }, { status: 400 })
     }
 
+    const POOL_ADDR = getAddress('0x08Ec3EEfC622b8a8742fC8Ab48E832c236bc360B')
+
     // Verify sender
     if (receipt.from.toLowerCase() !== userAddress.toLowerCase()) {
       return NextResponse.json({ error: 'Transaction sender does not match user address' }, { status: 400 })
@@ -59,6 +61,29 @@ export async function POST(req: NextRequest) {
     const expectedContract = fromCurrency === 'USDC' ? USDC_ADDRESS : EURC_ADDRESS
     if (receipt.to?.toLowerCase() !== expectedContract.toLowerCase()) {
       return NextResponse.json({ error: 'Transaction target address is not the correct token' }, { status: 400 })
+    }
+
+    // Verify actual transfer event log parameters to ensure funds were sent to the pool for the correct amount
+    const transferEventTopic = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef'
+    const expectedFromTopic = '0x' + userAddress.slice(2).padStart(64, '0').toLowerCase()
+    const expectedToTopic = '0x' + POOL_ADDR.slice(2).padStart(64, '0').toLowerCase()
+    const expectedAmountRaw = parseUnits(amount, 6)
+
+    const transferLog = receipt.logs.find(log => {
+      const isTransferTopic = log.topics[0]?.toLowerCase() === transferEventTopic
+      const isFrom = log.topics[1]?.toLowerCase() === expectedFromTopic
+      const isTo = log.topics[2]?.toLowerCase() === expectedToTopic
+      const isTargetContract = log.address.toLowerCase() === expectedContract.toLowerCase()
+      
+      if (isTransferTopic && isFrom && isTo && isTargetContract) {
+        const value = BigInt(log.data)
+        return value === expectedAmountRaw
+      }
+      return false
+    })
+
+    if (!transferLog) {
+      return NextResponse.json({ error: 'Could not find matching on-chain transfer to the swap pool for the specified amount' }, { status: 400 })
     }
 
     // Setup deployer wallet

@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useBridge, BridgeStep } from '../hooks/useBridge'
 import { BRIDGE_CHAINS } from '../lib/bridge-config'
-import { X, ArrowRight, RefreshCw, CheckCircle, ShieldAlert, ExternalLink, HelpCircle } from 'lucide-react'
+import { X, ArrowRight, RefreshCw, CheckCircle, ShieldAlert, ExternalLink, HelpCircle, Check, Circle } from 'lucide-react'
 import { EthereumIcon, BaseIcon, ArcIcon, USDCIcon } from './Icons'
 import { ButtonLoading } from './LoadingSystem'
 
@@ -84,10 +84,10 @@ export const BridgeModal: React.FC<BridgeModalProps> = ({ isOpen, onClose }) => 
       }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
           <div style={{ fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '6px' }}>
-            {stepStatus === 'success' && <span style={{ color: 'var(--accent-green)' }}>✓</span>}
-            {stepStatus === 'running' && <span className="inline-block animate-pulse" style={{ color: 'var(--accent-coral)' }}>●</span>}
-            {stepStatus === 'error' && <span style={{ color: '#f43f5e' }}>✗</span>}
-            {stepStatus === 'pending' && <span style={{ color: 'var(--text-light)' }}>○</span>}
+            {stepStatus === 'success' && <Check size={12} style={{ color: 'var(--accent-green)' }} />}
+            {stepStatus === 'running' && <RefreshCw size={12} className="spin" style={{ color: 'var(--accent-coral)' }} />}
+            {stepStatus === 'error' && <X size={12} style={{ color: '#f43f5e' }} />}
+            {stepStatus === 'pending' && <Circle size={12} style={{ color: 'var(--text-light)' }} />}
             <span style={{ color: stepStatus === 'pending' ? 'var(--text-light)' : 'var(--text-main)' }}>
               {label}
             </span>
@@ -269,8 +269,9 @@ export const BridgeModal: React.FC<BridgeModalProps> = ({ isOpen, onClose }) => 
                   </span>
                 </div>
                 {parseFloat(inputAmount) > parseFloat(sourceBalance) && (
-                  <p style={{ fontSize: '10px', color: '#f43f5e', marginTop: '4px' }}>
-                    ⚠️ Amount exceeds source chain USDC balance (${parseFloat(sourceBalance).toFixed(2)})
+                  <p style={{ fontSize: '10px', color: '#f43f5e', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <ShieldAlert size={12} />
+                    <span>Amount exceeds source chain USDC balance (${parseFloat(sourceBalance).toFixed(2)})</span>
                   </p>
                 )}
               </div>
@@ -382,6 +383,21 @@ export const BridgeModal: React.FC<BridgeModalProps> = ({ isOpen, onClose }) => 
                 {renderStepRow('attest', '3. Fetch Circle Attestation', 'Poll Attestation API for Circle verification signature.', 'attest')}
                 {renderStepRow('mint', '4. Mint USDC on Arc', 'Claim the USDC to credit your Arc Testnet account.', 'mint', BRIDGE_CHAINS.arc_testnet)}
               </div>
+
+              {currentStep === 'approve' && (status === 'loading' || status === 'error') && (
+                <div style={{
+                  padding: '12px',
+                  backgroundColor: '#eff6ff',
+                  border: '1px solid #bfdbfe',
+                  borderRadius: '4px',
+                  fontSize: '11px',
+                  color: '#1e40af',
+                  lineHeight: '1.4',
+                  fontFamily: 'monospace'
+                }}>
+                  <strong>Note for MetaMask:</strong> MetaMask may show a red <strong>"Review alert"</strong> shield button. This is standard behavior because we are testing on <code>http://localhost</code>. Click <strong>"Review alert"</strong> in MetaMask and select <strong>"Approve"</strong> to proceed.
+                </div>
+              )}
 
               {(status as string) === 'success' && (
                 <div style={{

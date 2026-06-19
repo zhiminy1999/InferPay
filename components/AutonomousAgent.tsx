@@ -48,13 +48,13 @@ export const AutonomousAgent: React.FC = () => {
     setChosenService(null)
     setServiceOutput(null)
 
-    addLog('🚀 Initializing Autonomous AI Agent...', 'header')
+    addLog('Initializing Autonomous AI Agent...', 'header')
     addLog(`Configured Policies: Capability [${capability}] | Min Reputation [${minReputation.toFixed(1)}] | Max Budget [$${maxBudget.toFixed(3)}]`, 'info')
 
     await new Promise(r => setTimeout(r, 1200))
 
     // Step 1: DISCOVER SERVICES
-    addLog('🔍 Step 1: Discovering AI services from registry matching capability criteria...', 'info')
+    addLog('Step 1: Discovering AI services from registry matching capability criteria...', 'info')
     const candidates = services.filter(s => {
       const search = capability.toLowerCase()
       return s.capability.toLowerCase().includes(search) || 
@@ -65,7 +65,7 @@ export const AutonomousAgent: React.FC = () => {
     await new Promise(r => setTimeout(r, 1200))
 
     if (candidates.length === 0) {
-      addLog('❌ Discovery failed: No registered services match capability keywords.', 'error')
+      addLog('Discovery failed: No registered services match capability keywords.', 'error')
       setIsRunning(false)
       setCurrentStep(0)
       return
@@ -80,13 +80,13 @@ export const AutonomousAgent: React.FC = () => {
     await new Promise(r => setTimeout(r, 1500))
 
     // Step 2: EVALUATE TRUST & SELECT PROVIDER
-    addLog('🧠 Step 2: Evaluating provider trust and budget thresholds...', 'info')
+    addLog('Step 2: Evaluating provider trust and budget thresholds...', 'info')
     
     // Filter candidates by budget & min reputation
     const compliant = candidates.filter(c => c.pricing <= maxBudget && c.reputation >= minReputation)
 
     if (compliant.length === 0) {
-      addLog(`❌ Evaluation failed: Found services but none meet both Budget <= $${maxBudget} and Reputation >= ${minReputation.toFixed(1)}.`, 'error')
+      addLog(`Evaluation failed: Found services but none meet both Budget <= $${maxBudget} and Reputation >= ${minReputation.toFixed(1)}.`, 'error')
       setIsRunning(false)
       setCurrentStep(0)
       return
@@ -111,7 +111,7 @@ export const AutonomousAgent: React.FC = () => {
     await new Promise(r => setTimeout(r, 1500))
 
     // Step 3: TRIGGER X402 CHALLENGE
-    addLog(`⛓️ Step 3: Initializing x402 HTTP challenge handshake with ${selected.name}...`, 'info')
+    addLog(`Step 3: Initializing x402 HTTP challenge handshake with ${selected.name}...`, 'info')
     addLog(` - GET request sent to /api/service/${selected.id}`, 'info')
     addLog(' - Received Response: Status 402 (Payment Required)', 'warning')
     addLog(` - Challenge Headers: [X-402-Price: ${selected.pricing.toFixed(4)}] | [X-402-Payment-Token: USDC]`, 'warning')
@@ -120,14 +120,14 @@ export const AutonomousAgent: React.FC = () => {
     await new Promise(r => setTimeout(r, 1500))
 
     // Step 4: SOLVE CHALLENGE VIA GATEWAY
-    addLog(`💳 Step 4: Resolving x402 payment challenge via Gateway Nanopayments...`, 'info')
+    addLog(`Step 4: Resolving x402 payment challenge via Gateway Nanopayments...`, 'info')
     addLog(` - Checking local Gateway Balance: ${gatewayBalanceFormatted} USDC`, 'info')
 
     const priceUnits = parseUnits(selected.pricing.toFixed(4), 6)
     const currentBalUnits = parseUnits(gatewayBalanceFormatted, 6)
 
     if (currentBalUnits < priceUnits) {
-      addLog(`❌ Payment failed: Insufficient Gateway balance. Please deposit funds on the Nanopayments tab.`, 'error')
+      addLog(`Payment failed: Insufficient Gateway balance. Please deposit funds on the Nanopayments tab.`, 'error')
       setIsRunning(false)
       setCurrentStep(0)
       return
@@ -138,7 +138,7 @@ export const AutonomousAgent: React.FC = () => {
     const settle = await payAndRunService(selected)
     
     if (!settle.success || !settle.proof) {
-      addLog(`❌ Challenge settlement failed: ${settle.error}`, 'error')
+      addLog(`Challenge settlement failed: ${settle.error}`, 'error')
       setIsRunning(false)
       setCurrentStep(0)
       return
@@ -173,7 +173,7 @@ export const AutonomousAgent: React.FC = () => {
     await new Promise(r => setTimeout(r, 1000))
 
     // Step 5: RECEIVE SERVICE RESULT
-    addLog('🚀 Step 5: Resubmitting request with payment receipt header to search corpus...', 'info')
+    addLog('Step 5: Resubmitting request with payment receipt header to search corpus...', 'info')
     addLog(` - Attached: [X-402-Receipt: ${settle.proof['X-402-Receipt']}]`, 'info')
     
     let matchedResults = ''
@@ -204,7 +204,7 @@ export const AutonomousAgent: React.FC = () => {
     setServiceOutput(finalResult)
     addLog('Result Payload Loaded: ' + finalResult.substring(0, 150) + '...', 'success')
 
-    addLog('✅ Autonomous task execution complete!', 'success')
+    addLog('Autonomous task execution complete!', 'success')
     setIsRunning(false)
     setCurrentStep(0)
     refreshBalances()

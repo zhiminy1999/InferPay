@@ -41,7 +41,7 @@ export function useAgentConsensus({
       const bal = await publicClient.getBalance({ address: agentAddress })
       // If below 0.002 native gas USDC
       if (bal < parseUnits('0.002', 18)) {
-        addActivity('Funding Agent Gas', `Feeding gas USDC to Agent at ${agentAddress.slice(0, 8)}...`, '⛽', 'info')
+        addActivity('Funding Agent Gas', `Feeding gas USDC to Agent at ${agentAddress.slice(0, 8)}...`, 'lightning', 'info')
         const fundTx = await walletClient.sendTransaction({
           account: address,
           to: agentAddress,
@@ -74,7 +74,7 @@ export function useAgentConsensus({
 
       const tokenAddress = currency === 'EURC' ? EURC_ADDRESS_ARC : USDC_ADDRESS_ARC
 
-      addActivity('Creating Proposal', `Submitting on-chain proposal for ${amountUsd} ${currency}...`, '📝', 'info')
+      addActivity('Creating Proposal', `Submitting on-chain proposal for ${amountUsd} ${currency}...`, 'clipboard', 'info')
       const amountUnits = parseUnits(amountUsd.toString(), 6)
 
       const hash = await walletClient.writeContract({
@@ -90,7 +90,7 @@ export function useAgentConsensus({
       const receipt = await publicClient.waitForTransactionReceipt({ hash })
       
       setTxStatus('success')
-      addActivity('Proposal Created', `Consensus proposal (${currency}) registered on-chain.`, '✅', 'success')
+      addActivity('Proposal Created', `Consensus proposal (${currency}) registered on-chain.`, 'party', 'success')
       
       // Save proposal to database
       try {
@@ -115,7 +115,7 @@ export function useAgentConsensus({
       setTxStatus('error')
       const msg = err.shortMessage || err.message || 'Transaction failed'
       setErrorMsg(msg)
-      addActivity('Proposal failed', msg, '❌', 'danger')
+      addActivity('Proposal failed', msg, 'cross', 'danger')
       return null
     } finally {
       setIsConsensusLoading(false)
@@ -145,7 +145,7 @@ export function useAgentConsensus({
         if (!isConnected || !walletClient || !address) {
           throw new Error("Wallet not connected")
         }
-        addActivity('Submitting Vote', `Master wallet voting ${approve ? 'APPROVE' : 'REJECT'}...`, '🗳️', 'info')
+        addActivity('Submitting Vote', `Master wallet voting ${approve ? 'APPROVE' : 'REJECT'}...`, 'balance', 'info')
         hash = await walletClient.writeContract({
           address: AGENT_CONSENSUS_ADDRESS,
           abi: agentConsensusAbi,
@@ -161,7 +161,7 @@ export function useAgentConsensus({
         
         await checkAndFundAgent(acc.address)
         
-        addActivity('Submitting Vote', `Agent ${agentIndex} voting ${approve ? 'APPROVE' : 'REJECT'}...`, '🤖', 'info')
+        addActivity('Submitting Vote', `Agent ${agentIndex} voting ${approve ? 'APPROVE' : 'REJECT'}...`, 'robot', 'info')
         const agentClient = createWalletClient({
           account: acc,
           chain: arcTestnet,
@@ -180,14 +180,14 @@ export function useAgentConsensus({
       setTxHash(hash)
       await publicClient.waitForTransactionReceipt({ hash })
       setTxStatus('success')
-      addActivity('Vote Recorded', `Vote submitted by Agent ${agentIndex} successfully.`, '✅', 'success')
+      addActivity('Vote Recorded', `Vote submitted by Agent ${agentIndex} successfully.`, 'party', 'success')
       return hash
     } catch (err: any) {
       console.error(err)
       setTxStatus('error')
       const msg = err.shortMessage || err.message || 'Transaction failed'
       setErrorMsg(msg)
-      addActivity('Voting failed', msg, '❌', 'danger')
+      addActivity('Voting failed', msg, 'cross', 'danger')
       return null
     } finally {
       setIsConsensusLoading(false)
@@ -206,7 +206,7 @@ export function useAgentConsensus({
         throw new Error("Wallet not connected")
       }
 
-      addActivity('Manual Override', 'Bypassing consensus to execute treasury payment...', '⚡', 'warning')
+      addActivity('Manual Override', 'Bypassing consensus to execute treasury payment...', 'lightning', 'warning')
 
       const hash = await walletClient.writeContract({
         address: AGENT_CONSENSUS_ADDRESS,
@@ -220,14 +220,14 @@ export function useAgentConsensus({
       setTxHash(hash)
       await publicClient.waitForTransactionReceipt({ hash })
       setTxStatus('success')
-      addActivity('Bypass Confirmed', 'Override executed. Funds released.', '✅', 'success')
+      addActivity('Bypass Confirmed', 'Override executed. Funds released.', 'party', 'success')
       return hash
     } catch (err: any) {
       console.error(err)
       setTxStatus('error')
       const msg = err.shortMessage || err.message || 'Transaction failed'
       setErrorMsg(msg)
-      addActivity('Bypass failed', msg, '❌', 'danger')
+      addActivity('Bypass failed', msg, 'cross', 'danger')
       return null
     } finally {
       setIsConsensusLoading(false)

@@ -2,6 +2,7 @@ import React from 'react'
 import { useBridge } from '../hooks/useBridge'
 import { Layers, Info } from 'lucide-react'
 import { EthereumIcon, BaseIcon, ArcIcon, USDCIcon } from './Icons'
+import { BrandIcon } from './BrandIcon'
 
 export const UnifiedBalance: React.FC = () => {
   const { balances } = useBridge()
@@ -26,6 +27,8 @@ export const UnifiedBalance: React.FC = () => {
             type="button"
             onMouseEnter={() => setShowTooltip(true)}
             onMouseLeave={() => setShowTooltip(false)}
+            onFocus={() => setShowTooltip(true)}
+            onBlur={() => setShowTooltip(false)}
             onClick={() => setShowTooltip(!showTooltip)}
             style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '2px', color: 'var(--text-light)' }}
           >
@@ -47,7 +50,7 @@ export const UnifiedBalance: React.FC = () => {
               lineHeight: '1.4',
               boxShadow: 'var(--shadow-soft)'
             }}>
-              💡 <strong>Unified Reserves:</strong> Cumulative company funds aggregate across Ethereum Sepolia, Base Sepolia, and Arc Testnet. Maintain positive balances to fund multi-agent execution budgets.
+              <BrandIcon name="idea" size={13} variant="yellow" style={{ display: 'inline-block', marginRight: '4px', verticalAlign: 'middle' }} /> <strong>Unified Reserves:</strong> Cumulative company funds aggregate across Ethereum Sepolia, Base Sepolia, and Arc Testnet. Maintain positive balances to fund multi-agent execution budgets.
             </div>
           )}
         </div>

@@ -1,7 +1,8 @@
 import React, { useState } from 'react'
 import { useTransactionHistory, TransactionRecord } from '../hooks/useTransactionHistory'
-import { Download, RefreshCw, Filter, Calendar, ExternalLink, Info, Database } from 'lucide-react'
+import { Download, RefreshCw, Filter, Calendar, ExternalLink, Info, Database, X } from 'lucide-react'
 import { Skeleton } from './LoadingSystem'
+import { BrandIcon } from './BrandIcon'
 
 export const TransactionHistory: React.FC = () => {
   const {
@@ -201,7 +202,7 @@ export const TransactionHistory: React.FC = () => {
             ) : error ? (
               <tr>
                 <td colSpan={8} style={{ padding: '32px', textAlign: 'center', color: '#9f1239' }}>
-                  ⚠️ Error loading logs: {error}
+                  <BrandIcon name="warning" size={13} variant="coral" style={{ display: 'inline-block', marginRight: '4px', verticalAlign: 'middle' }} /> Error loading logs: {error}
                 </td>
               </tr>
             ) : transactions.length === 0 ? (
@@ -308,7 +309,9 @@ export const TransactionHistory: React.FC = () => {
           <div className="modal-container" style={{ maxWidth: '520px' }}>
             <div className="modal-header">
               <h3 className="modal-title">Inspect Transaction <i>#{selectedTx.id.slice(0, 8)}</i></h3>
-              <button className="modal-close-btn" onClick={() => setSelectedTx(null)}>✕</button>
+              <button className="modal-close-btn" onClick={() => setSelectedTx(null)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <X size={16} />
+              </button>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-4)', borderBottom: '1px solid var(--border)', paddingBottom: 'var(--space-4)' }}>

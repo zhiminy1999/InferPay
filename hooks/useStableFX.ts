@@ -73,7 +73,7 @@ export function useStableFX({
 
   const getQuote = useCallback(async (fromCurrency: string, toCurrency: string, amount: string) => {
     if (!isConnected || !address) {
-      addActivity('Connection Required', 'Please connect your wallet first', '🔒', 'warning')
+      addActivity('Connection Required', 'Please connect your wallet first', 'lock', 'warning')
       return null
     }
     setLoading(true)
@@ -84,7 +84,7 @@ export function useStableFX({
       return q
     } catch (err: any) {
       console.error(err)
-      addActivity('Quote Error', 'Failed to retrieve StableFX quote', '❌', 'danger')
+      addActivity('Quote Error', 'Failed to retrieve StableFX quote', 'cross', 'danger')
       setLoading(false)
       return null
     }
@@ -92,12 +92,12 @@ export function useStableFX({
 
   const executeSwap = useCallback(async () => {
     if (!quote || !isConnected || !address || !walletClient || !publicClient) {
-      addActivity('Error', 'Missing quote or wallet connection', '❌', 'danger')
+      addActivity('Error', 'Missing quote or wallet connection', 'cross', 'danger')
       return false
     }
 
     setLoading(true)
-    addActivity('EIP-712 Request', 'Requesting quote signing verification from wallet...', '✍️', 'info')
+    addActivity('EIP-712 Request', 'Requesting quote signing verification from wallet...', 'clipboard', 'info')
 
     try {
       // 1. Sign Quote (EIP-712 PermitWitnessTransferFrom)
@@ -109,7 +109,7 @@ export function useStableFX({
         message: quote.typedData.message,
       })
 
-      addActivity('Quote Signed', 'Quote verification signature approved.', '✓', 'success')
+      addActivity('Quote Signed', 'Quote verification signature approved.', 'party', 'success')
 
       // 2. Create FX Trade
       const trade = await StableFXClient.createTrade(quote, address, quoteSignature)
@@ -121,7 +121,7 @@ export function useStableFX({
         quote.from.amount
       )
 
-      addActivity('Funding Signatures', 'Requesting funding authorization signature...', '✍️', 'info')
+      addActivity('Funding Signatures', 'Requesting funding authorization signature...', 'clipboard', 'info')
 
       // 4. Sign Funding Data (EIP-712 SingleTradeWitness)
       await walletClient.signTypedData({
@@ -132,13 +132,13 @@ export function useStableFX({
         message: fundingData.typedData.message,
       })
 
-      addActivity('Authorized', 'Funding signature validated successfully.', '✓', 'success')
+      addActivity('Authorized', 'Funding signature validated successfully.', 'party', 'success')
 
       // 5. Transfer tokens on Arc Testnet to the Pool contract
       const tokenAddress = quote.from.currency === 'USDC' ? USDC_ADDRESS_ARC : EURC_ADDRESS_ARC
       const amountRaw = parseUnits(quote.from.amount, 6)
 
-      addActivity('Submitting Swap', `Depositing ${quote.from.amount} ${quote.from.currency} to StableFX Settlement...`, '⛓️', 'info')
+      addActivity('Submitting Swap', `Depositing ${quote.from.amount} ${quote.from.currency} to StableFX Settlement...`, 'chain', 'info')
 
       const transferHash = await walletClient.writeContract({
         address: tokenAddress,
@@ -147,12 +147,12 @@ export function useStableFX({
         args: [getAddress(POOL_ADDR), amountRaw],
       })
 
-      addActivity('Deposited', `Deposit transaction pending: ${transferHash.slice(0, 10)}...`, '⏳', 'info')
+      addActivity('Deposited', `Deposit transaction pending: ${transferHash.slice(0, 10)}...`, 'refresh', 'info')
       
       // Wait for deposit transaction
       await publicClient.waitForTransactionReceipt({ hash: transferHash })
 
-      addActivity('Settling FX Swap', 'Verifying deposit & releasing counterparty stablecoins...', '⚡', 'info')
+      addActivity('Settling FX Swap', 'Verifying deposit & releasing counterparty stablecoins...', 'lightning', 'info')
 
       // 6. Call API route to execute payout from pool wallet
       const res = await fetch('/api/swap', {
@@ -195,7 +195,7 @@ export function useStableFX({
       const updatedHistory = [newRecord, ...history]
       saveHistory(updatedHistory)
 
-      addActivity('Swap Completed', `Swapped ${quote.from.amount} ${quote.from.currency} ➔ ${quote.to.amount} ${quote.to.currency}`, '💸', 'success')
+      addActivity('Swap Completed', `Swapped ${quote.from.amount} ${quote.from.currency} to ${quote.to.amount} ${quote.to.currency}`, 'money', 'success')
       
       if (onRefreshBalances) {
         onRefreshBalances()
@@ -206,7 +206,7 @@ export function useStableFX({
       return true
     } catch (err: any) {
       console.error(err)
-      addActivity('Swap Failed', err.message || 'Signature rejected or transaction failed', '❌', 'danger')
+      addActivity('Swap Failed', err.message || 'Signature rejected or transaction failed', 'cross', 'danger')
       setLoading(false)
       return false
     }

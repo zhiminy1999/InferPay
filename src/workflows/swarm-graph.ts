@@ -41,6 +41,11 @@ function isRealExecution(): boolean {
 
 // 2. Node implementation: planner
 async function runPlanner(state: typeof SwarmState.State) {
+  // If plan is already generated, skip planning to prevent resetting currentStepIndex
+  if (state.plannerSteps && state.plannerSteps.length > 0) {
+    return {}
+  }
+
   const lastMessage = state.messages[state.messages.length - 1]
   const userText = lastMessage?.content?.toString() || ''
 

@@ -106,7 +106,7 @@ export function useJobEscrow({ isConnected, address, walletClient, publicClient,
     setLoading(true)
     setError(null)
     try {
-      addActivity('Creating Job', 'Initiating ERC-8183 job post on-chain...', '📝', 'info')
+      addActivity('Creating Job', 'Initiating ERC-8183 job post on-chain...', 'clipboard', 'info')
 
       const { request } = await publicClient.simulateContract({
         account: address,
@@ -123,16 +123,16 @@ export function useJobEscrow({ isConnected, address, walletClient, publicClient,
       })
 
       const hash = await walletClient.writeContract(request)
-      addActivity('Transaction Broadcasted', 'Waiting for job creation to confirm...', '⏳', 'info')
+      addActivity('Transaction Broadcasted', 'Waiting for job creation to confirm...', 'refresh', 'info')
       await publicClient.waitForTransactionReceipt({ hash })
 
-      addActivity('Job Posted Successfully', 'Your job has been indexed on-chain.', '✅', 'success')
+      addActivity('Job Posted Successfully', 'Your job has been indexed on-chain.', 'party', 'success')
       return hash
     } catch (err: any) {
       console.error('Create job error:', err)
       const msg = err.shortMessage || err.message || 'Error posting job'
       setError(msg)
-      addActivity('Job Posting Failed', msg, '❌', 'danger')
+      addActivity('Job Posting Failed', msg, 'cross', 'danger')
       throw err
     } finally {
       setLoading(false)
@@ -146,7 +146,7 @@ export function useJobEscrow({ isConnected, address, walletClient, publicClient,
     setLoading(true)
     setError(null)
     try {
-      addActivity('Setting Budget', 'Submitting proposed pricing for job budget...', '💰', 'info')
+      addActivity('Setting Budget', 'Submitting proposed pricing for job budget...', 'cash', 'info')
 
       const amountRaw = parseUnits(budgetAmount, 6)
       const { request } = await publicClient.simulateContract({
@@ -158,16 +158,16 @@ export function useJobEscrow({ isConnected, address, walletClient, publicClient,
       })
 
       const hash = await walletClient.writeContract(request)
-      addActivity('Pricing Sent', 'Waiting for pricing to confirm...', '⏳', 'info')
+      addActivity('Pricing Sent', 'Waiting for pricing to confirm...', 'refresh', 'info')
       await publicClient.waitForTransactionReceipt({ hash })
 
-      addActivity('Budget Defined', `Job budget locked at ${budgetAmount} USDC.`, '✅', 'success')
+      addActivity('Budget Defined', `Job budget locked at ${budgetAmount} USDC.`, 'party', 'success')
       return hash
     } catch (err: any) {
       console.error('Set budget error:', err)
       const msg = err.shortMessage || err.message || 'Error setting budget'
       setError(msg)
-      addActivity('Budget Pricing Failed', msg, '❌', 'danger')
+      addActivity('Budget Pricing Failed', msg, 'cross', 'danger')
       throw err
     } finally {
       setLoading(false)
@@ -181,7 +181,7 @@ export function useJobEscrow({ isConnected, address, walletClient, publicClient,
     setLoading(true)
     setError(null)
     try {
-      addActivity('Funding Job', 'Approving USDC spending allowance...', '🪙', 'info')
+      addActivity('Funding Job', 'Approving USDC spending allowance...', 'cash', 'info')
 
       const amountRaw = parseUnits(budgetAmount, 6)
       
@@ -207,7 +207,7 @@ export function useJobEscrow({ isConnected, address, walletClient, publicClient,
 
       const approveHash = await walletClient.writeContract(approveReq)
       await publicClient.waitForTransactionReceipt({ hash: approveHash })
-      addActivity('Allowance Approved', 'Sending USDC into escrow...', '⏳', 'info')
+      addActivity('Allowance Approved', 'Sending USDC into escrow...', 'refresh', 'info')
 
       // 2. Fund escrow
       const { request: fundReq } = await publicClient.simulateContract({
@@ -221,13 +221,13 @@ export function useJobEscrow({ isConnected, address, walletClient, publicClient,
       const fundHash = await walletClient.writeContract(fundReq)
       await publicClient.waitForTransactionReceipt({ hash: fundHash })
 
-      addActivity('Job Escrow Funded', `${budgetAmount} USDC deposited in contract escrow.`, '🎉', 'success')
+      addActivity('Job Escrow Funded', `${budgetAmount} USDC deposited in contract escrow.`, 'party', 'success')
       return fundHash
     } catch (err: any) {
       console.error('Fund job error:', err)
       const msg = err.shortMessage || err.message || 'Error funding job'
       setError(msg)
-      addActivity('Funding Escrow Failed', msg, '❌', 'danger')
+      addActivity('Funding Escrow Failed', msg, 'cross', 'danger')
       throw err
     } finally {
       setLoading(false)
@@ -241,7 +241,7 @@ export function useJobEscrow({ isConnected, address, walletClient, publicClient,
     setLoading(true)
     setError(null)
     try {
-      addActivity('Submitting Deliverable', 'Hashing deliverable and writing to chain...', '📦', 'info')
+      addActivity('Submitting Deliverable', 'Hashing deliverable and writing to chain...', 'suitcase', 'info')
 
       const deliverableHash = keccak256(toHex(deliverableText))
       const { request } = await publicClient.simulateContract({
@@ -253,16 +253,16 @@ export function useJobEscrow({ isConnected, address, walletClient, publicClient,
       })
 
       const hash = await walletClient.writeContract(request)
-      addActivity('Submission Sent', 'Waiting for on-chain delivery confirmation...', '⏳', 'info')
+      addActivity('Submission Sent', 'Waiting for on-chain delivery confirmation...', 'refresh', 'info')
       await publicClient.waitForTransactionReceipt({ hash })
 
-      addActivity('Deliverable Submitted', 'Work proof locked in contract. Undergoing review.', '✅', 'success')
+      addActivity('Deliverable Submitted', 'Work proof locked in contract. Undergoing review.', 'party', 'success')
       return hash
     } catch (err: any) {
       console.error('Submit deliverable error:', err)
       const msg = err.shortMessage || err.message || 'Error submitting deliverable'
       setError(msg)
-      addActivity('Submission Failed', msg, '❌', 'danger')
+      addActivity('Submission Failed', msg, 'cross', 'danger')
       throw err
     } finally {
       setLoading(false)
@@ -276,7 +276,7 @@ export function useJobEscrow({ isConnected, address, walletClient, publicClient,
     setLoading(true)
     setError(null)
     try {
-      addActivity('Settling Job', 'Approving deliverables and releasing escrow...', '💸', 'info')
+      addActivity('Settling Job', 'Approving deliverables and releasing escrow...', 'money', 'info')
 
       const reasonHash = keccak256(toHex(reason))
       const { request } = await publicClient.simulateContract({
@@ -288,16 +288,16 @@ export function useJobEscrow({ isConnected, address, walletClient, publicClient,
       })
 
       const hash = await walletClient.writeContract(request)
-      addActivity('Payment Released', 'Confirming USDC settlement...', '⏳', 'info')
+      addActivity('Payment Released', 'Confirming USDC settlement...', 'refresh', 'info')
       await publicClient.waitForTransactionReceipt({ hash })
 
-      addActivity('Job Settlement Complete', 'USDC released from escrow to the worker agent.', '🎉', 'success')
+      addActivity('Job Settlement Complete', 'USDC released from escrow to the worker agent.', 'party', 'success')
       return hash
     } catch (err: any) {
       console.error('Complete job error:', err)
       const msg = err.shortMessage || err.message || 'Error completing job'
       setError(msg)
-      addActivity('Settlement Failed', msg, '❌', 'danger')
+      addActivity('Settlement Failed', msg, 'cross', 'danger')
       throw err
     } finally {
       setLoading(false)
@@ -311,7 +311,7 @@ export function useJobEscrow({ isConnected, address, walletClient, publicClient,
     setLoading(true)
     setError(null)
     try {
-      addActivity('Rejecting Job', 'Initiating rejection / cancellation request...', '🛡️', 'info')
+      addActivity('Rejecting Job', 'Initiating rejection / cancellation request...', 'shield', 'info')
 
       const reasonHash = keccak256(toHex(reason))
       const { request } = await publicClient.simulateContract({
@@ -323,16 +323,16 @@ export function useJobEscrow({ isConnected, address, walletClient, publicClient,
       })
 
       const hash = await walletClient.writeContract(request)
-      addActivity('Rejection Sent', 'Refunding USDC to client...', '⏳', 'info')
+      addActivity('Rejection Sent', 'Refunding USDC to client...', 'refresh', 'info')
       await publicClient.waitForTransactionReceipt({ hash })
 
-      addActivity('Job Cancelled', 'Job rejected. Funds refunded to client escrow.', '🛡️', 'warning')
+      addActivity('Job Cancelled', 'Job rejected. Funds refunded to client escrow.', 'shield', 'warning')
       return hash
     } catch (err: any) {
       console.error('Reject job error:', err)
       const msg = err.shortMessage || err.message || 'Error rejecting job'
       setError(msg)
-      addActivity('Rejection/Cancellation Failed', msg, '❌', 'danger')
+      addActivity('Rejection/Cancellation Failed', msg, 'cross', 'danger')
       throw err
     } finally {
       setLoading(false)
@@ -346,7 +346,7 @@ export function useJobEscrow({ isConnected, address, walletClient, publicClient,
     setLoading(true)
     setError(null)
     try {
-      addActivity('Opening Dispute', 'Filing official work dispute on-chain...', '⚠️', 'info')
+      addActivity('Opening Dispute', 'Filing official work dispute on-chain...', 'warning', 'info')
 
       const { request } = await publicClient.simulateContract({
         account: address,
@@ -357,16 +357,16 @@ export function useJobEscrow({ isConnected, address, walletClient, publicClient,
       })
 
       const hash = await walletClient.writeContract(request)
-      addActivity('Dispute Registered', 'Waiting for dispute registration...', '⏳', 'info')
+      addActivity('Dispute Registered', 'Waiting for dispute registration...', 'refresh', 'info')
       await publicClient.waitForTransactionReceipt({ hash })
 
-      addActivity('Job Disputed', 'On-chain dispute opened. Awaiting admin resolution.', '⚠️', 'warning')
+      addActivity('Job Disputed', 'On-chain dispute opened. Awaiting admin resolution.', 'warning', 'warning')
       return hash
     } catch (err: any) {
       console.error('Dispute job error:', err)
       const msg = err.shortMessage || err.message || 'Error opening dispute'
       setError(msg)
-      addActivity('Dispute Failed', msg, '❌', 'danger')
+      addActivity('Dispute Failed', msg, 'cross', 'danger')
       throw err
     } finally {
       setLoading(false)
@@ -380,7 +380,7 @@ export function useJobEscrow({ isConnected, address, walletClient, publicClient,
     setLoading(true)
     setError(null)
     try {
-      addActivity('Resolving Dispute', `Resolving dispute: ${approvePayment ? 'Approve Payment' : 'Refund Client'}...`, '⚖️', 'info')
+      addActivity('Resolving Dispute', `Resolving dispute: ${approvePayment ? 'Approve Payment' : 'Refund Client'}...`, 'balance', 'info')
 
       const { request } = await publicClient.simulateContract({
         account: address,
@@ -391,16 +391,16 @@ export function useJobEscrow({ isConnected, address, walletClient, publicClient,
       })
 
       const hash = await walletClient.writeContract(request)
-      addActivity('Resolution broadcasting', 'Finalizing dispute decision...', '⏳', 'info')
+      addActivity('Resolution broadcasting', 'Finalizing dispute decision...', 'refresh', 'info')
       await publicClient.waitForTransactionReceipt({ hash })
 
-      addActivity('Dispute Settled', `Dispute resolved. Funds routed accordingly.`, '⚖️', 'success')
+      addActivity('Dispute Settled', `Dispute resolved. Funds routed accordingly.`, 'balance', 'success')
       return hash
     } catch (err: any) {
       console.error('Resolve dispute error:', err)
       const msg = err.shortMessage || err.message || 'Error resolving dispute'
       setError(msg)
-      addActivity('Resolution Failed', msg, '❌', 'danger')
+      addActivity('Resolution Failed', msg, 'cross', 'danger')
       throw err
     } finally {
       setLoading(false)

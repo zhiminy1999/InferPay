@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Send, Terminal, Play, Cpu, CheckCircle, AlertCircle, TrendingUp, ShieldAlert, Sparkles, RefreshCw } from 'lucide-react'
 import { useWeb3 } from '../lib/web3-provider'
 
@@ -23,9 +23,21 @@ export default function AgentWorkspace() {
       agent: 'System Monitor',
       status: 'completed',
       message: 'LangGraph swarm initialized. Ready for user task allocation.',
-      timestamp: new Date().toLocaleTimeString()
+      timestamp: ''
     }
   ])
+
+  useEffect(() => {
+    setSteps([
+      {
+        id: 'step-init',
+        agent: 'System Monitor',
+        status: 'completed',
+        message: 'LangGraph swarm initialized. Ready for user task allocation.',
+        timestamp: new Date().toLocaleTimeString()
+      }
+    ])
+  }, [])
 
   const handleRunTask = async (e: React.FormEvent) => {
     e.preventDefault()

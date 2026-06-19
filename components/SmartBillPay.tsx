@@ -7,6 +7,7 @@ import { useNanopayments } from '@/hooks/useNanopayments'
 import { USDC_ADDRESS_ARC, EURC_ADDRESS_ARC, erc20Abi } from '@/lib/contracts'
 import { formatUnits } from 'viem'
 import { CurrencySelector } from './CurrencySelector'
+import { BrandIcon } from './BrandIcon'
 
 interface SmartBillPayProps {
   isConnected: boolean
@@ -98,7 +99,7 @@ export function SmartBillPay({
   const handleTriggerIntent = async () => {
     setIsIntentLoading(true)
     setCurrentStep(1)
-    addActivity('Bill received', 'Reading and analyzing the incoming invoice.', '✉️', 'info')
+    addActivity('Bill received', 'Reading and analyzing the incoming invoice.', 'email', 'info')
     
     const intent = intentsPreload.find(i => i.id === intentSelection)
     if (!intent) {
@@ -115,18 +116,18 @@ export function SmartBillPay({
       // --- REAL ON-CHAIN MODE ---
       try {
         setCurrentStep(2) // Bill details analyzed
-        addActivity('Bill analyzed', `${intent.name}. Total: $${intent.amount} USDC.`, '🧠', 'info')
+        addActivity('Bill analyzed', `${intent.name}. Total: $${intent.amount} USDC.`, 'brain', 'info')
 
         if (intent.type === 'nanopayment') {
           // Circle Gateway Nanopayments mode
           const res = await executeInference('llm_llama')
           if (res.success) {
             setCurrentStep(3)
-            addActivity('Nanopayment signature sent', `Signed offchain EIP-3009 payload for $0.001.`, '⚡', 'success')
+            addActivity('Nanopayment signature sent', `Signed offchain EIP-3009 payload for $0.001.`, 'lightning', 'success')
             
             setTimeout(() => {
               setCurrentStep(4)
-              addActivity('Nanopayment settled', 'Inference processed, gasless credit settled.', '🎉', 'success')
+              addActivity('Nanopayment settled', 'Inference processed, gasless credit settled.', 'party', 'success')
             }, 800)
           } else {
             throw new Error(res.data?.error || 'Nanopayment signature verification failed')
@@ -140,7 +141,7 @@ export function SmartBillPay({
             setCurrentStep(3) // Split completed
             setTimeout(() => {
               setCurrentStep(4) // Settle
-              addActivity('Bill split settled', `Treasury reserve set aside and vendor paid in ${currency}.`, '🎉', 'success')
+              addActivity('Bill split settled', `Treasury reserve set aside and vendor paid in ${currency}.`, 'party', 'success')
             }, 800)
           } else {
             throw new Error("Split transfer failed")
@@ -155,7 +156,7 @@ export function SmartBillPay({
             setCurrentStep(3) // Escrow locked
             setTimeout(() => {
               setCurrentStep(4) // Settle
-              addActivity('Inference escrow complete', `Job #${result[2]} active on-chain in ${currency}.`, '🎉', 'success')
+              addActivity('Inference escrow complete', `Job #${result[2]} active on-chain in ${currency}.`, 'party', 'success')
             }, 800)
           } else {
             throw new Error("Escrow deposit failed")
@@ -172,21 +173,21 @@ export function SmartBillPay({
       }
     } else {
       // --- OFFLINE DEMO MODE ---
-      addActivity('Processing in demo mode', 'Simulating the bill payment flow.', '⚡', 'warning')
+      addActivity('Processing in demo mode', 'Simulating the bill payment flow.', 'lightning', 'warning')
       
       setTimeout(() => {
         setCurrentStep(2)
-        addActivity('Bill analyzed (Demo)', `${intent.name}. Total: $${intent.amount}.`, '🧠', 'info')
+        addActivity('Bill analyzed (Demo)', `${intent.name}. Total: $${intent.amount}.`, 'brain', 'info')
       }, 1000)
 
       setTimeout(() => {
         setCurrentStep(3)
-        addActivity('Payment split complete (Demo)', `$${(intent.amount * 0.9).toFixed(2)} paid to vendor, $${(intent.amount * 0.1).toFixed(2)} saved.`, '📊', 'success')
+        addActivity('Payment split complete (Demo)', `$${(intent.amount * 0.9).toFixed(2)} paid to vendor, $${(intent.amount * 0.1).toFixed(2)} saved.`, 'chart', 'success')
       }, 2200)
 
       setTimeout(() => {
         setCurrentStep(4)
-        addActivity('Bill paid (Demo)', 'Everything is settled — done in under 5 seconds.', '🎉', 'success')
+        addActivity('Bill paid (Demo)', 'Everything is settled — done in under 5 seconds.', 'party', 'success')
         setIsIntentLoading(false)
       }, 3500)
     }
@@ -301,7 +302,10 @@ export function SmartBillPay({
               borderRadius: 'var(--radius-md)',
               boxShadow: 'var(--shadow-soft)'
             }}>
-              <div style={{ fontWeight: 800, color: 'var(--text-main)', marginBottom: '8px' }}>💼 How the payment is split</div>
+              <div style={{ fontWeight: 800, color: 'var(--text-main)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <BrandIcon name="suitcase" size={16} variant="coral" />
+                <span>How the payment is split</span>
+              </div>
               {activeIntent?.type === 'split' ? (
                 <>
                   <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid var(--border)' }}>

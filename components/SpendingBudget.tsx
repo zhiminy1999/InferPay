@@ -5,6 +5,7 @@ import { RefreshCw, Sparkles, Lock, EyeOff, Eye, AlertTriangle, Play, ExternalLi
 import { useAgentEscrow } from '@/hooks/useAgentEscrow'
 import { CurrencySelector } from './CurrencySelector'
 import { generateEphemeralKeypair } from '@/lib/wallet-utils'
+import { BrandIcon } from './BrandIcon'
 
 interface SpendingBudgetProps {
   isConnected: boolean
@@ -89,7 +90,7 @@ export function SpendingBudget({
       }
     } else {
       // Demo Mode
-      addActivity('Setting up AI budget (Demo)', 'Creating a separate simulated spending account.', '🔑', 'info')
+      addActivity('Setting up AI budget (Demo)', 'Creating a separate simulated spending account.', 'key', 'info')
       await new Promise(resolve => setTimeout(resolve, 800))
       
       const keypair = generateEphemeralKeypair()
@@ -102,7 +103,7 @@ export function SpendingBudget({
       setPiggyBankSpent(0)
       setShowPrivateKey(false)
       
-      addActivity('AI budget active (Demo)', `Your AI can spend up to $${pocketMoney} for the next ${safePeriod}.`, '🤖', 'success')
+      addActivity('AI budget active (Demo)', `Your AI can spend up to $${pocketMoney} for the next ${safePeriod}.`, 'robot', 'success')
     }
   }
 
@@ -112,7 +113,7 @@ export function SpendingBudget({
     // Check local limit first
     if (piggyBankSpent + 5 > pocketMoney) {
       setShowOverspentWarning(true)
-      addActivity('Budget limit reached', `Your AI tried to spend more than its $${pocketMoney} limit.`, '⚠️', 'danger')
+      addActivity('Budget limit reached', `Your AI tried to spend more than its $${pocketMoney} limit.`, 'warning', 'danger')
       return
     }
 
@@ -129,7 +130,7 @@ export function SpendingBudget({
     } else {
       // Demo Mode
       setPiggyBankSpent(prev => prev + 5)
-      addActivity('AI made a purchase (Demo)', 'Used $5 from its budget to pay for an OpenAI task.', '💸', 'success')
+      addActivity('AI made a purchase (Demo)', 'Used $5 from its budget to pay for an OpenAI task.', 'money', 'success')
     }
   }
 
@@ -152,7 +153,7 @@ export function SpendingBudget({
       setPiggyBankStatus('SWEPT')
       setEphemeralPrivateKey('')
       setShowPrivateKey(false)
-      addActivity('Funds returned (Demo)', `$${remainder} was safely returned to your main account.`, '🛡️', 'success')
+      addActivity('Funds returned (Demo)', `$${remainder} was safely returned to your main account.`, 'shield', 'success')
     }
   }
 
@@ -270,8 +271,9 @@ export function SpendingBudget({
           </div>
 
           {isConnected && (
-            <div style={{ fontSize: '11px', color: 'var(--text-light)', fontWeight: 550 }}>
-              💡 Estimated transaction fee: <strong>~0.0004 USDC</strong> (USDC native gas on Arc)
+            <div style={{ fontSize: '11px', color: 'var(--text-light)', fontWeight: 550, display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <BrandIcon name="idea" size={13} variant="yellow" />
+              <span>Estimated transaction fee: <strong>~0.0004 USDC</strong> (USDC native gas on Arc)</span>
             </div>
           )}
         </div>
@@ -320,27 +322,31 @@ export function SpendingBudget({
           <h3 className="card-title">How Your Money Flows</h3>
           
           <div className="non-tech-flow-wrap">
-            <div className={`flow-node-brutalist ${piggyBankStatus === 'ACTIVE' ? 'active' : ''}`}>
-              🏢 Your Company Account
+            <div className={`flow-node-brutalist ${piggyBankStatus === 'ACTIVE' ? 'active' : ''}`} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', height: 'auto', padding: '10px var(--space-2)' }}>
+              <BrandIcon name="company" size={16} variant={piggyBankStatus === 'ACTIVE' ? 'coral' : 'muted'} />
+              <span>Your Company Account</span>
             </div>
             
             <div className={`flow-connector-brutalist ${piggyBankStatus === 'ACTIVE' ? 'active' : ''}`}></div>
             
-            <div className={`flow-node-brutalist ${piggyBankStatus === 'ACTIVE' ? 'active' : ''}`}>
-              🐷 AI Spending Allowance
-              <div style={{ fontSize: '9px', fontWeight: 'normal', color: 'var(--text-muted)' }}>Budget: ${pocketMoney}</div>
+            <div className={`flow-node-brutalist ${piggyBankStatus === 'ACTIVE' ? 'active' : ''}`} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', height: 'auto', padding: '10px var(--space-2)' }}>
+              <BrandIcon name="piggy" size={16} variant={piggyBankStatus === 'ACTIVE' ? 'coral' : 'muted'} />
+              <span>AI Spending Allowance</span>
+              <div style={{ fontSize: '9px', fontWeight: 'normal', color: 'var(--text-muted)' }}>Budget: {pocketMoney} {currency}</div>
             </div>
 
             <div className={`flow-connector-brutalist ${piggyBankStatus === 'ACTIVE' ? 'active' : ''}`}></div>
 
-            <div className={`flow-node-brutalist ${piggyBankStatus === 'ACTIVE' ? 'active' : ''}`}>
-              🤖 AI Assistant
+            <div className={`flow-node-brutalist ${piggyBankStatus === 'ACTIVE' ? 'active' : ''}`} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', height: 'auto', padding: '10px var(--space-2)' }}>
+              <BrandIcon name="robot" size={16} variant={piggyBankStatus === 'ACTIVE' ? 'coral' : 'muted'} />
+              <span>AI Assistant</span>
             </div>
 
             <div className="flow-connector-brutalist"></div>
 
-            <div className="flow-node-brutalist">
-              🔒 Approved Service
+            <div className="flow-node-brutalist" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', height: 'auto', padding: '10px var(--space-2)' }}>
+              <BrandIcon name="lock" size={16} variant="muted" />
+              <span>Approved Service</span>
             </div>
           </div>
 
@@ -363,8 +369,9 @@ export function SpendingBudget({
                     <span>AI’s Ephemeral Account: <code style={{ fontSize: '11px', backgroundColor: '#e2dfd9', padding: '2px 6px', borderRadius: '4px' }}>{piggyBankAddress.slice(0, 10)}...{piggyBankAddress.slice(-6)}</code></span>
                   </div>
                   {isConnected && (
-                    <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-                      ⛽ Gas Balance: <strong>{ephemeralGasBal} USDC</strong> (native gas) · USDC Balance: <strong>{ephemeralUsdcBal} USDC</strong> · EURC Balance: <strong>{ephemeralEurcBal} EURC</strong>
+                    <div style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <BrandIcon name="lightning" size={12} variant="coral" />
+                      <span>Gas Balance: <strong>{ephemeralGasBal} USDC</strong> (native gas) · USDC Balance: <strong>{ephemeralUsdcBal} USDC</strong> · EURC Balance: <strong>{ephemeralEurcBal} EURC</strong></span>
                     </div>
                   )}
                 </div>
@@ -392,9 +399,13 @@ export function SpendingBudget({
                   color: '#92400e',
                   lineHeight: '1.4'
                 }}>
-                  <strong>🔒 Session Private Key:</strong> {ephemeralPrivateKey}
-                  <div style={{ fontSize: '10px', color: 'var(--text-light)', marginTop: '4px', fontFamily: 'var(--font-sans)', fontWeight: 550 }}>
-                    ⚠️ This private key is stored ONLY in memory. It will be destroyed immediately when the session is swept. Do not share it.
+                  <strong style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', verticalAlign: 'middle' }}>
+                    <BrandIcon name="lock" size={13} variant="coral" />
+                    <span>Session Private Key:</span>
+                  </strong> {ephemeralPrivateKey}
+                  <div style={{ fontSize: '10px', color: 'var(--text-light)', marginTop: '4px', fontFamily: 'var(--font-sans)', fontWeight: 550, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <BrandIcon name="warning" size={12} variant="coral" />
+                    <span>This private key is stored ONLY in memory. It will be destroyed immediately when the session is swept. Do not share it.</span>
                   </div>
                 </div>
               )}
@@ -416,7 +427,7 @@ export function SpendingBudget({
               gap: '10px'
             }}>
               <AlertTriangle size={18} />
-              <span>⚠️ Budget limit reached! Your AI tried to make a purchase but the spending cap stopped it. You can get your remaining funds back or increase the budget.</span>
+              <span>Budget limit reached! Your AI tried to make a purchase but the spending cap stopped it. You can get your remaining funds back or increase the budget.</span>
             </div>
           )}
 
