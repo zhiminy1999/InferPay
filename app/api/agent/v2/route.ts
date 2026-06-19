@@ -56,20 +56,19 @@ export async function POST(req: NextRequest) {
     // Format steps tracing output for the client visualization interface
     const steps = result.plannerSteps.map((stepName: string, index: number) => {
       let agent = 'Tool Execution Agent'
-      let message = `Executed task tool: "${stepName}".`
+      
+      // Find the AIMessage returned by the specific tool node execution
+      const toolMsg = result.messages.find((msg: any) => msg.name === stepName)
+      let message = toolMsg ? toolMsg.content : `Executed task tool: "${stepName}".`
       
       if (stepName === 'query_balance') {
         agent = 'Balance Inquirer Agent'
-        message = 'Queried live wallet and escrow stablecoin balances.'
       } else if (stepName === 'swap_tokens') {
         agent = 'Trading Swarm Agent'
-        message = 'Executed stablecoin token exchange on StableFX.'
       } else if (stepName === 'bridge_cctp') {
         agent = 'Bridge Operator Agent'
-        message = 'Triggered cross-chain CCTP stablecoin transfer.'
       } else if (stepName === 'record_payment') {
         agent = 'Ledger Auditor Agent'
-        message = 'Recorded transaction logs to the database tables.'
       }
 
       return {

@@ -94,6 +94,30 @@ export default function AgentWorkspace() {
     }
   }
 
+  const renderMessageContent = (message: string) => {
+    const txRegex = /0x[a-fA-F0-9]{64}/g
+    const match = message.match(txRegex)
+    if (match) {
+      const txHash = match[0]
+      const parts = message.split(txHash)
+      return (
+        <span>
+          {parts[0]}
+          <a 
+            href={`https://testnet.arcscan.app/tx/${txHash}`} 
+            target="_blank" 
+            rel="noreferrer"
+            style={{ color: 'var(--accent-coral)', textDecoration: 'underline', fontWeight: 'bold' }}
+          >
+            {txHash.slice(0, 10)}...{txHash.slice(-6)}
+          </a>
+          {parts[1]}
+        </span>
+      )
+    }
+    return message
+  }
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', width: '100%' }}>
       {/* 1. Indicators Grid */}
@@ -327,7 +351,7 @@ export default function AgentWorkspace() {
                     <strong style={{ fontSize: '12.5px', color: 'var(--text-main)' }}>{step.agent}</strong>
                     <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{step.timestamp}</span>
                   </div>
-                  <p style={{ margin: 0, fontSize: '12px', color: 'var(--text-light)', lineHeight: '1.4' }}>{step.message}</p>
+                  <p style={{ margin: 0, fontSize: '12px', color: 'var(--text-light)', lineHeight: '1.4' }}>{renderMessageContent(step.message)}</p>
                 </div>
               </div>
             ))}
