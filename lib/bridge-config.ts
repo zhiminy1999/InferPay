@@ -41,11 +41,11 @@ export const BRIDGE_CHAINS: Record<string, ChainConfig> = {
 export const CCTP_CONFIG = {
   // Main CCTP contracts on Sepolia (Source)
   ethereum_sepolia: {
-    tokenMessenger: '0x9f3B8679c73C2Fef8b59B4f3444d4e156fb70A5e',
+    tokenMessenger: '0x9f3B8679c73C2Fef8b59B4f3444d4e156fb70AA5',
     messageTransmitter: '0x7865c0E2d1ab353503845b4B5c56c2452FBA2F76',
   },
   base_sepolia: {
-    tokenMessenger: '0x9f3B8679c73C2Fef8b59B4f3444d4e156fb70A5e',
+    tokenMessenger: '0x9f3B8679c73C2Fef8b59B4f3444d4e156fb70AA5',
     messageTransmitter: '0x7865c0E2d1ab353503845b4B5c56c2452FBA2F76',
   },
   arc_testnet: {
