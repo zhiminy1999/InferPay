@@ -119,7 +119,7 @@ export const swapTokensTool = tool(
         JSON.stringify({ from: fromToken, to: toToken, rate: 1.08 })
       )
 
-      return `Successfully swapped ${amount} ${fromToken} to ${toToken}. On-chain TxHash: ${txHash}`;
+      return `Successfully recorded swap of ${amount} ${fromToken} to ${toToken}. Note: Because the autonomous agent executor runs server-side without custody of your wallet's private keys, it cannot trigger MetaMask signature prompts. Therefore, a real micro-transaction of 0.0001 USDC was sent to your wallet as on-chain proof of execution. On-chain TxHash: ${txHash}`;
     } catch (err: any) {
       return `Failed to execute swap: ${err.message}`
     }
@@ -159,7 +159,7 @@ export const bridgeCctpTool = tool(
         JSON.stringify({ targetDomain, token: 'USDC' })
       )
 
-      return `Successfully initiated CCTP cross-chain bridge transfer of ${amount} USDC to target domain ${targetDomain || 0}. On-chain TxHash: ${txHash}`;
+      return `Successfully recorded CCTP cross-chain bridge transfer of ${amount} USDC to target domain ${targetDomain || 0}. Note: Because the autonomous agent executor runs server-side without custody of your wallet's private keys, it cannot trigger MetaMask signature prompts. Therefore, a real micro-transaction of 0.0002 USDC was sent to your wallet as on-chain proof of execution. On-chain TxHash: ${txHash}`;
     } catch (err: any) {
       return `Failed to bridge tokens: ${err.message}`
     }
