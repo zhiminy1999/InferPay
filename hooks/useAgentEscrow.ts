@@ -176,13 +176,17 @@ export function useAgentEscrow({
             metadata: { expiration: Number(duration) + Math.floor(Date.now() / 1000), currency }
           })
         })
-      } catch (err) {
-        console.warn('Failed to save session in DB:', err)
+      } catch (dbErr) {
+        console.warn('Failed to save session in DB:', dbErr)
       }
 
       return keypair
     } catch (err: any) {
-      console.error(err)
+      if (err.name === 'UserRejectedRequestError' || err.message?.includes('User rejected') || err.message?.includes('user rejected') || err.message?.includes('User denied')) {
+        console.warn('User rejected the transaction request.')
+      } else {
+        console.error(err)
+      }
       setTxStatus('error')
       const msg = err.shortMessage || err.message || 'Transaction failed'
       setErrorMsg(msg)
@@ -242,7 +246,11 @@ export function useAgentEscrow({
       await updateEphemeralBalances(epAccount.address)
       return tx
     } catch (err: any) {
-      console.error(err)
+      if (err.name === 'UserRejectedRequestError' || err.message?.includes('User rejected') || err.message?.includes('user rejected') || err.message?.includes('User denied')) {
+        console.warn('User rejected the spend transaction request.')
+      } else {
+        console.error(err)
+      }
       setTxStatus('error')
       const msg = err.shortMessage || err.message || 'Transaction failed'
       setErrorMsg(msg)
@@ -283,7 +291,11 @@ export function useAgentEscrow({
       await updateEphemeralBalances(ephemeralAddress)
       return tx
     } catch (err: any) {
-      console.error(err)
+      if (err.name === 'UserRejectedRequestError' || err.message?.includes('User rejected') || err.message?.includes('user rejected') || err.message?.includes('User denied')) {
+        console.warn('User rejected the sweep transaction request.')
+      } else {
+        console.error(err)
+      }
       setTxStatus('error')
       const msg = err.shortMessage || err.message || 'Transaction failed'
       setErrorMsg(msg)

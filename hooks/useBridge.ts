@@ -518,7 +518,11 @@ export function useBridge() {
       setCurrentStep('complete')
       setStatus('success')
     } catch (err: any) {
-      console.error('CCTP Bridge error:', err)
+      if (err.name === 'UserRejectedRequestError' || err.message?.includes('User rejected') || err.message?.includes('user rejected') || err.message?.includes('User denied')) {
+        console.warn('User rejected the CCTP bridge transaction request.')
+      } else {
+        console.error('CCTP Bridge error:', err)
+      }
       setErrorMessage(err.message || 'Transaction failed or rejected by wallet.')
       setStatus('error')
     }
@@ -542,7 +546,11 @@ export function useBridge() {
       setCurrentStep('complete')
       setStatus('success')
     } catch (err: any) {
-      console.error('CCTP Bridge retry error:', err)
+      if (err.name === 'UserRejectedRequestError' || err.message?.includes('User rejected') || err.message?.includes('user rejected') || err.message?.includes('User denied')) {
+        console.warn('User rejected the CCTP bridge retry transaction request.')
+      } else {
+        console.error('CCTP Bridge retry error:', err)
+      }
       setErrorMessage(err.message || 'Transaction failed during retry.')
       setStatus('error')
     }
