@@ -97,16 +97,40 @@ export async function GET(request: Request) {
     const eurcInUsd = eurcWallet * 1.085 // Current EURC/USDC FX Rate
     const totalTreasury = usdcWallet + eurcInUsd + usdcGateway
 
-    // Treasury Value Over Time (Generate 7 historical data points)
+    // Treasury Value Over Time (Generate 7 historical data points based on actual transaction deltas)
     const treasuryHistory = Array.from({ length: 7 }, (_, i) => {
       const dayOffset = (6 - i) * 24 * 60 * 60 * 1000
       const date = new Date(Date.now() - dayOffset)
       const dayLabel = date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
-      // Simulate historical growth
-      const baseVal = totalTreasury - (6 - i) * 120 + Math.random() * 50
+      const timestampCutoff = Math.floor(date.getTime() / 1000)
+
+      let delta = 0
+      parsedPayments.forEach(p => {
+        if (p.timestamp > timestampCutoff) {
+          delta -= p.amount
+        }
+      })
+      parsedSwaps.forEach(s => {
+        if (s.timestamp > timestampCutoff) {
+          if (s.metadata?.fromToken === 'EURC') {
+            delta += s.amount * 1.08
+            delta -= s.amount * 1.085
+          } else {
+            delta -= s.amount
+            delta += (s.amount / 1.08) * 1.085
+          }
+        }
+      })
+      parsedBridges.forEach(b => {
+        if (b.timestamp > timestampCutoff && b.status === 'SUCCESS') {
+          delta += b.amount
+        }
+      })
+
+      const historicalValue = totalTreasury - delta
       return {
         date: dayLabel,
-        value: Math.max(2000, parseFloat(baseVal.toFixed(2)))
+        value: parseFloat(Math.max(0, historicalValue).toFixed(2))
       }
     })
 
@@ -118,7 +142,7 @@ export async function GET(request: Request) {
         .filter(p => p.metadata?.serviceId === s.id)
         .reduce((sum, p) => sum + p.amount, 0)
 
-      const jobsCompleted = parsedPayments.filter(p => p.metadata?.serviceId === s.id).length + (earnings > 0 ? 5 : 0)
+      const jobsCompleted = parsedPayments.filter(p => p.metadata?.serviceId === s.id).length
 
       return {
         id: s.id,
@@ -126,7 +150,7 @@ export async function GET(request: Request) {
         capability: s.capability,
         reputation: s.reputation,
         completionRate: sMeta.completionRate || 0.95,
-        totalEarned: earnings + (jobsCompleted * s.pricing),
+        totalEarned: earnings,
         jobsCompleted
       }
     })
@@ -171,26 +195,6 @@ export async function GET(request: Request) {
         message: `Consensus Bypass Event: Direct execution detected for transfer of $${bypassTx.amount} USDC without Approval Committee signature verification.`,
         timestamp: bypassTx.timestamp
       })
-    }
-
-    // Add general fallback alerts if none are generated from database to keep demo interactive
-    if (alerts.length === 0) {
-      alerts.push(
-        {
-          id: 'alert-def-1',
-          type: 'LARGE_TX',
-          severity: 'HIGH',
-          message: 'Large treasury allocation of $12,500.00 USDC completed to Escrow Vault.',
-          timestamp: Math.floor(Date.now() / 1000) - 3600
-        },
-        {
-          id: 'alert-def-2',
-          type: 'BUDGET_OVERRUN',
-          severity: 'MEDIUM',
-          message: 'DeepSeek Coder API spending exceeded threshold budget allocation of $50/day.',
-          timestamp: Math.floor(Date.now() / 1000) - 7200
-        }
-      )
     }
 
     return NextResponse.json({
