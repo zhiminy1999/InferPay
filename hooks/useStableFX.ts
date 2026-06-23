@@ -141,6 +141,7 @@ export function useStableFX({
       addActivity('Submitting Swap', `Depositing ${quote.from.amount} ${quote.from.currency} to StableFX Settlement...`, 'chain', 'info')
 
       const transferHash = await walletClient.writeContract({
+        account: address as `0x${string}`,
         address: tokenAddress,
         abi: erc20Abi,
         functionName: 'transfer',

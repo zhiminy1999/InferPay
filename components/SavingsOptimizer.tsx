@@ -32,9 +32,10 @@ export function SavingsOptimizer({
 }: SavingsOptimizerProps) {
   // Local swap form states
   const [fromCurrency, setFromCurrency] = useState<'USDC' | 'EURC'>('USDC')
-  const [amountInput, setAmountInput] = useState<string>('10.00')
+  const [amountInput, setAmountInput] = useState<string>('1.00')
   const [alertRateThreshold, setAlertRateThreshold] = useState<string>('0.93')
   const [rateAlertEnabled, setRateAlertEnabled] = useState<boolean>(true)
+  const [swapStatus, setSwapStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
 
   // Custom balance update callback
   const handleBalanceUpdate = () => {
@@ -87,7 +88,14 @@ export function SavingsOptimizer({
   }
 
   const handleExecuteSwapSubmit = async () => {
-    await executeSwap()
+    setSwapStatus(null)
+    const currentQuote = quote
+    const success = await executeSwap()
+    if (success) {
+      setSwapStatus({ type: 'success', message: `Atomic FX Swap completed successfully! Received ${currentQuote?.to.amount} ${currentQuote?.to.currency}.` })
+    } else {
+      setSwapStatus({ type: 'error', message: 'Swap settlement failed. Please verify your signature approval, token balances, or network state.' })
+    }
   }
 
   // Calculate stats from history
@@ -110,6 +118,20 @@ export function SavingsOptimizer({
               <strong style={{ fontSize: '13px' }}>StableFX Rate Alert Triggered!</strong>
               <div style={{ fontSize: '12px', color: 'var(--text-light)' }}>
                 The real-time FX exchange rate ({currentRate.toFixed(4)}) has surpassed your alert threshold of {thresholdVal.toFixed(4)}. Optimize now to capture yield!
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {swapStatus && (
+        <div className={`alert-brutalist accent-${swapStatus.type === 'success' ? 'green' : 'coral'}`} style={{ marginBottom: '20px', borderLeft: `4px solid var(--accent-${swapStatus.type === 'success' ? 'green' : 'coral'})` }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {swapStatus.type === 'success' ? <ShieldCheck size={18} style={{ color: 'var(--accent-green)' }} /> : <AlertTriangle size={18} style={{ color: 'var(--accent-coral)' }} />}
+            <div>
+              <strong style={{ fontSize: '13px' }}>{swapStatus.type === 'success' ? 'Swap Completed Successfully!' : 'Swap Settlement Failed'}</strong>
+              <div style={{ fontSize: '12px', color: 'var(--text-light)' }}>
+                {swapStatus.message}
               </div>
             </div>
           </div>

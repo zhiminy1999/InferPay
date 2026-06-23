@@ -94,11 +94,6 @@ export const StableFXClient = {
         verifyingContract: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
       },
       types: {
-        EIP712Domain: [
-          { name: 'name', type: 'string' },
-          { name: 'chainId', type: 'uint256' },
-          { name: 'verifyingContract', type: 'address' },
-        ],
         Consideration: [
           { name: 'quoteId', type: 'string' },
           { name: 'base', type: 'address' },
@@ -213,11 +208,6 @@ export const StableFXClient = {
           verifyingContract: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
         },
         types: {
-          EIP712Domain: [
-            { name: 'name', type: 'string' },
-            { name: 'chainId', type: 'uint256' },
-            { name: 'verifyingContract', type: 'address' },
-          ],
           TokenPermissions: [
             { name: 'token', type: 'address' },
             { name: 'amount', type: 'uint256' },
@@ -243,7 +233,7 @@ export const StableFXClient = {
           nonce: fundingNonce,
           deadline,
           witness: {
-            id: contractTradeId,
+            id: BigInt(contractTradeId.startsWith('0x') ? contractTradeId : '0x' + contractTradeId),
           },
         },
       },
