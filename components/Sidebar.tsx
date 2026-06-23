@@ -44,7 +44,7 @@ export function Sidebar({ activeTab, setActiveTab, mobileOpen = false, onCloseMo
           className={`sidebar-menu-item ${activeTab === 'agents' ? 'active' : ''}`}
           onClick={() => handleItemClick('agents')}
         >
-          <div className="sidebar-icon-wrap" style={{ color: 'var(--accent-coral)' }}>
+          <div className="sidebar-icon-wrap" style={activeTab === 'agents' ? { color: 'var(--accent-coral)' } : undefined}>
             <Cpu size={15} />
             <span>AI Agent Workspace</span>
           </div>
@@ -154,7 +154,7 @@ export function Sidebar({ activeTab, setActiveTab, mobileOpen = false, onCloseMo
           className={`sidebar-menu-item ${activeTab === 'history' ? 'active' : ''}`}
           onClick={() => handleItemClick('history')}
         >
-          <div className="sidebar-icon-wrap text-accent-pink font-bold">
+          <div className={`sidebar-icon-wrap ${activeTab === 'history' ? 'text-accent-pink font-bold' : ''}`}>
             <History size={15} />
             <span>Transaction Audit Trail</span>
           </div>

@@ -65,3 +65,6 @@ data/
 # Deployment scripts containing credentials
 scripts/deploy-v2.js
 
+# Temporary scratch space
+scratch/
+
