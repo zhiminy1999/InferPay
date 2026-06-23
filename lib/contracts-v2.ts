@@ -1,6 +1,6 @@
-export const AGENT_ESCROW_V2_ADDRESS = "0xceb2daed59fe7d23047d5986c1d1ac49d24ac6b6" as const;
-export const AGENT_CONSENSUS_V2_ADDRESS = "0x359439379ba6f989917b702a9c2dff6dc179d898" as const;
-export const INFERPAY_ESCROW_V2_ADDRESS = "0xaffa3c0ec0c100053c719b8c939601d784d9f415" as const;
+export const AGENT_ESCROW_V2_ADDRESS = "0x6ac15aadcd3b3c80db04a9cf9b92f3f6967af9cd" as const;
+export const AGENT_CONSENSUS_V2_ADDRESS = "0x271aaa0ae0f1dfa5b0e65cb6b15a9b366637b36a" as const;
+export const INFERPAY_ESCROW_V2_ADDRESS = "0x8f09bacf3e423b8e9a4158c01c08d4b1b45d5401" as const;
 
 export const agentEscrowV2Abi = [
   {
@@ -156,6 +156,11 @@ export const agentEscrowV2Abi = [
       },
       {
         "internalType": "address",
+        "name": "masterWallet",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
         "name": "token",
         "type": "address"
       },
@@ -183,6 +188,19 @@ export const agentEscrowV2Abi = [
         "internalType": "bool",
         "name": "isSwept",
         "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "contractOwner",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
       }
     ],
     "stateMutability": "view",
@@ -258,19 +276,6 @@ export const agentEscrowV2Abi = [
         "internalType": "bool",
         "name": "",
         "type": "bool"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "masterWallet",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
       }
     ],
     "stateMutability": "view",

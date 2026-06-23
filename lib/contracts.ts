@@ -1,4 +1,7 @@
 import { 
+  AGENT_ESCROW_V2_ADDRESS,
+  AGENT_CONSENSUS_V2_ADDRESS,
+  INFERPAY_ESCROW_V2_ADDRESS,
   agentEscrowV2Abi, 
   agentConsensusV2Abi, 
   inferPayEscrowV2Abi 
@@ -7,10 +10,8 @@ import {
 export const USDC_ADDRESS_ARC = "0x3600000000000000000000000000000000000000" as const;
 export const EURC_ADDRESS_ARC = "0x89B50855Aa3bE2F677cD6303Cec089B5F319D72a" as const;
 
-// V2 addresses
-export const AGENT_ESCROW_V2_ADDRESS = "0xceb2daed59fe7d23047d5986c1d1ac49d24ac6b6" as const;
-export const AGENT_CONSENSUS_V2_ADDRESS = "0x359439379ba6f989917b702a9c2dff6dc179d898" as const;
-export const INFERPAY_ESCROW_V2_ADDRESS = "0xaffa3c0ec0c100053c719b8c939601d784d9f415" as const;
+// Export V2 addresses
+export { AGENT_ESCROW_V2_ADDRESS, AGENT_CONSENSUS_V2_ADDRESS, INFERPAY_ESCROW_V2_ADDRESS };
 
 // Map original names to V2 addresses for backward compatibility
 export const INFERPAY_CONTRACT_ADDRESS = INFERPAY_ESCROW_V2_ADDRESS;

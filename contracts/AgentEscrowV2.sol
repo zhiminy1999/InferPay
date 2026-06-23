@@ -10,13 +10,15 @@ interface IERC20 {
 /**
  * @title AgentEscrowV2
  * @notice Multi-token version of AgentEscrow supporting USDC, EURC, etc.
+ * Supports multi-tenant budgets where each session records its own creator as masterWallet.
  */
 contract AgentEscrowV2 {
-    address public masterWallet;
+    address public contractOwner;
     mapping(address => bool) public isAllowedToken;
 
     struct SessionPolicy {
         address ephemeralWallet;
+        address masterWallet;
         address token;
         uint256 spendLimit;
         uint256 totalSpent;
@@ -34,8 +36,8 @@ contract AgentEscrowV2 {
     event SessionSwept(address indexed ephemeralWallet, address indexed masterWallet, uint256 amountSwept);
     event TokenAllowedUpdated(address indexed token, bool allowed);
 
-    modifier onlyMaster() {
-        require(msg.sender == masterWallet, "Only master wallet can authorize");
+    modifier onlyOwner() {
+        require(msg.sender == contractOwner, "Only owner can call");
         _;
     }
 
@@ -45,14 +47,14 @@ contract AgentEscrowV2 {
     }
 
     constructor(address[] memory _allowedTokens) {
-        masterWallet = msg.sender;
+        contractOwner = msg.sender;
         for (uint256 i = 0; i < _allowedTokens.length; i++) {
             isAllowedToken[_allowedTokens[i]] = true;
             emit TokenAllowedUpdated(_allowedTokens[i], true);
         }
     }
 
-    function setTokenAllowed(address _token, bool _allowed) external onlyMaster {
+    function setTokenAllowed(address _token, bool _allowed) external onlyOwner {
         isAllowedToken[_token] = _allowed;
         emit TokenAllowedUpdated(_token, _allowed);
     }
@@ -63,12 +65,13 @@ contract AgentEscrowV2 {
         uint256 _spendLimit,
         uint256 _duration,
         address[] calldata _whitelist
-    ) external onlyMaster {
+    ) external {
         require(isAllowedToken[_token], "Token not allowed");
         require(activePolicies[_ephemeralWallet].ephemeralWallet == address(0) || activePolicies[_ephemeralWallet].isSwept, "Session active");
         
         activePolicies[_ephemeralWallet] = SessionPolicy({
             ephemeralWallet: _ephemeralWallet,
+            masterWallet: msg.sender,
             token: _token,
             spendLimit: _spendLimit,
             totalSpent: 0,
@@ -81,8 +84,8 @@ contract AgentEscrowV2 {
             whitelistedContracts[_ephemeralWallet][_whitelist[i]] = true;
         }
 
-        // Pull limit from Master Wallet to Escrow
-        require(IERC20(_token).transferFrom(masterWallet, address(this), _spendLimit), "Funding escrow failed");
+        // Pull limit from caller's wallet to Escrow
+        require(IERC20(_token).transferFrom(msg.sender, address(this), _spendLimit), "Funding escrow failed");
 
         emit SessionCreated(_ephemeralWallet, _token, _spendLimit, block.timestamp + _duration);
     }
@@ -104,18 +107,19 @@ contract AgentEscrowV2 {
         emit SpendExecuted(_ephemeralWallet, _target, _amount);
     }
 
+    // Anyone can call sweepSession after expiration, but only the session's masterWallet can sweep before expiration
     function sweepSession(address _ephemeralWallet) external {
         SessionPolicy storage policy = activePolicies[_ephemeralWallet];
-        require(msg.sender == masterWallet || block.timestamp > policy.expiration, "Unauthorized sweep");
+        require(msg.sender == policy.masterWallet || block.timestamp > policy.expiration, "Unauthorized sweep");
         require(!policy.isSwept, "Already swept");
 
         policy.isSwept = true;
         uint256 remainingFunds = policy.spendLimit - policy.totalSpent;
         
         if (remainingFunds > 0) {
-            require(IERC20(policy.token).transfer(masterWallet, remainingFunds), "Sweeping failed");
+            require(IERC20(policy.token).transfer(policy.masterWallet, remainingFunds), "Sweeping failed");
         }
 
-        emit SessionSwept(_ephemeralWallet, masterWallet, remainingFunds);
+        emit SessionSwept(_ephemeralWallet, policy.masterWallet, remainingFunds);
     }
 }
