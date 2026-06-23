@@ -70,11 +70,35 @@ export function AIWorkReview({
       agentWallet: '0x0c200b495d3EF602151caa364e071Bd71829978B',
       description: 'Checked your code for vulnerabilities and strengthened protections.', 
       achievements: ['Reviewed 5 code repositories', 'Fixed 2 critical security issues'], 
-      amount: 850, 
+      amount: 2, 
       currency: 'USDC', 
       status: 'PENDING',
       defaultReputation: 99,
       capabilities: 'Address Risk Scoring, Compliance Verification'
+    },
+    { 
+      id: 'INV-04', 
+      agentName: 'Vision Payout Matcher Agent', 
+      agentWallet: '0x08Ec3EEfC622b8a8742fC8Ab48E832c236bc360B',
+      description: 'Automated invoice validation and matched payout criteria.', 
+      achievements: ['Matched 12 invoices', 'Flagged 1 duplicate payout entry'], 
+      amount: 1, 
+      currency: 'USDC', 
+      status: 'PENDING',
+      defaultReputation: 97,
+      capabilities: 'Invoice Verification, Payout Matcher'
+    },
+    { 
+      id: 'INV-05', 
+      agentName: 'StableFX Quote Tracker Agent', 
+      agentWallet: '0xB2a136968F2a8085371577Cbbe173F79b93caF1a',
+      description: 'Monitored real-time arbitrage quotes and optimized yield conversion.', 
+      achievements: ['Tracked 240 currency quotes', 'Secured 0.25% arbitrage optimization bonus'], 
+      amount: 5, 
+      currency: 'USDC', 
+      status: 'PENDING',
+      defaultReputation: 96,
+      capabilities: 'FX Tracking, Yield Routing'
     }
   ])
 
