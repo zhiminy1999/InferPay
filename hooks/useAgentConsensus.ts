@@ -48,7 +48,10 @@ export function useAgentConsensus({
           value: parseUnits('0.005', 18),
           chain: null
         })
-        await publicClient.waitForTransactionReceipt({ hash: fundTx })
+        const receipt = await publicClient.waitForTransactionReceipt({ hash: fundTx })
+        if (receipt.status === 'reverted') {
+          throw new Error("Gas pre-funding transaction reverted on-chain")
+        }
       }
     } catch (err) {
       console.error("Gas pre-funding check failed:", err)
@@ -88,6 +91,9 @@ export function useAgentConsensus({
       
       setTxHash(hash)
       const receipt = await publicClient.waitForTransactionReceipt({ hash })
+      if (receipt.status === 'reverted') {
+        throw new Error("Proposal creation transaction reverted on-chain")
+      }
       
       setTxStatus('success')
       addActivity('Proposal Created', `Consensus proposal (${currency}) registered on-chain.`, 'party', 'success')
@@ -178,7 +184,10 @@ export function useAgentConsensus({
       }
 
       setTxHash(hash)
-      await publicClient.waitForTransactionReceipt({ hash })
+      const receipt = await publicClient.waitForTransactionReceipt({ hash })
+      if (receipt.status === 'reverted') {
+        throw new Error("Vote submission transaction reverted on-chain")
+      }
       setTxStatus('success')
       addActivity('Vote Recorded', `Vote submitted by Agent ${agentIndex} successfully.`, 'party', 'success')
       return hash
@@ -218,7 +227,10 @@ export function useAgentConsensus({
       })
 
       setTxHash(hash)
-      await publicClient.waitForTransactionReceipt({ hash })
+      const receipt = await publicClient.waitForTransactionReceipt({ hash })
+      if (receipt.status === 'reverted') {
+        throw new Error("Bypass transaction reverted on-chain")
+      }
       setTxStatus('success')
       addActivity('Bypass Confirmed', 'Override executed. Funds released.', 'party', 'success')
       return hash

@@ -41,6 +41,33 @@ export const SYSTEM_AGENTS: AgentInfo[] = [
     serviceEndpoint: 'https://api.inferpay.io/v1/audits',
     reputation: 95,
     isSystem: true
+  },
+  {
+    wallet: '0x71C7656EC7ab88b098defB751B7401B5f6d8976F',
+    name: 'DeepSeek Coder Agent',
+    description: 'Verifies smart contract compiler options, runs automated unit tests, and rates code security.',
+    capabilities: 'Static Analysis, Code Audit, Solidity Verification',
+    serviceEndpoint: 'https://api.inferpay.io/v1/deepseek-coder',
+    reputation: 97,
+    isSystem: true
+  },
+  {
+    wallet: '0x4443656EC7ab88b098defB751B7401B5f6d8999F',
+    name: 'CCTP Arbitrage Bot',
+    description: 'Monitors stablecoin liquidity pools across Base, Arbitrum, and Arc to route crosschain transfers.',
+    capabilities: 'USDC Bridging Route Optimization, Spread Arbitrage',
+    serviceEndpoint: 'https://api.inferpay.io/v1/cctp-router',
+    reputation: 94,
+    isSystem: true
+  },
+  {
+    wallet: '0x8888856EC7ab88b098defB751B7401B5f6d8888A',
+    name: 'Vercel Deployment Sweeper',
+    description: 'Polls GitHub commits and Vercel production deployments to trigger automated contributor payments.',
+    capabilities: 'Webhook Processing, Build Verification, Payroll Triggers',
+    serviceEndpoint: 'https://api.inferpay.io/v1/vercel-sweeper',
+    reputation: 96,
+    isSystem: true
   }
 ]
 
@@ -93,7 +120,10 @@ export function useAgentRegistry({
       })
 
       setTxHash(hash)
-      await publicClient.waitForTransactionReceipt({ hash })
+      const receipt = await publicClient.waitForTransactionReceipt({ hash })
+      if (receipt.status === 'reverted') {
+        throw new Error('Agent registration transaction reverted on-chain.')
+      }
       setTxStatus('success')
       addActivity('Agent Registered', `AI Agent registered on-chain.`, 'party', 'success')
       return hash

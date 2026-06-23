@@ -71,27 +71,76 @@ export function useJobEscrow({ isConnected, address, walletClient, publicClient,
   }, [publicClient])
 
   const getAllJobs = useCallback(async (): Promise<Job[]> => {
-    if (!publicClient) return []
-    try {
-      const jobCount = await publicClient.readContract({
-        address: JOB_ESCROW_ADDRESS,
-        abi: jobEscrowAbi,
-        functionName: 'jobCount',
-      })
+    let list: Job[] = []
+    if (publicClient) {
+      try {
+        const jobCount = await publicClient.readContract({
+          address: JOB_ESCROW_ADDRESS,
+          abi: jobEscrowAbi,
+          functionName: 'jobCount',
+        })
 
-      const count = Number(jobCount)
-      const list: Job[] = []
-      for (let i = 0; i < count; i++) {
-        const item = await getJobDetails(i)
-        if (item) {
-          list.push(item)
+        const count = Number(jobCount)
+        for (let i = 0; i < count; i++) {
+          const item = await getJobDetails(i)
+          if (item) {
+            list.push(item)
+          }
         }
+      } catch (err: any) {
+        console.error('Error fetching all jobs from chain:', err)
       }
-      return list
-    } catch (err: any) {
-      console.error('Error fetching all jobs:', err)
-      return []
     }
+
+    // Blend/Append database seed/sample jobs
+    try {
+      const res = await fetch('/api/jobs')
+      if (res.ok) {
+        const json = await res.json()
+        const dbJobs = json.data || []
+        
+        dbJobs.forEach((dj: any) => {
+          // Avoid duplicate IDs if the DB has on-chain jobs indexed
+          const numericId = parseInt(dj.id.replace(/[^\d]/g, '')) || Math.floor(Math.random() * 10000)
+          if (!list.some(j => j.id === numericId)) {
+            let statusVal = 0
+            if (dj.status === 'COMPLETED' || dj.status === 'SUCCESS') statusVal = 3
+            else if (dj.status === 'IN_PROGRESS') statusVal = 1
+            else if (dj.status === 'REJECTED') statusVal = 4
+            else if (dj.status === 'PENDING') statusVal = 0
+
+            list.push({
+              id: numericId,
+              client: dj.wallet_address || '0x7a304A671e21b79528659dC0D775e53FE233b2B0',
+              provider: dj.metadata?.agentId || 'agent-deepseek-coder',
+              evaluator: '0x0c200b495d3EF602151caa364e071Bd71829978B',
+              description: dj.metadata?.title || 'Autonomous Agent Task Execution',
+              budget: dj.amount.toString(),
+              expiredAt: dj.timestamp + 86400 * 5,
+              status: statusVal,
+              hook: '0x0000000000000000000000000000000000000000',
+              deliverable: dj.metadata?.resultSummary || 'Running task execution models...',
+              disputed: false,
+              isSample: true
+            } as any)
+          }
+        })
+      }
+    } catch (e) {
+      console.warn('Failed to fetch fallback jobs from DB API:', e)
+    }
+
+    // Sort list: on-chain first, then by ID desc
+    list.sort((a, b) => {
+      const aIsSample = (a as any).isSample ? 1 : 0
+      const bIsSample = (b as any).isSample ? 1 : 0
+      if (aIsSample !== bIsSample) {
+        return aIsSample - bIsSample // On-chain first
+      }
+      return b.id - a.id
+    })
+
+    return list
   }, [publicClient, getJobDetails])
 
   const createJob = useCallback(async (
@@ -124,7 +173,10 @@ export function useJobEscrow({ isConnected, address, walletClient, publicClient,
 
       const hash = await walletClient.writeContract(request)
       addActivity('Transaction Broadcasted', 'Waiting for job creation to confirm...', 'refresh', 'info')
-      await publicClient.waitForTransactionReceipt({ hash })
+      const receipt = await publicClient.waitForTransactionReceipt({ hash })
+      if (receipt.status === 'reverted') {
+        throw new Error("Job creation reverted on-chain")
+      }
 
       addActivity('Job Posted Successfully', 'Your job has been indexed on-chain.', 'party', 'success')
       return hash
@@ -159,7 +211,10 @@ export function useJobEscrow({ isConnected, address, walletClient, publicClient,
 
       const hash = await walletClient.writeContract(request)
       addActivity('Pricing Sent', 'Waiting for pricing to confirm...', 'refresh', 'info')
-      await publicClient.waitForTransactionReceipt({ hash })
+      const receipt = await publicClient.waitForTransactionReceipt({ hash })
+      if (receipt.status === 'reverted') {
+        throw new Error("Setting budget reverted on-chain")
+      }
 
       addActivity('Budget Defined', `Job budget locked at ${budgetAmount} USDC.`, 'party', 'success')
       return hash
@@ -206,7 +261,10 @@ export function useJobEscrow({ isConnected, address, walletClient, publicClient,
       })
 
       const approveHash = await walletClient.writeContract(approveReq)
-      await publicClient.waitForTransactionReceipt({ hash: approveHash })
+      const approveReceipt = await publicClient.waitForTransactionReceipt({ hash: approveHash })
+      if (approveReceipt.status === 'reverted') {
+        throw new Error("Approval transaction reverted on-chain")
+      }
       addActivity('Allowance Approved', 'Sending USDC into escrow...', 'refresh', 'info')
 
       // 2. Fund escrow
@@ -219,7 +277,10 @@ export function useJobEscrow({ isConnected, address, walletClient, publicClient,
       })
 
       const fundHash = await walletClient.writeContract(fundReq)
-      await publicClient.waitForTransactionReceipt({ hash: fundHash })
+      const fundReceipt = await publicClient.waitForTransactionReceipt({ hash: fundHash })
+      if (fundReceipt.status === 'reverted') {
+        throw new Error("Escrow funding transaction reverted on-chain")
+      }
 
       addActivity('Job Escrow Funded', `${budgetAmount} USDC deposited in contract escrow.`, 'party', 'success')
       return fundHash
@@ -254,7 +315,10 @@ export function useJobEscrow({ isConnected, address, walletClient, publicClient,
 
       const hash = await walletClient.writeContract(request)
       addActivity('Submission Sent', 'Waiting for on-chain delivery confirmation...', 'refresh', 'info')
-      await publicClient.waitForTransactionReceipt({ hash })
+      const receipt = await publicClient.waitForTransactionReceipt({ hash })
+      if (receipt.status === 'reverted') {
+        throw new Error("Deliverable submission reverted on-chain")
+      }
 
       addActivity('Deliverable Submitted', 'Work proof locked in contract. Undergoing review.', 'party', 'success')
       return hash
@@ -289,7 +353,10 @@ export function useJobEscrow({ isConnected, address, walletClient, publicClient,
 
       const hash = await walletClient.writeContract(request)
       addActivity('Payment Released', 'Confirming USDC settlement...', 'refresh', 'info')
-      await publicClient.waitForTransactionReceipt({ hash })
+      const receipt = await publicClient.waitForTransactionReceipt({ hash })
+      if (receipt.status === 'reverted') {
+        throw new Error("Job completion reverted on-chain")
+      }
 
       addActivity('Job Settlement Complete', 'USDC released from escrow to the worker agent.', 'party', 'success')
       return hash
@@ -324,7 +391,10 @@ export function useJobEscrow({ isConnected, address, walletClient, publicClient,
 
       const hash = await walletClient.writeContract(request)
       addActivity('Rejection Sent', 'Refunding USDC to client...', 'refresh', 'info')
-      await publicClient.waitForTransactionReceipt({ hash })
+      const receipt = await publicClient.waitForTransactionReceipt({ hash })
+      if (receipt.status === 'reverted') {
+        throw new Error("Job rejection reverted on-chain")
+      }
 
       addActivity('Job Cancelled', 'Job rejected. Funds refunded to client escrow.', 'shield', 'warning')
       return hash
@@ -358,7 +428,10 @@ export function useJobEscrow({ isConnected, address, walletClient, publicClient,
 
       const hash = await walletClient.writeContract(request)
       addActivity('Dispute Registered', 'Waiting for dispute registration...', 'refresh', 'info')
-      await publicClient.waitForTransactionReceipt({ hash })
+      const receipt = await publicClient.waitForTransactionReceipt({ hash })
+      if (receipt.status === 'reverted') {
+        throw new Error("Opening dispute reverted on-chain")
+      }
 
       addActivity('Job Disputed', 'On-chain dispute opened. Awaiting admin resolution.', 'warning', 'warning')
       return hash
@@ -392,7 +465,10 @@ export function useJobEscrow({ isConnected, address, walletClient, publicClient,
 
       const hash = await walletClient.writeContract(request)
       addActivity('Resolution broadcasting', 'Finalizing dispute decision...', 'refresh', 'info')
-      await publicClient.waitForTransactionReceipt({ hash })
+      const receipt = await publicClient.waitForTransactionReceipt({ hash })
+      if (receipt.status === 'reverted') {
+        throw new Error("Dispute resolution reverted on-chain")
+      }
 
       addActivity('Dispute Settled', `Dispute resolved. Funds routed accordingly.`, 'balance', 'success')
       return hash

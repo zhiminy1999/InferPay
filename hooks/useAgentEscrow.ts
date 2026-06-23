@@ -59,8 +59,8 @@ export function useAgentEscrow({
   const [ephemeralGasBal, setEphemeralGasBal] = useState<string>('0.00')
 
   // Helper to fetch ephemeral balances
-  const updateEphemeralBalances = async (ephemeralAddress: `0x${string}`) => {
-    if (!publicClient) return
+  const updateEphemeralBalances = async (ephemeralAddress: `0x${string}`): Promise<string | null> => {
+    if (!publicClient) return null
     try {
       // 1. ERC20 USDC balance (6 decimals)
       const usdcBal = await publicClient.readContract({
@@ -83,8 +83,30 @@ export function useAgentEscrow({
       // 3. Native gas balance (18 decimals)
       const gasBal = await publicClient.getBalance({ address: ephemeralAddress })
       setEphemeralGasBal(Number(formatUnits(gasBal, 18)).toFixed(4))
+
+      // 4. On-chain session policy check
+      const policy = await publicClient.readContract({
+        address: AGENT_ESCROW_ADDRESS,
+        abi: agentEscrowAbi,
+        functionName: 'activePolicies',
+        args: [ephemeralAddress]
+      }) as any
+
+      if (policy && policy[0] !== '0x0000000000000000000000000000000000000000') {
+        const expiration = Number(policy[5])
+        const isSwept = policy[7]
+        const currentBlockTime = Math.floor(Date.now() / 1000)
+
+        if (isSwept) {
+          return 'SWEPT'
+        } else if (currentBlockTime > expiration) {
+          return 'EXPIRED'
+        }
+      }
+      return 'ACTIVE'
     } catch (err) {
-      console.error("Failed to read ephemeral balances:", err)
+      console.error("Failed to read ephemeral balances and policy:", err)
+      return null
     }
   }
 
@@ -122,7 +144,10 @@ export function useAgentEscrow({
         chain: null
       })
       setTxHash(approveTx)
-      await publicClient.waitForTransactionReceipt({ hash: approveTx })
+      const approveReceipt = await publicClient.waitForTransactionReceipt({ hash: approveTx })
+      if (approveReceipt.status === 'reverted') {
+        throw new Error(`ERC20 Approve transaction reverted on-chain for ${currency}`)
+      }
       addActivity('Allowance Approved', `${currency} spend allowance verified.`, 'party', 'success')
 
       // 2. Fund Ephemeral Wallet with gas
@@ -135,7 +160,10 @@ export function useAgentEscrow({
         chain: null
       })
       setTxHash(fundTx)
-      await publicClient.waitForTransactionReceipt({ hash: fundTx })
+      const fundReceipt = await publicClient.waitForTransactionReceipt({ hash: fundTx })
+      if (fundReceipt.status === 'reverted') {
+        throw new Error("Gas Funding transaction reverted on-chain")
+      }
       addActivity('Gas Funded', 'Gas tokens received by ephemeral wallet.', 'lightning', 'success')
 
       // 3. Collect Whitelist addresses
@@ -157,7 +185,10 @@ export function useAgentEscrow({
         chain: null
       })
       setTxHash(createTx)
-      await publicClient.waitForTransactionReceipt({ hash: createTx })
+      const createReceipt = await publicClient.waitForTransactionReceipt({ hash: createTx })
+      if (createReceipt.status === 'reverted') {
+        throw new Error("Session creation transaction reverted on-chain (likely insufficient token balance)")
+      }
 
       setTxStatus('success')
       addActivity('Session Active', `AI budget policy (${currency}) enforced on Arc Testnet.`, 'shield', 'success')
@@ -239,7 +270,10 @@ export function useAgentEscrow({
         chain: arcTestnet
       })
       setTxHash(tx)
-      await publicClient.waitForTransactionReceipt({ hash: tx })
+      const spendReceipt = await publicClient.waitForTransactionReceipt({ hash: tx })
+      if (spendReceipt.status === 'reverted') {
+        throw new Error("Spend execution reverted on-chain (likely session expired, overspent, or target not whitelisted)")
+      }
 
       setTxStatus('success')
       addActivity('Spend successful', `Purchased service from ${serviceKey} for $${amountUsd} USDC.`, 'party', 'success')
@@ -284,7 +318,10 @@ export function useAgentEscrow({
         chain: null
       })
       setTxHash(tx)
-      await publicClient.waitForTransactionReceipt({ hash: tx })
+      const sweepReceipt = await publicClient.waitForTransactionReceipt({ hash: tx })
+      if (sweepReceipt.status === 'reverted') {
+        throw new Error("Sweep session reverted on-chain")
+      }
 
       setTxStatus('success')
       addActivity('Sweep successful', 'All unspent funds returned to your account.', 'shield', 'success')

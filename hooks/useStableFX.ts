@@ -150,7 +150,10 @@ export function useStableFX({
       addActivity('Deposited', `Deposit transaction pending: ${transferHash.slice(0, 10)}...`, 'refresh', 'info')
       
       // Wait for deposit transaction
-      await publicClient.waitForTransactionReceipt({ hash: transferHash })
+      const receipt = await publicClient.waitForTransactionReceipt({ hash: transferHash })
+      if (receipt.status === 'reverted') {
+        throw new Error('Swap deposit transaction reverted on-chain.')
+      }
 
       addActivity('Settling FX Swap', 'Verifying deposit & releasing counterparty stablecoins...', 'lightning', 'info')
 

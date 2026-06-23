@@ -151,9 +151,13 @@ export function useBridge() {
   }, [address])
 
   useEffect(() => {
-    if (isConnected && address) {
-      refreshBalances()
-    }
+    if (!isConnected || !address) return
+
+    refreshBalances()
+
+    const interval = setInterval(refreshBalances, 4000)
+
+    return () => clearInterval(interval)
   }, [isConnected, address, refreshBalances])
 
   // Executes a single on-chain CCTP Bridge step
@@ -275,7 +279,10 @@ export function useBridge() {
         setTxHashes((prev) => ({ ...prev, approve: approveTx }))
         
         // Wait for approval confirmation
-        await sourcePublicClient.waitForTransactionReceipt({ hash: approveTx })
+        const receipt = await sourcePublicClient.waitForTransactionReceipt({ hash: approveTx })
+        if (receipt.status === 'reverted') {
+          throw new Error('USDC Approval transaction reverted on-chain.')
+        }
         return true
       }
 
@@ -326,6 +333,9 @@ export function useBridge() {
 
         setTxHashes((prev) => ({ ...prev, burn: burnTx }))
         const receipt = await sourcePublicClient.waitForTransactionReceipt({ hash: burnTx })
+        if (receipt.status === 'reverted') {
+          throw new Error('CCTP Burn transaction reverted on-chain.')
+        }
 
         // Extract message bytes from receipt logs using decodeEventLog
         let messageHex: string | null = null
@@ -479,7 +489,10 @@ export function useBridge() {
         })
 
         setTxHashes((prev) => ({ ...prev, mint: mintTx }))
-        await destPublicClient.waitForTransactionReceipt({ hash: mintTx })
+        const receipt = await destPublicClient.waitForTransactionReceipt({ hash: mintTx })
+        if (receipt.status === 'reverted') {
+          throw new Error('CCTP Mint transaction reverted on-chain.')
+        }
 
         // Cleanup
         localStorage.removeItem(`cctp_message_${address.toLowerCase()}`)

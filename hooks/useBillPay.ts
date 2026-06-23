@@ -71,8 +71,10 @@ export function useBillPay({
         account: address,
         chain: null
       })
-      setTxHashes([vendorHash])
-      await publicClient.waitForTransactionReceipt({ hash: vendorHash })
+      const vendorReceipt = await publicClient.waitForTransactionReceipt({ hash: vendorHash })
+      if (vendorReceipt.status === 'reverted') {
+        throw new Error("Vendor transfer transaction reverted on-chain")
+      }
 
       addActivity('Reserve Allocation', `Sending 10% (${(amountUsd * 0.1).toFixed(2)} ${currency}) to company reserve account...`, 'bank', 'info')
       // 2. Transfer to Reserve
@@ -85,7 +87,10 @@ export function useBillPay({
         chain: null
       })
       setTxHashes([vendorHash, reserveHash])
-      await publicClient.waitForTransactionReceipt({ hash: reserveHash })
+      const reserveReceipt = await publicClient.waitForTransactionReceipt({ hash: reserveHash })
+      if (reserveReceipt.status === 'reverted') {
+        throw new Error("Reserve allocation transaction reverted on-chain")
+      }
 
       setTxStatus('success')
       addActivity('Split Payment Settled', `Both transactions confirmed. Vendor paid and 10% reserve allocated in ${currency}.`, 'party', 'success')
@@ -169,7 +174,10 @@ export function useBillPay({
         chain: null
       })
       setTxHashes([approveHash])
-      await publicClient.waitForTransactionReceipt({ hash: approveHash })
+      const approveReceipt = await publicClient.waitForTransactionReceipt({ hash: approveHash })
+      if (approveReceipt.status === 'reverted') {
+        throw new Error("Escrow approval transaction reverted on-chain")
+      }
 
       addActivity('Registering Job', `Submitting inference job #${nextId} for model ${modelId} on-chain...`, 'computer', 'info')
       // 2. Request Inference
@@ -182,7 +190,10 @@ export function useBillPay({
         chain: null
       })
       setTxHashes([approveHash, requestHash])
-      await publicClient.waitForTransactionReceipt({ hash: requestHash })
+      const requestReceipt = await publicClient.waitForTransactionReceipt({ hash: requestHash })
+      if (requestReceipt.status === 'reverted') {
+        throw new Error("Inference request transaction reverted on-chain")
+      }
 
       setTxStatus('success')
       addActivity('Inference job created', `Escrow deposit complete. Job #${nextId} active.`, 'party', 'success')
