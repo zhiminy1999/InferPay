@@ -150,7 +150,14 @@ export function JobDetail({
           <span style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-light)' }}>
             ERC-8183 Job ID #{job.id}
           </span>
-          <h4 style={{ margin: '4px 0 0 0', fontSize: '18px', fontWeight: 800 }}>On-Chain Job Ledger</h4>
+          <h4 style={{ margin: '4px 0 0 0', fontSize: '18px', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px' }}>
+            On-Chain Job Ledger
+            {(job as any).isSample && (
+              <span className="badge-brutalist yellow" style={{ fontSize: '10px', fontWeight: 800, padding: '2px 6px', border: '1px solid var(--border)' }}>
+                Simulated
+              </span>
+            )}
+          </h4>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 12px', border: '1px solid var(--border)', background: 'var(--bg-inner)', fontWeight: 650, fontSize: '13px', borderRadius: 'var(--radius-sm)' }}>
           {statusInfo.icon}

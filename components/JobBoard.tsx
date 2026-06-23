@@ -260,6 +260,11 @@ export function JobBoard({
                           }}>
                             {job.status === 0 ? 'OPEN' : job.status === 1 ? 'FUNDED' : job.status === 2 ? 'SUBMITTED' : job.status === 3 ? 'COMPLETED' : 'REJECTED'}
                           </span>
+                          {(job as any).isSample && (
+                            <span className="badge-brutalist yellow" style={{ fontSize: '9px', fontWeight: 800, padding: '2px 4px', border: '1px solid var(--border)' }}>
+                              Simulated
+                            </span>
+                          )}
                           {job.disputed && (
                             <span style={{ fontSize: '9px', fontWeight: 850, backgroundColor: 'var(--accent-red)', color: 'white', padding: '1px 4px', border: '1px solid var(--text)' }}>
                               DISPUTED

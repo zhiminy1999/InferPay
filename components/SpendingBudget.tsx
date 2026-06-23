@@ -64,8 +64,19 @@ export function SpendingBudget({
   // Synchronize balances if connected and session is active
   useEffect(() => {
     if (isConnected && piggyBankStatus === 'ACTIVE' && piggyBankAddress) {
-      const interval = setInterval(() => {
-        updateEphemeralBalances(piggyBankAddress as `0x${string}`)
+      const interval = setInterval(async () => {
+        const status = await updateEphemeralBalances(piggyBankAddress as `0x${string}`)
+        if (status === 'SWEPT') {
+          setPiggyBankStatus('SWEPT')
+          setEphemeralPrivateKey('')
+          setShowPrivateKey(false)
+          addActivity('Session Swept', 'The AI spending session was swept on-chain.', 'shield', 'info')
+        } else if (status === 'EXPIRED') {
+          setPiggyBankStatus('SWEPT')
+          setEphemeralPrivateKey('')
+          setShowPrivateKey(false)
+          addActivity('Session Expired', 'The AI spending session has expired on-chain. Please create a new budget.', 'warning', 'warning')
+        }
       }, 5000)
       return () => clearInterval(interval)
     }

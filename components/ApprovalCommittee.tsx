@@ -129,7 +129,10 @@ export function ApprovalCommittee({
         account: address as `0x${string}`,
         chain: null
       })
-      await publicClient.waitForTransactionReceipt({ hash: hash0 })
+      const receipt0 = await publicClient.waitForTransactionReceipt({ hash: hash0 })
+      if (receipt0.status === 'reverted') {
+        throw new Error('Proposer agent registration transaction reverted.')
+      }
 
       // 2. Register Compliance (Agent 1)
       const acc1 = privateKeyToAccount(AGENT_1_KEY)
@@ -152,7 +155,10 @@ export function ApprovalCommittee({
         ],
         chain: arcTestnet
       })
-      await publicClient.waitForTransactionReceipt({ hash: hash1 })
+      const receipt1 = await publicClient.waitForTransactionReceipt({ hash: hash1 })
+      if (receipt1.status === 'reverted') {
+        throw new Error('Safety agent registration transaction reverted.')
+      }
 
       // 3. Register Auditor (Agent 2)
       const acc2 = privateKeyToAccount(AGENT_2_KEY)
@@ -175,7 +181,10 @@ export function ApprovalCommittee({
         ],
         chain: arcTestnet
       })
-      await publicClient.waitForTransactionReceipt({ hash: hash2 })
+      const receipt2 = await publicClient.waitForTransactionReceipt({ hash: hash2 })
+      if (receipt2.status === 'reverted') {
+        throw new Error('Budget agent registration transaction reverted.')
+      }
 
       addActivity('Identities created', 'All 3 committee agents verified under ERC-8004.', 'party', 'success')
       await checkAgentRegistrations()

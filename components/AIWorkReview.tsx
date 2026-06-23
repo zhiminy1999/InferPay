@@ -191,7 +191,10 @@ export function AIWorkReview({
         })
 
         addActivity('Transaction Submitted', `Transaction hash: ${hash.slice(0, 10)}... Waiting for confirmation.`, 'chain', 'info')
-        await publicClient.waitForTransactionReceipt({ hash })
+        const receipt = await publicClient.waitForTransactionReceipt({ hash })
+        if (receipt.status === 'reverted') {
+          throw new Error('Payroll payment transaction reverted on-chain.')
+        }
 
         setInvoices(prev => prev.map(inv => inv.id === selectedInvoiceId ? { ...inv, status: 'PAID' } : inv))
         addActivity('Report verified', 'This work report has been confirmed as authentic and untampered.', 'shield', 'success')
