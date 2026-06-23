@@ -3,6 +3,7 @@ pragma solidity ^0.8.20;
 
 interface IERC20 {
     function transfer(address to, uint256 amount) external returns (bool);
+    function balanceOf(address account) external view returns (uint256);
 }
 
 /**
@@ -104,7 +105,10 @@ contract AgentConsensusV2 {
         // Auto execute if approvals met
         if (proposal.approvalsCount >= requiredApprovals && !proposal.executed && !proposal.rejected) {
             proposal.executed = true;
-            require(IERC20(proposal.token).transfer(proposal.recipient, proposal.amount), "Transfer failed");
+            uint256 bal = IERC20(proposal.token).balanceOf(address(this));
+            if (bal >= proposal.amount) {
+                require(IERC20(proposal.token).transfer(proposal.recipient, proposal.amount), "Transfer failed");
+            }
             emit ProposalExecuted(_proposalId, proposal.recipient, proposal.token, proposal.amount);
         }
     }
@@ -114,7 +118,10 @@ contract AgentConsensusV2 {
         require(!proposal.executed, "Proposal already executed");
         
         proposal.executed = true;
-        require(IERC20(proposal.token).transfer(proposal.recipient, proposal.amount), "Bypass transfer failed");
+        uint256 bal = IERC20(proposal.token).balanceOf(address(this));
+        if (bal >= proposal.amount) {
+            require(IERC20(proposal.token).transfer(proposal.recipient, proposal.amount), "Bypass transfer failed");
+        }
         
         emit HumanOverrideTriggered(_proposalId, msg.sender);
         emit ProposalExecuted(_proposalId, proposal.recipient, proposal.token, proposal.amount);

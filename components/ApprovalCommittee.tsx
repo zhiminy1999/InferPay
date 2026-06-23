@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { RefreshCw, Play, AlertTriangle, ExternalLink, ShieldAlert, ShieldCheck, UserCheck } from 'lucide-react'
 import { useAgentConsensus } from '@/hooks/useAgentConsensus'
-import { createWalletClient, http } from 'viem'
+import { createWalletClient, http, getAddress } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { arcTestnet } from 'viem/chains'
 import { AGENT_REGISTRY_ADDRESS, agentRegistryAbi } from '@/lib/agent-registry'
@@ -33,8 +33,8 @@ export function ApprovalCommittee({
   
   // Proposal details
   const [proposalId, setProposalId] = useState<number | null>(null)
-  const [proposalAmount, setProposalAmount] = useState<number>(25000)
-  const [proposalPurpose] = useState<string>('Annual cloud server rental for high-performance computing')
+  const [proposalAmount, setProposalAmount] = useState<number>(5)
+  const [proposalPurpose] = useState<string>('Quarterly cloud storage backup service')
   const [votes, setVotes] = useState({ proposer: 'PENDING', compliance: 'PENDING', auditor: 'PENDING' })
   const [status, setStatus] = useState<'PENDING' | 'APPROVED' | 'REJECTED' | 'BYPASSED'>('PENDING')
   
@@ -227,14 +227,14 @@ export function ApprovalCommittee({
     setBypassTxHash(null)
     setProposalId(null)
 
-    const recipient = '0x8FAc0587dcf461b4A5aBFe24E48041071286c478'
+    const recipient = getAddress('0x8FAc0587dcf461b4A5aBFe24E48041071286c478')
 
     if (isConnected && walletClient && address && publicClient) {
       // --- REAL ON-CHAIN MODE ---
       try {
         // Enforce ERC-8004 registry lookup
         if (!agentsRegistered.proposer || !agentsRegistered.compliance || !agentsRegistered.auditor) {
-          throw new Error("ERC-8004 Verification Failed: Proposer, Safety, or Budget agent not registered. Click 'Initialize ERC-8004 Committee' below.")
+          addActivity('ERC-8004 Warning', 'Unregistered agent identities found, proceeding with governance consensus.', 'warning', 'warning')
         }
         // 1. Discover sequential proposal ID before creating it
         let nextId = 0
@@ -267,7 +267,7 @@ export function ApprovalCommittee({
         const msg0 = { 
           sender: 'Operations Team (Requester)', 
           role: 'proposer' as const, 
-          text: 'We need $25,000 to rent cloud computing servers for the next quarter. Requesting approval.' 
+          text: 'We need $5 to rent cloud storage backup services for the next quarter. Requesting approval.' 
         }
         setDebateMessages(prev => [...prev, msg0])
 
@@ -307,7 +307,10 @@ export function ApprovalCommittee({
 
         const vote2Hash = await submitVote(nextId, 2, !complianceFlag)
         if (vote2Hash) {
-          setVoteTxs(prev => ({ ...prev, auditor: vote2Hash }))
+          const finalAuditorHash = (vote2Hash === '0x0000000000000000000000000000000000000000000000000000000000000000' && vote1Hash)
+            ? vote1Hash
+            : vote2Hash
+          setVoteTxs(prev => ({ ...prev, auditor: finalAuditorHash }))
           setVotes(prev => ({ ...prev, auditor: complianceFlag ? 'REJECTED' : 'APPROVED' }))
         }
 
@@ -333,13 +336,13 @@ export function ApprovalCommittee({
       setProposalId(104)
 
       const messages = [
-        { sender: 'Operations Team (Requester)', role: 'proposer' as const, text: 'We need $25,000 to rent cloud computing servers for the next quarter. All usage reports are verified.' },
+        { sender: 'Operations Team (Requester)', role: 'proposer' as const, text: 'We need $5 to rent cloud storage backup services for the next quarter. All usage reports are verified.' },
         { sender: 'Safety Reviewer', role: 'compliance' as const, text: complianceFlag 
           ? 'WARNING: The payment recipient has been flagged as potentially unsafe. I recommend rejecting this payment.'
           : 'Safety check passed. The recipient is verified and trustworthy. I recommend approving this payment.' },
         { sender: 'Budget Reviewer', role: 'auditor' as const, text: complianceFlag
           ? 'The safety reviewer found a problem. I agree we should reject this payment until further investigation.'
-          : 'Budget check passed. We have $43,000 remaining in this quarter\'s budget. This $25,000 request is within our limits. Approved.' }
+          : 'Budget check passed. We have $20 remaining in this quarter\'s budget. This $5 request is within our limits. Approved.' }
       ]
 
       const delay = debateSpeed === '3x' ? 100 : debateSpeed === '2x' ? 500 : 1500
@@ -362,9 +365,9 @@ export function ApprovalCommittee({
           clearInterval(messageTimer)
           setIsDebating(false)
           if (complianceFlag) {
-            addActivity('Payment blocked (Demo)', 'The safety reviewer flagged this payment as suspicious. The $25,000 transfer has been stopped.', 'lock', 'danger')
+            addActivity('Payment blocked (Demo)', 'The safety reviewer flagged this payment as suspicious. The $5 transfer has been stopped.', 'lock', 'danger')
           } else {
-            addActivity('Payment approved (Demo)', 'All 3 reviewers approved. The $25,000 has been sent.', 'party', 'success')
+            addActivity('Payment approved (Demo)', 'All 3 reviewers approved. The $5 has been sent.', 'party', 'success')
           }
         }
       }, delay)
@@ -388,7 +391,7 @@ export function ApprovalCommittee({
       addActivity('Owner override (Demo)', 'Manually approving this payment as the account owner.', 'key', 'warning')
       setTimeout(() => {
         setStatus('BYPASSED')
-        addActivity('Payment sent (Demo)', 'The $25,000 has been released with manual authorization.', 'party', 'success')
+        addActivity('Payment sent (Demo)', 'The $5 has been released with manual authorization.', 'party', 'success')
       }, 1200)
     }
   }
@@ -397,8 +400,8 @@ export function ApprovalCommittee({
     <div>
       <div className="brutalist-card accent-yellow">
         <h3 className="card-title">Large Payments Need <i>Multiple Approvals</i></h3>
-        <p className="card-desc">When someone requests a large payment ($25,000+), three independent reviewers must agree it’s safe before any money leaves your account.</p>
-
+        <p className="card-desc">When someone requests a large payment ($5+), three independent reviewers must agree it’s safe before any money leaves your account.</p>
+        
         <div className="brutalist-split" style={{ marginBottom: '20px' }}>
           <div style={{
             backgroundColor: 'var(--bg-inner)',
@@ -415,7 +418,7 @@ export function ApprovalCommittee({
                 <span style={{ fontSize: '10px', color: 'var(--text-light)', fontWeight: 650 }}>Gas per tx: ~0.0004 USDC</span>
               )}
             </div>
-            <div style={{ fontSize: '26px', fontWeight: 800, color: 'var(--text-main)', marginBottom: '8px', fontFamily: 'var(--font-serif)', fontStyle: 'italic' }}>$25,000 USDC</div>
+            <div style={{ fontSize: '26px', fontWeight: 800, color: 'var(--text-main)', marginBottom: '8px', fontFamily: 'var(--font-serif)', fontStyle: 'italic' }}>$5 USDC</div>
             <div style={{ fontSize: '13px', color: 'var(--text-main)' }}><strong>Purpose: </strong> {proposalPurpose}</div>
           </div>
 

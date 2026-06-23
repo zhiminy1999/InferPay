@@ -1,6 +1,6 @@
-export const AGENT_ESCROW_V2_ADDRESS = "0x6ac15aadcd3b3c80db04a9cf9b92f3f6967af9cd" as const;
-export const AGENT_CONSENSUS_V2_ADDRESS = "0x271aaa0ae0f1dfa5b0e65cb6b15a9b366637b36a" as const;
-export const INFERPAY_ESCROW_V2_ADDRESS = "0x8f09bacf3e423b8e9a4158c01c08d4b1b45d5401" as const;
+export const AGENT_ESCROW_V2_ADDRESS = "0x8c361edbc27b5e8dc07da5f76abd5e38eb792f67" as const;
+export const AGENT_CONSENSUS_V2_ADDRESS = "0x5f2f188f5aedfcf272ef391b87569da013472090" as const;
+export const INFERPAY_ESCROW_V2_ADDRESS = "0x17ef5df9be3413a095da423ef97598179d130f6e" as const;
 
 export const agentEscrowV2Abi = [
   {
