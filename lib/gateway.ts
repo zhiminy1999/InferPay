@@ -149,6 +149,7 @@ export class GatewayClient {
 
     // Step 1: Approve InferPayEscrowV2 to spend user's USDC
     const approveHash = await this.walletClient.writeContract({
+      account: this.userAddress,
       address: USDC_ADDRESS_ARC,
       abi: erc20Abi,
       functionName: 'approve',
@@ -160,6 +161,7 @@ export class GatewayClient {
     let depositHash: string
     try {
       depositHash = await this.walletClient.writeContract({
+        account: this.userAddress,
         address: INFERPAY_ESCROW_V2_ADDRESS,
         abi: inferPayEscrowV2Abi,
         functionName: 'deposit',
@@ -169,6 +171,7 @@ export class GatewayClient {
       // Fallback: Transfer USDC directly to escrow contract address
       console.warn('Escrow deposit() not available, using direct transfer:', e)
       depositHash = await this.walletClient.writeContract({
+        account: this.userAddress,
         address: USDC_ADDRESS_ARC,
         abi: erc20Abi,
         functionName: 'transfer',
@@ -201,6 +204,7 @@ export class GatewayClient {
     let withdrawHash: string
     try {
       withdrawHash = await this.walletClient.writeContract({
+        account: this.userAddress,
         address: INFERPAY_ESCROW_V2_ADDRESS,
         abi: inferPayEscrowV2Abi,
         functionName: 'withdraw',

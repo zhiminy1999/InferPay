@@ -56,16 +56,16 @@ const SEED_SERVICES = [
     })
   }
 ]
-
 function ensureSeedData() {
   try {
-    const existing = db.prepare('SELECT COUNT(*) as count FROM services').get() as { count: number }
-    if (!existing || existing.count === 0) {
-      const stmt = db.prepare(`
-        INSERT INTO services (id, name, capability, pricing, reputation, wallet_address, metadata)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-      `)
-      for (const service of SEED_SERVICES) {
+    const list = db.prepare('SELECT * FROM services').all() as any[]
+    for (const service of SEED_SERVICES) {
+      const found = list.find((s: any) => s.id === service.id)
+      if (!found) {
+        const stmt = db.prepare(`
+          INSERT INTO services (id, name, capability, pricing, reputation, wallet_address, metadata)
+          VALUES (?, ?, ?, ?, ?, ?, ?)
+        `)
         stmt.run(
           service.id,
           service.name,
@@ -78,29 +78,7 @@ function ensureSeedData() {
       }
     }
   } catch (err) {
-    // If running in FallbackDB, prepare().get() or getCount might fail or need direct list access
-    try {
-      const list = db.prepare('SELECT * FROM services').all()
-      if (list.length === 0) {
-        const stmt = db.prepare(`
-          INSERT INTO services (id, name, capability, pricing, reputation, wallet_address, metadata)
-          VALUES (?, ?, ?, ?, ?, ?, ?)
-        `)
-        for (const service of SEED_SERVICES) {
-          stmt.run(
-            service.id,
-            service.name,
-            service.capability,
-            service.pricing,
-            service.reputation,
-            service.wallet_address,
-            service.metadata
-          )
-        }
-      }
-    } catch (innerErr) {
-      console.warn('Could not seed services database:', innerErr)
-    }
+    console.warn('Could not seed services database:', err)
   }
 }
 

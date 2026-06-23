@@ -219,11 +219,6 @@ export const TransactionHistory: React.FC = () => {
                       <span className={getBadgeClass(tx.type)}>
                         {tx.type}
                       </span>
-                      {tx.metadata?.isSample && (
-                        <span className="badge-brutalist yellow" style={{ fontSize: '8px', padding: '1px 3px', border: '1px solid var(--border)', width: 'fit-content' }}>
-                          Simulated
-                        </span>
-                      )}
                     </div>
                   </td>
                   <td style={{ fontWeight: 700, color: 'var(--text-main)' }}>
@@ -317,11 +312,6 @@ export const TransactionHistory: React.FC = () => {
             <div className="modal-header">
               <h3 className="modal-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 Inspect Transaction <i>#{selectedTx.id.slice(0, 8)}</i>
-                {selectedTx.metadata?.isSample && (
-                  <span className="badge-brutalist yellow" style={{ fontSize: '9px', fontWeight: 800, padding: '2px 6px', border: '1px solid var(--border)' }}>
-                    Simulated
-                  </span>
-                )}
               </h3>
               <button className="modal-close-btn" onClick={() => setSelectedTx(null)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <X size={16} />

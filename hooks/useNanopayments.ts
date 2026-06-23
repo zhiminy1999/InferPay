@@ -48,6 +48,11 @@ export function useNanopayments() {
       setGatewayBalance(bals.gateway.available)
       setWalletBalance(bals.wallet.amount)
 
+      // Sync on-chain gateway balance to localStorage for the x402 simulator
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(`gateway_bal_${address.toLowerCase()}`, bals.gateway.available.toString())
+      }
+
       // Load history from database
       try {
         const paymentsRes = await fetch(`/api/payments?wallet_address=${address}`)

@@ -99,13 +99,18 @@ class FallbackDB {
           if (tableMatch) {
             const table = tableMatch[1].toLowerCase()
             const list = self.data[table]
-            if (list && args.length >= 2) {
-              const status = args[0]
-              const id = args[1]
-              const item = list.find((x: any) => x.id === id)
-              if (item) {
-                item.status = status
-                self.save()
+            if (list) {
+              const setPart = cleanSql.match(/set\s+([^where]+)/i)
+              if (setPart) {
+                const fields = setPart[1].split(',').map(f => f.split('=')[0].trim().toLowerCase())
+                const idVal = args[args.length - 1]
+                const item = list.find((x: any) => x.id === idVal)
+                if (item) {
+                  fields.forEach((field, index) => {
+                    item[field] = args[index]
+                  })
+                  self.save()
+                }
               }
             }
           }
@@ -118,9 +123,17 @@ class FallbackDB {
         if (tableMatch) {
           const table = tableMatch[1].toLowerCase()
           let list = self.data[table] || []
-          if (cleanSql.includes('where wallet_address =')) {
-            const addr = args[0]
-            list = list.filter((x: any) => x.wallet_address === addr)
+          
+          const whereMatch = cleanSql.match(/where\s+(\w+)\s*=/i)
+          if (whereMatch) {
+            const fieldName = whereMatch[1].toLowerCase()
+            const searchVal = args[0]
+            if (searchVal !== undefined) {
+              list = list.filter((x: any) => {
+                const val = x[fieldName] !== undefined ? x[fieldName] : x[whereMatch[1]]
+                return String(val).toLowerCase() === String(searchVal).toLowerCase()
+              })
+            }
           }
           return list
         }
@@ -242,9 +255,112 @@ try {
     );
   `)
   
+  
 } catch (e) {
   console.warn('Native better-sqlite3 not available, falling back to JSON persistence:', e)
   localDb = new FallbackDB()
+}
+
+// Seed initial jobs if the database is empty (works for both SQLite and FallbackDB)
+try {
+  let isJobsEmpty = false
+  if (localDb.data) {
+    if (!localDb.data.jobs || localDb.data.jobs.length === 0) {
+      isJobsEmpty = true
+    }
+  } else {
+    const jobCount = localDb.prepare('SELECT COUNT(*) as count FROM jobs').get() as any
+    if (jobCount && jobCount.count === 0) {
+      isJobsEmpty = true
+    }
+  }
+
+  if (isJobsEmpty) {
+    console.log('[Database]: Seeding initial autonomous jobs data...')
+    const seedJobsList = [
+      {
+        id: 'job-1',
+        tx_hash: '0x1c97a8ec584ef7a8de9b5ec284c78dbd71214ec969f8b544b5bec39b1ecee0fb',
+        block_number: 1042345,
+        timestamp: Math.floor(Date.now() / 1000) - 86400 * 3,
+        wallet_address: '0xDEVEL_WALLET_PLACEHOLDER',
+        amount: 2.5,
+        status: 'COMPLETED',
+        metadata: JSON.stringify({
+          title: 'Social Media Sentiment Analysis Campaign',
+          agentId: 'agent-deepseek-coder',
+          resultSummary: 'Analyzed 1,250 Twitter/X posts regarding stablecoin commerce stack. Average sentiment score: 0.76 (Highly positive). Output reports saved to IPFS.'
+        })
+      },
+      {
+        id: 'job-2',
+        tx_hash: '0x2c97a8ec584ef7a8de9b5ec284c78dbd71214ec969f8b544b5bec39b1ecee0fb',
+        block_number: 1043120,
+        timestamp: Math.floor(Date.now() / 1000) - 86400 * 2,
+        wallet_address: '0xDEVEL_WALLET_PLACEHOLDER',
+        amount: 8.0,
+        status: 'IN_PROGRESS',
+        metadata: JSON.stringify({
+          title: 'Token Yield Optimization Model',
+          agentId: 'agent-yield-maximizer',
+          resultSummary: 'Evaluating Base, Arbitrum, and Arc yields. Optimized gas-allocation strategy in progress...'
+        })
+      },
+      {
+        id: 'job-3',
+        tx_hash: '0x3c97a8ec584ef7a8de9b5ec284c78dbd71214ec969f8b544b5bec39b1ecee0fb',
+        block_number: 1043990,
+        timestamp: Math.floor(Date.now() / 1000) - 86400 * 1,
+        wallet_address: '0xDEVEL_WALLET_PLACEHOLDER',
+        amount: 12.0,
+        status: 'PENDING',
+        metadata: JSON.stringify({
+          title: 'Smart Contract Compliance Audit v3',
+          agentId: 'agent-security-auditor',
+          resultSummary: 'Awaiting escrow funding to initiate security scanning models.'
+        })
+      },
+      {
+        id: 'job-4',
+        tx_hash: '0x4c97a8ec584ef7a8de9b5ec284c78dbd71214ec969f8b544b5bec39b1ecee0fb',
+        block_number: 1044550,
+        timestamp: Math.floor(Date.now() / 1000) - 3600 * 4,
+        wallet_address: '0x08Ec3EEfC622b8a8742fC8Ab48E832c236bc360B',
+        amount: 1.5,
+        status: 'COMPLETED',
+        metadata: JSON.stringify({
+          title: 'Competitor Price Indexation Web Scraping',
+          agentId: 'agent-scraping-master',
+          resultSummary: 'Indexed 14 e-commerce merchant portals. Average USDC payment discount is 1.5% compared to credit cards.'
+        })
+      }
+    ]
+
+    if (localDb.data) {
+      localDb.data.jobs = seedJobsList
+      localDb.save()
+    } else {
+      const insertStmt = localDb.prepare(`
+        INSERT INTO jobs (id, tx_hash, block_number, timestamp, wallet_address, amount, status, metadata)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `)
+      for (const job of seedJobsList) {
+        insertStmt.run(
+          job.id,
+          job.tx_hash,
+          job.block_number,
+          job.timestamp,
+          job.wallet_address,
+          job.amount,
+          job.status,
+          job.metadata
+        )
+      }
+    }
+    console.log('[Database]: Seeded jobs successfully.')
+  }
+} catch (seedErr) {
+  console.warn('[Database]: Failed to seed jobs:', seedErr)
 }
 
 // -------------------------------------------------------------

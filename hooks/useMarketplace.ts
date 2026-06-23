@@ -165,6 +165,7 @@ export function useMarketplace() {
             tx_hash: settleRes.proof['X-402-Receipt'], // Store receipt as simulated tx hash
             metadata: {
               type: 'X402',
+              source: 'Gateway Nanopayments',
               currency: 'USDC',
               serviceId: service.id,
               serviceName: service.name,
