@@ -149,6 +149,7 @@ export const BridgeModal: React.FC<BridgeModalProps> = ({ isOpen, onClose }) => 
         <div className="modal-header">
           <div className="modal-title">
             <span className="badge-brutalist pink animate-pulse">CCTP V2</span>
+            <span className="badge-brutalist" style={{ backgroundColor: 'var(--accent-coral)', color: 'white', border: '1px solid black', padding: '2px 6px', fontSize: '10px', textTransform: 'uppercase', fontWeight: 800, marginLeft: '6px' }}>App Kit</span>
             <span>Cross-Chain <i>USDC Bridge</i></span>
           </div>
           <button onClick={onClose} className="modal-close-btn">

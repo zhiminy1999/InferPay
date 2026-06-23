@@ -21,6 +21,7 @@ export const UnifiedBalance: React.FC = () => {
         <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
           <Layers style={{ color: 'var(--accent-coral)' }} size={18} />
           <span className="brutalist-label" style={{ marginBottom: 0 }}>Your Unified Stablecoin Treasury Balance</span>
+          <span className="badge-brutalist" style={{ backgroundColor: 'var(--accent-purple)', color: 'white', border: '1px solid black', padding: '1px 5px', fontSize: '9px', textTransform: 'uppercase', fontWeight: 800, marginLeft: '6px' }}>Unified Balance SDK</span>
         </div>
         <div style={{ position: 'relative' }}>
           <button 

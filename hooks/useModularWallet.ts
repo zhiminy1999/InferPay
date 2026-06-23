@@ -1,10 +1,18 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { createWalletClient, custom, http, getAddress, keccak256, toHex } from 'viem'
+import { createWalletClient, custom, http, getAddress, keccak256, toHex, createPublicClient } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { defineChain } from 'viem'
 import { CircleModularWalletHelper, PasskeyCredential } from '@/lib/modular-wallet'
+import {
+  toCircleSmartAccount,
+  toModularTransport,
+  toPasskeyTransport,
+  toWebAuthnCredential,
+  WebAuthnMode
+} from '@circle-fin/modular-wallets-core'
+import { toWebAuthnAccount } from 'viem/account-abstraction'
 
 const arcTestnet = defineChain({
   id: 5042002,
@@ -62,15 +70,57 @@ export function useModularWallet({ addActivity }: UseModularWalletProps) {
     addActivity('Creating Passkey', `Initiating WebAuthn registration for ${user}...`, 'key', 'info')
     
     try {
-      const cred = await CircleModularWalletHelper.registerPasskey(user)
+      let cred: any
+      let derivedAddress = ''
       
+      try {
+        addActivity('Circle SDK', 'Initializing Circle Passkey Transport...', 'key', 'info')
+        const clientKey = process.env.NEXT_PUBLIC_CIRCLE_CLIENT_KEY || 'TEST_CLIENT_KEY:7313d7ebea6caf047933111f3b96e392:020a95a91b12365acedee37a8102d4b0'
+        const clientUrl = process.env.NEXT_PUBLIC_CIRCLE_CLIENT_URL || 'https://api.circle.com/v1/w3s'
+
+        const passkeyTransport = toPasskeyTransport(clientUrl, clientKey)
+        const modularTransport = toModularTransport(`${clientUrl}/arcTestnet`, clientKey)
+        
+        const publicClient = createPublicClient({
+          chain: arcTestnet,
+          transport: modularTransport,
+        })
+
+        addActivity('Circle SDK', 'Calling Circle toWebAuthnCredential...', 'key', 'info')
+        const sdkCred = await toWebAuthnCredential({
+          transport: passkeyTransport,
+          mode: WebAuthnMode.Register,
+          username: user,
+        })
+        
+        addActivity('Circle SDK', 'Deriving Smart Account via toCircleSmartAccount...', 'key', 'info')
+        const owner = toWebAuthnAccount({ credential: sdkCred as any })
+        const account = await toCircleSmartAccount({
+          client: publicClient,
+          owner: owner as any,
+          name: user,
+        })
+        
+        derivedAddress = account.address
+        const sdkCredAny = sdkCred as any
+        cred = {
+          id: sdkCredAny.id,
+          rawId: sdkCredAny.raw || sdkCredAny.rawId || sdkCredAny.id,
+          type: sdkCredAny.type || 'public-key',
+          username: user,
+          scaAddress: account.address
+        }
+        addActivity('Circle SDK', 'Circle Smart Account created successfully!', 'key', 'success')
+      } catch (sdkErr: any) {
+        console.warn('Circle Modular Wallet SDK registration failed, using local secure vault fallback:', sdkErr)
+        addActivity('Circle SDK Fallback', 'WebAuthn domain security error or cancelled. Using local secure vault fallback...', 'key', 'warning')
+        cred = await CircleModularWalletHelper.registerPasskey(user)
+        derivedAddress = cred.scaAddress
+      }
+
       // Derive deterministic key from credential ID
       const privateKey = keccak256(toHex(cred.id)) as `0x${string}`
-      const account = privateKeyToAccount(privateKey)
-      const derivedAddress = account.address
-
-      // We use the derived address as the SCA address
-      cred.scaAddress = derivedAddress
+      const accountObj = privateKeyToAccount(privateKey)
 
       setUsername(user)
       setScaAddress(derivedAddress)
@@ -78,7 +128,7 @@ export function useModularWallet({ addActivity }: UseModularWalletProps) {
       setIsModularConnected(true)
 
       const client = createWalletClient({
-        account,
+        account: accountObj,
         chain: arcTestnet,
         transport: http('https://rpc.testnet.arc.network'),
       })
@@ -134,14 +184,56 @@ export function useModularWallet({ addActivity }: UseModularWalletProps) {
         }
       }
 
-      const cred = await CircleModularWalletHelper.loginPasskey(user, savedCred?.id)
+      let cred: any
+      let derivedAddress = ''
+
+      try {
+        addActivity('Circle SDK', 'Initializing Circle Passkey Transport...', 'key', 'info')
+        const clientKey = process.env.NEXT_PUBLIC_CIRCLE_CLIENT_KEY || 'TEST_CLIENT_KEY:7313d7ebea6caf047933111f3b96e392:020a95a91b12365acedee37a8102d4b0'
+        const clientUrl = process.env.NEXT_PUBLIC_CIRCLE_CLIENT_URL || 'https://api.circle.com/v1/w3s'
+
+        const passkeyTransport = toPasskeyTransport(clientUrl, clientKey)
+        const modularTransport = toModularTransport(`${clientUrl}/arcTestnet`, clientKey)
+        
+        const publicClient = createPublicClient({
+          chain: arcTestnet,
+          transport: modularTransport,
+        })
+
+        addActivity('Circle SDK', 'Authenticating via toWebAuthnCredential...', 'key', 'info')
+        const sdkCred = await toWebAuthnCredential({
+          transport: passkeyTransport,
+          mode: WebAuthnMode.Login,
+        })
+        
+        addActivity('Circle SDK', 'Restoring Smart Account via toCircleSmartAccount...', 'key', 'info')
+        const owner = toWebAuthnAccount({ credential: sdkCred as any })
+        const account = await toCircleSmartAccount({
+          client: publicClient,
+          owner: owner as any,
+          name: user,
+        })
+        
+        derivedAddress = account.address
+        const sdkCredAny = sdkCred as any
+        cred = {
+          id: sdkCredAny.id,
+          rawId: sdkCredAny.raw || sdkCredAny.rawId || sdkCredAny.id,
+          type: sdkCredAny.type || 'public-key',
+          username: user,
+          scaAddress: account.address
+        }
+        addActivity('Circle SDK', 'Circle Modular Wallet authenticated!', 'key', 'success')
+      } catch (sdkErr: any) {
+        console.warn('Circle Modular Wallet SDK login failed, using local secure vault fallback:', sdkErr)
+        addActivity('Circle SDK Fallback', 'Using local secure vault credentials.', 'key', 'warning')
+        cred = await CircleModularWalletHelper.loginPasskey(user, savedCred?.id)
+        derivedAddress = cred.scaAddress
+      }
 
       // Derive deterministic key from credential ID
       const privateKey = keccak256(toHex(cred.id)) as `0x${string}`
-      const account = privateKeyToAccount(privateKey)
-      const derivedAddress = account.address
-
-      cred.scaAddress = derivedAddress
+      const accountObj = privateKeyToAccount(privateKey)
 
       setUsername(user)
       setScaAddress(derivedAddress)
@@ -149,7 +241,7 @@ export function useModularWallet({ addActivity }: UseModularWalletProps) {
       setIsModularConnected(true)
 
       const client = createWalletClient({
-        account,
+        account: accountObj,
         chain: arcTestnet,
         transport: http('https://rpc.testnet.arc.network'),
       })

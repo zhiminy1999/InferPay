@@ -23,7 +23,7 @@ export function SpendingBudget({
   addActivity
 }: SpendingBudgetProps) {
   // Local States
-  const [pocketMoney, setPocketMoney] = useState<number>(50)
+  const [pocketMoney, setPocketMoney] = useState<number>(5)
   const [safePeriod, setSafePeriod] = useState<string>('12h')
   const [whitelistServices, setWhitelistServices] = useState({
     openai: true,

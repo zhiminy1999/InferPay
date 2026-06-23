@@ -18,10 +18,10 @@ interface SmartBillPayProps {
 }
 
 const intentsPreload = [
-  { id: 'renew_subscription', name: 'Renew Software Subscriptions — $250', amount: 250, type: 'split', details: 'Your assistant reads the invoice from tools like Figma or Canva, pays it on time, and logs the expense for your records.' },
-  { id: 'scale_gpu', name: 'Scale Up Cloud Computing — $100', amount: 100, type: 'escrow', details: 'When your servers get busy, InferPay automatically adds more computing power so your services stay fast.' },
+  { id: 'renew_subscription', name: 'Renew Software Subscriptions — $2', amount: 2, type: 'split', details: 'Your assistant reads the invoice from tools like Figma or Canva, pays it on time, and logs the expense for your records.' },
+  { id: 'scale_gpu', name: 'Scale Up Cloud Computing — $1', amount: 1, type: 'escrow', details: 'When your servers get busy, InferPay automatically adds more computing power so your services stay fast.' },
   { id: 'nanopayment_api', name: 'Micro-Inference Tokens — $0.001', amount: 0.001, type: 'nanopayment', details: 'A sub-cent request for AI model token inference, using Circle Gateway Nanopayments (x402 protocol) without gas friction.' },
-  { id: 'data_purchase', name: 'Purchase Data & Research — $450', amount: 450, type: 'split', details: 'Your AI assistant buys verified research datasets your team needs, without waiting for manual approval.' }
+  { id: 'data_purchase', name: 'Purchase Data & Research — $5', amount: 5, type: 'split', details: 'Your AI assistant buys verified research datasets your team needs, without waiting for manual approval.' }
 ]
 
 export function SmartBillPay({
@@ -33,7 +33,7 @@ export function SmartBillPay({
 }: SmartBillPayProps) {
   // Local States
   const [intentSelection, setIntentSelection] = useState<string>('renew_subscription')
-  const [intentAmount, setIntentAmount] = useState<number>(250)
+  const [intentAmount, setIntentAmount] = useState<number>(2)
   const [isIntentLoading, setIsIntentLoading] = useState(false)
   const [vendorTx, setVendorTx] = useState<string | null>(null)
   const [reserveTx, setReserveTx] = useState<string | null>(null)
