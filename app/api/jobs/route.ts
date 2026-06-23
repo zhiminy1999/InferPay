@@ -62,3 +62,40 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }
+
+export async function PUT(request: Request) {
+  try {
+    const body = await request.json()
+    const { id, status, amount, metadata } = body
+
+    if (!id) {
+      return NextResponse.json({ error: 'Missing job id' }, { status: 400 })
+    }
+
+    if (status !== undefined) {
+      db.prepare('UPDATE jobs SET status = ? WHERE id = ?').run(status, id)
+    }
+    if (amount !== undefined) {
+      db.prepare('UPDATE jobs SET amount = ? WHERE id = ?').run(amount, id)
+    }
+    if (metadata !== undefined) {
+      const existing = db.prepare('SELECT metadata FROM jobs WHERE id = ?').get(id) as any
+      let merged = metadata
+      if (existing && existing.metadata) {
+        try {
+          const parsedExisting = JSON.parse(existing.metadata)
+          const parsedNew = typeof metadata === 'string' ? JSON.parse(metadata) : metadata
+          merged = { ...parsedExisting, ...parsedNew }
+        } catch (e) {
+          // Fallback if parsing fails
+        }
+      }
+      const metaStr = typeof merged === 'string' ? merged : JSON.stringify(merged)
+      db.prepare('UPDATE jobs SET metadata = ? WHERE id = ?').run(metaStr, id)
+    }
+
+    return NextResponse.json({ success: true })
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+}
