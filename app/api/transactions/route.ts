@@ -37,22 +37,68 @@ export async function GET(request: Request) {
       try {
         let rows: any[] = []
         if (walletAddress) {
-          rows = db.prepare(`SELECT * FROM ${table} WHERE wallet_address = ?`).all(walletAddress)
+          const realRows = db.prepare(`SELECT * FROM ${table} WHERE wallet_address = ?`).all(walletAddress)
+          const sampleWallet = '0x7a304A671e21b79528659dC0D775e53FE233b2B0'
+          
+          if (walletAddress.toLowerCase() === sampleWallet.toLowerCase()) {
+            rows = realRows
+          } else {
+            const sampleRows = db.prepare(`SELECT * FROM ${table} WHERE wallet_address = ?`).all(sampleWallet)
+            
+            const mappedReal = realRows.map((r: any) => ({
+              id: r.id,
+              tx_hash: r.tx_hash,
+              block_number: r.block_number,
+              timestamp: r.timestamp,
+              wallet_address: r.wallet_address,
+              amount: r.amount,
+              status: r.status,
+              type: table.slice(0, -1),
+              metadata: r.metadata ? JSON.parse(r.metadata) : {}
+            }))
+            
+            const mappedSample = sampleRows.map((r: any) => {
+              const meta = r.metadata ? JSON.parse(r.metadata) : {}
+              meta.isSample = true
+              return {
+                id: r.id,
+                tx_hash: r.tx_hash,
+                block_number: r.block_number,
+                timestamp: r.timestamp,
+                wallet_address: walletAddress,
+                amount: r.amount,
+                status: r.status,
+                type: table.slice(0, -1),
+                metadata: meta
+              }
+            })
+
+            const targetCount = 10
+            const sampleSlice = mappedSample.slice(0, Math.max(0, targetCount - mappedReal.length))
+            allTx = allTx.concat(mappedReal).concat(sampleSlice)
+            continue
+          }
         } else {
           rows = db.prepare(`SELECT * FROM ${table}`).all()
         }
 
-        const mapped = rows.map(r => ({
-          id: r.id,
-          tx_hash: r.tx_hash,
-          block_number: r.block_number,
-          timestamp: r.timestamp,
-          wallet_address: r.wallet_address,
-          amount: r.amount,
-          status: r.status,
-          type: table.slice(0, -1), // singular: session, proposal, job, payment, swap, bridge
-          metadata: r.metadata ? JSON.parse(r.metadata) : {}
-        }))
+        const mapped = rows.map((r: any) => {
+          const meta = r.metadata ? JSON.parse(r.metadata) : {}
+          if (r.wallet_address?.toLowerCase() === '0x7a304a671e21b79528659dc0d775e53fe233b2b0') {
+            meta.isSample = true
+          }
+          return {
+            id: r.id,
+            tx_hash: r.tx_hash,
+            block_number: r.block_number,
+            timestamp: r.timestamp,
+            wallet_address: r.wallet_address,
+            amount: r.amount,
+            status: r.status,
+            type: table.slice(0, -1), // singular
+            metadata: meta
+          }
+        })
 
         allTx = allTx.concat(mapped)
       } catch (err) {

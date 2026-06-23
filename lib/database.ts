@@ -242,13 +242,6 @@ try {
     );
   `)
   
-  // Initialize RAG virtual tables and seed developer documentation
-  try {
-    const { initAndSeedRag } = require('../src/rag/ingest')
-    initAndSeedRag()
-  } catch (ragErr: any) {
-    console.warn('[Database RAG Setup]: Warning seeding RAG tables:', ragErr.message)
-  }
 } catch (e) {
   console.warn('Native better-sqlite3 not available, falling back to JSON persistence:', e)
   localDb = new FallbackDB()
@@ -411,4 +404,15 @@ class DatabaseWrapper {
 }
 
 const db = new DatabaseWrapper()
+
+// Initialize RAG virtual tables and seed developer documentation
+if (!(localDb instanceof FallbackDB)) {
+  try {
+    const { initAndSeedRag } = require('../src/rag/ingest')
+    initAndSeedRag()
+  } catch (ragErr: any) {
+    console.warn('[Database RAG Setup]: Warning seeding RAG tables:', ragErr.message)
+  }
+}
+
 export { db }

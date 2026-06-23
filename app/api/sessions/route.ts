@@ -39,7 +39,9 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { id, tx_hash, block_number, timestamp, wallet_address, amount, status, metadata } = body
+    const { id, block_number, timestamp, amount, status, metadata } = body
+    const wallet_address = body.wallet_address || body.walletAddress || ''
+    const tx_hash = body.tx_hash || body.txHash || ''
 
     const stmt = db.prepare(`
       INSERT INTO sessions (id, tx_hash, block_number, timestamp, wallet_address, amount, status, metadata)

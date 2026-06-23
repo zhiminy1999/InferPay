@@ -73,16 +73,24 @@ async function runPlanner(state: typeof SwarmState.State) {
   // Real DeepSeek execution
   try {
     const response = await openai!.chat.completions.create({
-      model: 'deepseek-v4-pro',
+      model: 'deepseek-chat',
       messages: [
-        { role: 'system', content: 'You are the Planner Agent. Analyze the user request and respond with a comma-separated list of tool names to execute (valid tools: query_balance, swap_tokens, bridge_cctp, record_payment). Only return the comma-separated names, nothing else.' },
+        { role: 'system', content: 'You are the Planner Agent. Analyze the user request and respond with a comma-separated list of tool names to execute (valid tools: query_balance, swap_tokens, bridge_cctp, record_payment). If the user asks to swap/trade/exchange, you must include swap_tokens. If the user asks to bridge/transfer across chains, you must include bridge_cctp. Only return the comma-separated names, nothing else.' },
         { role: 'user', content: userText }
-      ],
-      extra_body: { thinking: { type: 'enabled' } },
-      reasoning_effort: 'high'
-    } as any)
+      ]
+    })
     const content = response.choices[0].message.content || 'query_balance'
-    const steps = content.split(',').map(s => s.trim().toLowerCase()).filter(s => ['query_balance', 'swap_tokens', 'bridge_cctp', 'record_payment'].includes(s))
+    let steps = content.split(',').map(s => s.trim().toLowerCase()).filter(s => ['query_balance', 'swap_tokens', 'bridge_cctp', 'record_payment'].includes(s))
+    
+    // Safety check: if user asked for swap/bridge but LLM planner missed it, force add it
+    const lowerUserText = userText.toLowerCase()
+    if ((lowerUserText.includes('swap') || lowerUserText.includes('exchange') || lowerUserText.includes('trade')) && !steps.includes('swap_tokens')) {
+      steps.push('swap_tokens')
+    }
+    if ((lowerUserText.includes('bridge') || lowerUserText.includes('cctp') || lowerUserText.includes('transfer')) && !steps.includes('bridge_cctp')) {
+      steps.push('bridge_cctp')
+    }
+
     return {
       plannerSteps: steps.length > 0 ? steps : ['query_balance'],
       currentStepIndex: 0
@@ -125,8 +133,24 @@ async function runToolExecutor(state: typeof SwarmState.State) {
   let toolArgs: any = { walletAddress }
   
   if (currentStep === 'swap_tokens') {
-    toolArgs.fromToken = userText.toLowerCase().includes('eurc') ? 'EURC' : 'USDC'
-    toolArgs.toToken = toolArgs.fromToken === 'USDC' ? 'EURC' : 'USDC'
+    let fromToken = 'USDC'
+    let toToken = 'EURC'
+    
+    const lowerText = userText.toLowerCase()
+    const idxUsdc = lowerText.indexOf('usdc')
+    const idxEurc = lowerText.indexOf('eurc')
+    
+    if (idxEurc !== -1 && (idxUsdc === -1 || idxEurc < idxUsdc)) {
+      fromToken = 'EURC'
+      toToken = 'USDC'
+    } else if (idxUsdc !== -1 && (idxEurc === -1 || idxUsdc < idxEurc)) {
+      fromToken = 'USDC'
+      toToken = 'EURC'
+    }
+    
+    toolArgs.fromToken = fromToken
+    toolArgs.toToken = toToken
+    
     // Parse amount from text if present, otherwise default to 10
     const match = userText.match(/(\d+(\.\d+)?)/)
     toolArgs.amount = match ? parseFloat(match[1]) : 10.0
@@ -135,7 +159,12 @@ async function runToolExecutor(state: typeof SwarmState.State) {
     toolArgs.amount = match ? parseFloat(match[1]) : 10.0
     toolArgs.targetDomain = userText.toLowerCase().includes('base') ? 6 : (userText.toLowerCase().includes('arbitrum') ? 3 : 0)
   } else if (currentStep === 'query_balance') {
-    toolArgs.token = userText.toLowerCase().includes('eurc') ? 'EURC' : 'USDC'
+    const lowerText = userText.toLowerCase()
+    if (lowerText.includes('balances') || (lowerText.includes('usdc') && lowerText.includes('eurc'))) {
+      toolArgs.token = 'both'
+    } else {
+      toolArgs.token = lowerText.includes('eurc') ? 'EURC' : 'USDC'
+    }
   } else if (currentStep === 'record_payment') {
     toolArgs.txHash = '0x' + Array.from({ length: 32 }, () => Math.floor(Math.random() * 256).toString(16).padStart(2, '0')).join('')
     const match = userText.match(/(\d+(\.\d+)?)/)

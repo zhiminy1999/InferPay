@@ -29,6 +29,16 @@ export async function POST(req: NextRequest) {
       }
     )
 
+    // Reset plannerSteps and currentStepIndex in the thread checkpoint so subsequent requests plan fresh.
+    try {
+      await agentExecutor.updateState(
+        { configurable: { thread_id: targetThreadId } },
+        { plannerSteps: [], currentStepIndex: 0 }
+      )
+    } catch (updateErr: any) {
+      console.warn('[LangGraph State Reset Error]:', updateErr.message)
+    }
+
     // Save activity logs to local/Supabase database
     try {
       const logId = 'log_' + Date.now()

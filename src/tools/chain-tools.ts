@@ -59,9 +59,27 @@ export const queryBalanceTool = tool(
   async ({ walletAddress, token }) => {
     try {
       const address = getAddress(walletAddress)
-      let balanceBigInt = BigInt(0)
       let decimals = 6
 
+      if (token && token.toLowerCase() === 'both') {
+        const usdcRes = await publicClient.readContract({
+          address: USDC_ADDRESS_ARC as `0x${string}`,
+          abi: erc20Abi,
+          functionName: 'balanceOf',
+          args: [address]
+        })
+        const eurcRes = await publicClient.readContract({
+          address: EURC_ADDRESS_ARC as `0x${string}`,
+          abi: erc20Abi,
+          functionName: 'balanceOf',
+          args: [address]
+        })
+        const usdcFormatted = formatUnits(BigInt(usdcRes), decimals)
+        const eurcFormatted = formatUnits(BigInt(eurcRes), decimals)
+        return `On-chain balances for ${walletAddress}: ${usdcFormatted} USDC and ${eurcFormatted} EURC`
+      }
+
+      let balanceBigInt = BigInt(0)
       if (token && token.toLowerCase() === 'eurc') {
         const res = await publicClient.readContract({
           address: EURC_ADDRESS_ARC as `0x${string}`,
@@ -91,7 +109,7 @@ export const queryBalanceTool = tool(
     description: 'Queries the on-chain stablecoin balance of a wallet address on Arc Testnet.',
     schema: z.object({
       walletAddress: z.string().describe('The EVM wallet address to query'),
-      token: z.string().optional().describe('Token symbol (USDC or EURC), defaults to USDC')
+      token: z.string().optional().describe('Token symbol (USDC, EURC, or both), defaults to USDC')
     })
   }
 )
