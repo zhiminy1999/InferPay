@@ -6,15 +6,15 @@ import {
 } from './contracts'
 import { JOB_ESCROW_ADDRESS } from './job-escrow'
 
-// Arc Testnet configuration
+const customRpcUrl = process.env.NEXT_PUBLIC_ARC_RPC_URL || 'https://rpc.testnet.arc.network'
 const arcTestnet = {
   id: 5042002,
   name: 'Arc Testnet',
   network: 'arc-testnet',
   nativeCurrency: { name: 'USDC', symbol: 'USDC', decimals: 18 },
   rpcUrls: {
-    public: { http: ['https://rpc.testnet.arc.network'] },
-    default: { http: ['https://rpc.testnet.arc.network'] },
+    public: { http: [customRpcUrl] },
+    default: { http: [customRpcUrl] },
   },
 }
 

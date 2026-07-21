@@ -6,12 +6,13 @@ import { USDC_ADDRESS_ARC } from '@/lib/contracts'
 import { parseUnits, keccak256, toHex, stringToHex, createWalletClient, http, defineChain, type WalletClient, type PublicClient } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 
+const customRpcUrl = process.env.NEXT_PUBLIC_ARC_RPC_URL || 'https://rpc.testnet.arc.network'
 const arcTestnet = defineChain({
   id: 5042002,
   name: 'Arc Testnet',
   nativeCurrency: { name: 'USDC', symbol: 'USDC', decimals: 18 },
   rpcUrls: {
-    default: { http: ['https://rpc.testnet.arc.network'] },
+    default: { http: [customRpcUrl] },
   },
 })
 

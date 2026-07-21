@@ -115,10 +115,11 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
             const cred = JSON.parse(savedCred)
             const privateKey = keccak256(toHex(cred.id)) as `0x${string}`
             const account = privateKeyToAccount(privateKey)
+            const customRpcUrl = process.env.NEXT_PUBLIC_ARC_RPC_URL || 'https://rpc.testnet.arc.network'
             const wClient = createWalletClient({
               account,
               chain: arcTestnet,
-              transport: http('https://rpc.testnet.arc.network')
+              transport: http(customRpcUrl)
             })
             setWalletClient(wClient)
           } catch (e) {
@@ -155,13 +156,15 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
             })
           } catch (switchError: any) {
             if (switchError.code === 4902) {
+              const customRpcUrl = process.env.NEXT_PUBLIC_ARC_RPC_URL || 'https://rpc.testnet.arc.network'
+              const finalRpcs = [customRpcUrl, ...arcTestnet.rpcUrls.default.http.filter(url => url !== customRpcUrl)]
               await activeProvider.request({
                 method: 'wallet_addEthereumChain',
                 params: [{
                   chainId: `0x${arcTestnet.id.toString(16)}`,
                   chainName: arcTestnet.name,
                   nativeCurrency: arcTestnet.nativeCurrency,
-                  rpcUrls: arcTestnet.rpcUrls.default.http,
+                  rpcUrls: finalRpcs,
                   blockExplorerUrls: [arcTestnet.blockExplorers.default.url],
                 }],
               })

@@ -14,12 +14,13 @@ import {
 } from '@circle-fin/modular-wallets-core'
 import { toWebAuthnAccount } from 'viem/account-abstraction'
 
+const customRpcUrl = process.env.NEXT_PUBLIC_ARC_RPC_URL || 'https://rpc.testnet.arc.network'
 const arcTestnet = defineChain({
   id: 5042002,
   name: 'Arc Testnet',
   nativeCurrency: { name: 'USDC', symbol: 'USDC', decimals: 18 },
   rpcUrls: {
-    default: { http: ['https://rpc.testnet.arc.network'] },
+    default: { http: [customRpcUrl] },
   },
 })
 
@@ -56,7 +57,7 @@ export function useModularWallet({ addActivity }: UseModularWalletProps) {
         const client = createWalletClient({
           account,
           chain: arcTestnet,
-          transport: http('https://rpc.testnet.arc.network'),
+          transport: http(customRpcUrl),
         })
         setWalletClient(client)
       } catch (e) {
@@ -130,7 +131,7 @@ export function useModularWallet({ addActivity }: UseModularWalletProps) {
       const client = createWalletClient({
         account: accountObj,
         chain: arcTestnet,
-        transport: http('https://rpc.testnet.arc.network'),
+        transport: http(customRpcUrl),
       })
       setWalletClient(client)
 
@@ -243,7 +244,7 @@ export function useModularWallet({ addActivity }: UseModularWalletProps) {
       const client = createWalletClient({
         account: accountObj,
         chain: arcTestnet,
-        transport: http('https://rpc.testnet.arc.network'),
+        transport: http(customRpcUrl),
       })
       setWalletClient(client)
 

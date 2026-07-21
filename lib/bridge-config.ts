@@ -34,7 +34,7 @@ export const BRIDGE_CHAINS: Record<string, ChainConfig> = {
     explorerUrl: 'https://testnet.arcscan.app',
     usdcAddress: '0x3600000000000000000000000000000000000000', // Arc USDC
     chainId: 5042002,
-    rpcUrl: 'https://rpc.testnet.arc.network',
+    rpcUrl: process.env.NEXT_PUBLIC_ARC_RPC_URL || 'https://rpc.testnet.arc.network',
   },
 }
 
