@@ -3,7 +3,10 @@ import { createWalletClient, createPublicClient, http, getAddress, parseUnits } 
 import { privateKeyToAccount } from 'viem/accounts'
 import { defineChain } from 'viem'
 
-const customRpcUrl = process.env.NEXT_PUBLIC_ARC_RPC_URL || 'https://rpc.testnet.arc.network'
+let customRpcUrl = process.env.NEXT_PUBLIC_ARC_RPC_URL || 'https://rpc.testnet.arc.network'
+if (customRpcUrl.startsWith('NEXT_PUBLIC_ARC_RPC_URL=')) {
+  customRpcUrl = customRpcUrl.replace('NEXT_PUBLIC_ARC_RPC_URL=', '')
+}
 const arcTestnet = defineChain({
   id: 5042002,
   name: 'Arc Testnet',

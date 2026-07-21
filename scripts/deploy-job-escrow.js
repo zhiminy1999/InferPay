@@ -29,7 +29,10 @@ try {
 
 // Load environment configuration
 const privateKey = process.env.DEPLOYER_PRIVATE_KEY || '0x0000000000000000000000000000000000000000000000000000000000000000';
-const rpcUrl = process.env.NEXT_PUBLIC_ARC_RPC_URL || 'https://rpc.testnet.arc.network';
+let rpcUrl = process.env.NEXT_PUBLIC_ARC_RPC_URL || 'https://rpc.testnet.arc.network';
+if (rpcUrl.startsWith('NEXT_PUBLIC_ARC_RPC_URL=')) {
+  rpcUrl = rpcUrl.replace('NEXT_PUBLIC_ARC_RPC_URL=', '');
+}
 const usdc = '0x3600000000000000000000000000000000000000';
 const agentRegistry = '0xb4a614a597280888D3EEAB8a44562EAB59871270';
 

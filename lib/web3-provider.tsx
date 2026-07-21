@@ -75,9 +75,13 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
   const [provider, setProvider] = useState<any | null>(null)
 
   useEffect(() => {
+    let customRpcUrl = process.env.NEXT_PUBLIC_ARC_RPC_URL || 'https://rpc.testnet.arc.network'
+    if (customRpcUrl.startsWith('NEXT_PUBLIC_ARC_RPC_URL=')) {
+      customRpcUrl = customRpcUrl.replace('NEXT_PUBLIC_ARC_RPC_URL=', '')
+    }
     const client = createPublicClient({
       chain: arcTestnet,
-      transport: http()
+      transport: http(customRpcUrl)
     })
     setPublicClient(client)
     
@@ -115,7 +119,10 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
             const cred = JSON.parse(savedCred)
             const privateKey = keccak256(toHex(cred.id)) as `0x${string}`
             const account = privateKeyToAccount(privateKey)
-            const customRpcUrl = process.env.NEXT_PUBLIC_ARC_RPC_URL || 'https://rpc.testnet.arc.network'
+            let customRpcUrl = process.env.NEXT_PUBLIC_ARC_RPC_URL || 'https://rpc.testnet.arc.network'
+            if (customRpcUrl.startsWith('NEXT_PUBLIC_ARC_RPC_URL=')) {
+              customRpcUrl = customRpcUrl.replace('NEXT_PUBLIC_ARC_RPC_URL=', '')
+            }
             const wClient = createWalletClient({
               account,
               chain: arcTestnet,
@@ -156,7 +163,10 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
             })
           } catch (switchError: any) {
             if (switchError.code === 4902) {
-              const customRpcUrl = process.env.NEXT_PUBLIC_ARC_RPC_URL || 'https://rpc.testnet.arc.network'
+              let customRpcUrl = process.env.NEXT_PUBLIC_ARC_RPC_URL || 'https://rpc.testnet.arc.network'
+              if (customRpcUrl.startsWith('NEXT_PUBLIC_ARC_RPC_URL=')) {
+                customRpcUrl = customRpcUrl.replace('NEXT_PUBLIC_ARC_RPC_URL=', '')
+              }
               const finalRpcs = [customRpcUrl, ...arcTestnet.rpcUrls.default.http.filter(url => url !== customRpcUrl)]
               await activeProvider.request({
                 method: 'wallet_addEthereumChain',

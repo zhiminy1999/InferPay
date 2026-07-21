@@ -6,7 +6,10 @@ import { createPublicClient, createWalletClient, http, formatUnits, parseUnits, 
 import { privateKeyToAccount } from 'viem/accounts'
 
 // Initialize the Viem public client for on-chain queries on Arc Testnet
-const rpcUrl = process.env.NEXT_PUBLIC_ARC_RPC_URL || 'https://rpc.testnet.arc.network'
+let rpcUrl = process.env.NEXT_PUBLIC_ARC_RPC_URL || 'https://rpc.testnet.arc.network'
+if (rpcUrl.startsWith('NEXT_PUBLIC_ARC_RPC_URL=')) {
+  rpcUrl = rpcUrl.replace('NEXT_PUBLIC_ARC_RPC_URL=', '')
+}
 const publicClient = createPublicClient({
   transport: http(rpcUrl)
 })

@@ -8,6 +8,11 @@ export interface ChainConfig {
   rpcUrl: string
 }
 
+let customRpcUrl = process.env.NEXT_PUBLIC_ARC_RPC_URL || 'https://rpc.testnet.arc.network'
+if (customRpcUrl.startsWith('NEXT_PUBLIC_ARC_RPC_URL=')) {
+  customRpcUrl = customRpcUrl.replace('NEXT_PUBLIC_ARC_RPC_URL=', '')
+}
+
 export const BRIDGE_CHAINS: Record<string, ChainConfig> = {
   ethereum_sepolia: {
     id: 'ethereum_sepolia',
@@ -34,7 +39,7 @@ export const BRIDGE_CHAINS: Record<string, ChainConfig> = {
     explorerUrl: 'https://testnet.arcscan.app',
     usdcAddress: '0x3600000000000000000000000000000000000000', // Arc USDC
     chainId: 5042002,
-    rpcUrl: process.env.NEXT_PUBLIC_ARC_RPC_URL || 'https://rpc.testnet.arc.network',
+    rpcUrl: customRpcUrl,
   },
 }
 
