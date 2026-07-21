@@ -14,7 +14,9 @@ import {
 } from '@circle-fin/modular-wallets-core'
 import { toWebAuthnAccount } from 'viem/account-abstraction'
 
-let customRpcUrl = process.env.NEXT_PUBLIC_ARC_RPC_URL || 'https://rpc.testnet.arc.network'
+let customRpcUrl = typeof window !== 'undefined'
+  ? '/api/rpc'
+  : (process.env.NEXT_PUBLIC_ARC_RPC_URL || 'https://rpc.testnet.arc.network')
 if (customRpcUrl.startsWith('NEXT_PUBLIC_ARC_RPC_URL=')) {
   customRpcUrl = customRpcUrl.replace('NEXT_PUBLIC_ARC_RPC_URL=', '')
 }

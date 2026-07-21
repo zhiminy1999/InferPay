@@ -28,16 +28,27 @@ if (supabaseUrl && supabaseKey) {
 // Fallback Database implementation (JSON)
 // -------------------------------------------------------------
 class FallbackDB {
-  private filepath: string
+  private filepath: string | null = null
   private data: any
 
   constructor() {
-    const dir = path.join(process.cwd(), 'data')
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true })
+    try {
+      const dir = path.join(process.cwd(), 'data')
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true })
+      }
+      this.filepath = path.join(dir, 'inferpay_fallback.json')
+    } catch {
+      try {
+        // Fallback to writable /tmp directory on Vercel/lambda environments
+        const dir = '/tmp'
+        this.filepath = path.join(dir, 'inferpay_fallback.json')
+      } catch {
+        this.filepath = null
+      }
     }
-    this.filepath = path.join(dir, 'inferpay_fallback.json')
-    if (fs.existsSync(this.filepath)) {
+
+    if (this.filepath && fs.existsSync(this.filepath)) {
       try {
         this.data = JSON.parse(fs.readFileSync(this.filepath, 'utf-8'))
       } catch {
@@ -63,7 +74,12 @@ class FallbackDB {
   }
 
   private save() {
-    fs.writeFileSync(this.filepath, JSON.stringify(this.data, null, 2), 'utf-8')
+    if (!this.filepath) return
+    try {
+      fs.writeFileSync(this.filepath, JSON.stringify(this.data, null, 2), 'utf-8')
+    } catch (e: any) {
+      console.warn('[Database Fallback]: Failed to write fallback JSON to disk. Operating in-memory.', e.message)
+    }
   }
 
   prepare(sql: string) {
