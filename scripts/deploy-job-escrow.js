@@ -5,8 +5,30 @@ const { createWalletClient, createPublicClient, http } = require('viem');
 const { privateKeyToAccount } = require('viem/accounts');
 const { defineChain } = require('viem');
 
+// Load environment variables from .env manually without external packages
+try {
+  const envPath = path.resolve(__dirname, '../.env');
+  if (fs.existsSync(envPath)) {
+    const envContent = fs.readFileSync(envPath, 'utf8');
+    envContent.split(/\r?\n/).forEach(line => {
+      const trimmed = line.trim();
+      if (trimmed && !trimmed.startsWith('#') && trimmed.includes('=')) {
+        const index = trimmed.indexOf('=');
+        const key = trimmed.substring(0, index).trim();
+        let val = trimmed.substring(index + 1).trim();
+        if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+          val = val.substring(1, val.length - 1);
+        }
+        process.env[key] = val;
+      }
+    });
+  }
+} catch (e) {
+  console.warn('Failed to load local .env file:', e.message);
+}
+
 // Load environment configuration
-const privateKey = '0x0000000000000000000000000000000000000000000000000000000000000000';
+const privateKey = process.env.DEPLOYER_PRIVATE_KEY || '0x0000000000000000000000000000000000000000000000000000000000000000';
 const rpcUrl = 'https://rpc.testnet.arc.network';
 const usdc = '0x3600000000000000000000000000000000000000';
 const agentRegistry = '0xb4a614a597280888D3EEAB8a44562EAB59871270';
